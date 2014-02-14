@@ -14,3 +14,38 @@ Python v2.x (2.6 or later ) python 3 will not work out of the box
 PyEphem
 
 TeX/LaTeX
+
+INSTALLATION Linux:
+Install your platforms Python- and LaTeX distribution. Remember to chose python 2.x and install all develpment header files.
+Run at the command line:
+
+pip install pyephem
+
+Put the Pyalmanac files in any directory and start with:
+
+python pyalmanac
+or 
+./pyalmanac 
+
+
+
+INSTALLATION MAC:
+
+Every Mac comes with python preinstalled. You need to install the PyEphem library to use Pyalmanac. Type the following commands at the commandline (terminal app):
+
+sudo easy_install pip
+
+pip install pyephem
+
+If this command fails your mac asks you if you would like to install the header files. Do so, you do not need to install the full IDE.
+Try again.
+
+Install TeX/LaTeX from http://www.tug.org/mactex/
+
+Now you are almost ready
+Put the Pyalmanac files in any directory and start with 
+python pyalmanac
+or 
+./pyalmanac 
+
+
