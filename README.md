@@ -15,7 +15,10 @@ PyEphem
 
 TeX/LaTeX
 
+
+
 INSTALLATION Linux:
+
 Install your platforms Python- and LaTeX distribution. Remember to chose python 2.x and install all develpment header files.
 Run at the command line:
 
