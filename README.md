@@ -1,7 +1,7 @@
 Pyalmanac 
 =========
 
-Pyalmanac is a Python script that creats the daaily pages of the
+Pyalmanac is a Python script that creats the daily pages of the
 Nautical Almanac. These are tabels that are needed for selestial
 navigation with a Sekstant. Normally these tables must be bought every
 year as a Book. This little program is trying to do away with this
