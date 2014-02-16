@@ -61,7 +61,7 @@ def starstab(date):
     \multicolumn{3}{c}{\normalsize{Stars}}  \\ 
     \hline
     \hline
-    & \multicolumn{1}{c}{SHA} & \multicolumn{1}{c|}{Dec} \\ 
+    & \multicolumn{1}{c}{\textbf{SHA}} & \multicolumn{1}{c|}{\textbf{Dec}} \\ 
     \hline
     """
     stars = stellar(date+1)
@@ -72,7 +72,7 @@ def starstab(date):
     for i in range(3):
         datex = str(ephem.date(date + i))
         m = m + '\\hline \n'
-        m = m + ' %s & SHA & Mer.pass \\\ \n' %datex[0:8]
+        m = m + ''' %s & \\textbf{SHA} & \\textbf{Mer.pass} \\\ \n''' %datex[0:8]
         p = planetstransit(datex)
         m = m + 'Venus & %s & %s \\\ \n' %(p[0],p[1])
         m = m + 'Mars & %s & %s \\\ \n' %(p[2],p[3])
@@ -80,6 +80,13 @@ def starstab(date):
         m = m + 'Saturn & %s & %s \\\ \n' %(p[6],p[7])
         m = m + '\\hline \n'
     out = out + m
+    hp = '\\hline \n'
+    hp = hp + '\multicolumn{2}{|r}{\\textbf{Horizontal paralax}} & \multicolumn{1}{c|}{}\\\ \n '
+    hp = hp + '\multicolumn{2}{|r}{Venus:} & \multicolumn{1}{c|}{%s} \\\ \n' %(p[9])
+    hp = hp + '\multicolumn{2}{|r}{Mars:} & \multicolumn{1}{c|}{%s} \\\ \n' %(p[8])
+    hp = hp + '\\hline \n'
+    out = out + hp
+    
     out = out + r'\end{tabular*}'
     return out
 
