@@ -1,6 +1,6 @@
 #! /usr/bin/python
 # -*- coding: UTF-8 -*-
-
+from math import *
 
 
 
@@ -12,19 +12,27 @@ def degmin(deg):
     return gm
 
 def decdeg(d,min):
+	# returns decimal degrees from deg. and min.
 	d=d*1.0
 	min=min*1.0
 	deg=d+(min/60)
 	return deg
+	
+def rad(d,min):
+	#returns radiands from deg. and min.
+	rad=decdeg(d,min)/180*pi
+	return rad
 
 def suninc(m,s):
-	min= m*1.0
+	# returns the increment for the sun.
+	min=m*1.0
 	sec=s/60.0
 	hour=(sec+min)/60
 	inc=degmin(15*hour)
 	return inc
 
 def ariesinc(m,s):
+	# returns the increment for aries
 	min= m*1.0
 	sec=s/60.0
 	hour=(sec+min)/60
@@ -32,6 +40,7 @@ def ariesinc(m,s):
 	return inc
 
 def mooninc(m,s):
+	# returns the increment for the Moon
 	min= m*1.0
 	sec=s/60.0
 	hour=(sec+min)/60
@@ -39,6 +48,7 @@ def mooninc(m,s):
 	return inc
 	
 def vcorr(m,v):
+	# returns the v correction for a given minute and tabular v.
 	h=(m+0.5)/60.0
 	corr=round(v*h,1)
 	return corr
@@ -67,12 +77,162 @@ def inctab(min):
     return tab
 
 def allinctabs():
+	# iterates throu 60 minutes
 	min=0
 	tab=""
 	while min < 60:
 		tab = tab + inctab(min)
 		min += 1
 	return tab
+
+
+def dip(meter):
+	dip=60*0.0293*sqrt(meter)
+	return dip
+
+def diptab():
+	meter=1
+	tab = r'''\noindent 
+	\begin{tabular}[t]{|c c c|} 
+	\multicolumn{3}{c}{\textbf{DIP}}\\
+	\hline 
+	\textit{m} & \textit{dip} & \textit{ft}\\ 
+	\hline
+	'''
+	while meter < 25.5:
+		line = "%s &  %.1f & %.1f\\\ \n" %(meter, dip(meter), meter/0.3084)
+		tab = tab + line
+		meter += 0.5
+	tab = tab + r"""\hline
+	\end{tabular}
+	"""
+	
+	return tab
+	
+
+
+def refrac(h):
+	r = 1/tan((h+7.31/(h+4.4))/180*pi)
+	return r
+
+def refractab():
+	ho=5
+	tab = r'''\noindent 
+	\begin{tabular}[t]{|c c|} 
+	\multicolumn{2}{c}{\textbf{Refract.}}\\
+	\hline 
+	\textit{$H_{a}$} & \textit{ref} \\ 
+	\hline
+	'''
+	while ho < 20:
+		line = "%s° &  %.1f\\\ \n" %(ho, refrac(ho))
+		tab = tab + line
+		ho += 0.5
+	while ho < 40:
+		line = "%s° &  %.1f\\\ \n" %(ho, refrac(ho))
+		tab = tab + line
+		ho += 1
+	while ho < 90:
+		line = "%s° &  %.1f\\\ \n" %(ho, refrac(ho))
+		tab = tab + line
+		ho += 5
+	tab = tab + r"""\hline
+	\end{tabular}
+	"""
+	return tab
+
+
+def parallax(hp, deg, min):
+	#returns parallax in dec minutes from horizontal parallax, and Ha
+	p = rad(0, hp) * cos(rad(deg, min)) * 180/pi *60
+	return p 
+	
+def parallaxtab():
+	Hdeg=0 
+	
+	HP=54.0
+	tab = r'''\noindent 
+	\begin{tabular}[t]{|c|rrrrrrrrrrrrrrrrrr|}
+	\multicolumn{19}{c}{\textbf{Parallax of the Moon}}\\
+	\hline
+	'''
+	d = 0
+	line = "\\textbf{$H_{a}$} "
+	while d<90:
+		line += "& \multicolumn{1}{>{\hspace{-4pt}}c<{\hspace{-4pt}}|}{\\textbf{%s-%s°}}" %(d, d+5)
+		d+= 5
+	line += " \\\ \n \\hline"
+	tab += line
+	
+	while Hdeg < 5 :
+		line = " ´ "
+		dd = Hdeg
+		while dd < 90:
+			line += "& \multicolumn{1}{l}{\\textbf{%s°}}" %(dd)
+			dd += 5
+		line += "\\vline \\\ \n"
+		tab = tab + line
+		Hmin=0
+		while Hmin < 60:
+			dd = Hdeg
+			line = "\\textbf{%s} " %(Hmin)
+			while dd < 90:
+				line += " & %.1f " %(parallax(HP,dd,Hmin))
+				dd += 5
+			line += "\\\ \n"
+			tab = tab + line
+			Hmin += 10	
+		Hdeg += 1
+		
+	tab += r"""\hline 
+	\multicolumn{1}{|c|}{\textbf{HP}} & \multicolumn{18}{c|}{correction for HP per collum}\\
+	\hline
+	"""
+	hp = 54.3
+	while hp<61.5:
+		line = "\\textbf{ %.1f} " %(hp)
+		d = 2
+		while d<90:
+			line += "& %.1f " %(parallax(hp, d, 30) - parallax(54, d, 30))
+			d += 5
+		line += "\\\ \n"
+		tab += line
+		hp += 0.3
+			
+		
+	tab = tab + r"""\hline
+	\end{tabular}
+	"""
+	return tab
+	
+def venparallax():
+	Hdeg=10 
+	
+	tab = r'''\noindent 
+	\begin{tabular}[t]{|c|cccccc|}
+	\multicolumn{7}{c}{\textbf{Parallax of Venus and Mars}}\\
+	'''
+	tab += r"""\hline 
+	$H_{a}$ HP & \textbf{.1'} & \textbf{.2'} & \textbf{.3} & \textbf{.4'} & \textbf{.5'} & \textbf{.6'} \\
+	\hline
+	"""
+	while Hdeg<90:
+		hp = 0.1
+		line = "\\textbf{ %s°} " %(Hdeg)
+		while hp < 0.7:
+			line += "& %.1f " %(parallax(hp, Hdeg, 0))
+			hp += 0.1
+		line += "\\\ \n"
+		tab += line
+		Hdeg += 10		
+	tab = tab + r"""\hline
+	\end{tabular}
+	"""
+	return tab
+	
+	
+	
+	
 	
 def makelatex():
 	lx = r"""\documentclass[ 10pt, twoside, a4paper]{scrreprt}
@@ -83,17 +243,69 @@ def makelatex():
     \usepackage[utf8x]{inputenc}
     \usepackage[english]{babel}
     \usepackage{fontenc}
-    \usepackage{array}
+    \usepackage{array, multicol, blindtext}
     \usepackage[landscape,headsep=0mm, headheight=5mm, top=15mm, bottom=15mm, left=8mm, right=8mm]{geometry}
-	\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+	\newcommand{\HRule}{\rule{\linewidth}{0.9mm}}
 	\usepackage[pdftex]{graphicx}
 \begin{document}
 \begin{scriptsize}"""
 	lx = lx + allinctabs()
-	lx = lx + '\end{scriptsize} \end{document}'
+	lx = lx + refractab()
+	lx = lx + parallaxtab()
+	lx = lx + diptab()
+	lx += r''' \newpage \end{scriptsize}
+	\begin{multicols}{2} \begin{scriptsize}
+	'''
+	lx = lx + venparallax()
+	lx = lx + r'''\end{scriptsize} 
+	\section*{About these tables}
+	The preceding static tables are independent from the year. They differ from the tables found in the official paper versions of the Nautical almanac in to important considerations. 
+\begin{itemize}
+      \item My tables are not arranged as /textit{critical} tables. So chose the value that fits best to your value and interpolate in the rare cases where this should be necessary.
+      \item My tables do not combine multiple corrections as some tables in the paper Nautical Almanac do. Each correction has to be applied separately. 
+    \end{itemize}
+All tables that are specific for a year are contained in the Nautical Almanac daily pages for the corresponding year.
+\subsubsection*{increments}
+The large increment table is is nothing but a linear interpolation between the tabulated values in the daily pages of the Nautical almanac. This table is basically identical with the official one.
+\subsubsection*{DIP}
+The DIP table corrects for hight of eye over the surface. This value has to be subtracted from the sextant altitude ($H_s$). The  correction in degrees for hight of eye in meters is given by the following formula: 
+\[d=0.0293\sqrt{m}\]
+This is the first correction (apart from index error) that has to be applied to the measured altitude.
+\subsubsection*{Refraction}
+The next correction is for refraction in the earths atmosphere. As usual this table is correct for 10°C and a pressure of 1010hPa. This correction has to be applied to apparent altitude ($H_a$). The exat values can be calculated by the following formula.
+\[R_0=\cot \left( H_a + \frac{7.31}{H_a+4.4}\right)\]
+For other than standard conditions calculate a correction factor for $R_0$ by: \[f=\frac{0.28P}{T+273}\] where $P$ is the pressure in hectopascal and $T$ is the temperature in °C. No table is given for this correction so far.
+\subsubsection*{Parallax}
+For moon sight and if necessary for Mars and Venus a parallax correction is necessary. For Mars and Venus the horizontal parallax ($HP$) is never more than 0.5’ and can be omitted if this kind of precision is not necessary. The parallax ($P$) can be calculated from horizontal parallax ($HP$ ) and observed altitude $H_o$ with the following formula:
+\[P=\cos{HP}\]
+The table for the moon gives the parallax for a horizontal parallax of 54’ which is the lowest value for the moon. For all other values the value in the lower half of the table has to be added. Note that this table is only for parallax and does not correct for refraction and semidiameter. For all moon and sun sights semidiameter has to be added for lower limb sight and subtracted for upper limb sights. The value for HP and semidiameter is tabulated in the daily pages. The smaler parallax table is for parallax of Venus and Mars.
+\subsubsection*{Altitude correction}
+To correct your sextant altitude $H_s$ do the following:
+Calculate $H_a$ by
+ \[H_a= H_s+I-dip\] 
+Where $I$ is the sextants index error. Than calculate the observed altitude $H_o$ by
+\[H_o= H_a-R+P\pm SD\]
+where $R$ is refraction, $P$ is parallax and $SD$ is the semidiameter.
+\subsubsection*{Sight reduktion}
+Sight reduction tables can be downloaded for the US governments internet pages. Search for HO-229 or HO-249.  These values can also be calculated with to, relatively simple, formulas
+\[ \sin H_c= \sin L \sin d + \cos L \cos d \cos LHA\]
+and
+\[\cos A = \frac{\sin d - \sin L \sin H_c}{\cos L \cos H_c}\]
+where $A$ is the azimuth angle, $L$ is the latitude, $d$ is the declination and $LHA$ is the local hour angle. The azimuth ($Z_n$) is given by the following rule:
+\begin{itemize}
+      \item if the $LHA$ is greater than 180°, $Z_n=A$
+      \item if the $LHA$ is less than 180°, $Z_n = 360° - A$
+\end{itemize}
+
+	\end{multicols} \end{document}'''
 	return lx
     
 outfile = open("inc.tex", 'w')
 outfile.write(makelatex())
 outfile.close()
-	
+
+
+
+
+
+

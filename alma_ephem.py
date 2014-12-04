@@ -274,6 +274,7 @@ def vdmean(date):
     dmars = "%0.1f" %(deg*360*30/ephem.pi)
     mmars = "%0.1f" %(mars.mag)
     
+    
     #Jupiter
     obs.date = date
     j.compute(date)
@@ -428,26 +429,31 @@ def planetstransit(date):
     mars = ephem.Mars()
     j = ephem.Jupiter()
     sat = ephem.Saturn()
-    
     obs = ephem.Observer()
-    obs.date = date
     
+    obs.date = date
     v.compute(date)
     vsha = nadeg(2*math.pi-ephem.degrees(v.g_ra).norm)
     vtrans = time(obs.next_transit(v))
+    hpvenus = "%0.1f" %((math.tan(6371/(v.earth_distance*149597870.7)))*60*180/math.pi)
+    
     obs.date = date
     mars.compute(date)
     marssha = nadeg(2*math.pi-ephem.degrees(mars.g_ra).norm)
     marstrans = time(obs.next_transit(mars))
+    hpmars = "%0.1f" %((math.tan(6371/(mars.earth_distance*149597870.7)))*60*180/math.pi)
+
     obs.date = date
     j.compute(date)
     jsha = nadeg(2*math.pi-ephem.degrees(j.g_ra).norm)
     jtrans = time(obs.next_transit(j))
+    
     obs.date = date
     sat.compute(date)
     satsha = nadeg(2*math.pi-ephem.degrees(sat.g_ra).norm)
     sattrans = time(obs.next_transit(sat))
-    return [vsha,vtrans,marssha,marstrans,jsha,jtrans,satsha,sattrans]
+    
+    return [vsha,vtrans,marssha,marstrans,jsha,jtrans,satsha,sattrans,hpmars,hpvenus]
 
 def equation_of_time(date):
     """returns equation of time, the suns transit time, 

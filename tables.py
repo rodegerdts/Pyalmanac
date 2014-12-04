@@ -117,7 +117,7 @@ def sunmoontab(date):
         & \multicolumn{1}{c}{SD.=%s} & \multicolumn{1}{c|}{d=%s} & \multicolumn{5}{c|}{S.D.=%s} \\
         \hline
         \multicolumn{7}{c}{}\\
-        """ %(vd[0],vd[1],vd[2])
+        """ %(vd[1],vd[0],vd[2])
         d = d + 1
     tab = tab+r"""\end{tabular*}"""
     return tab
