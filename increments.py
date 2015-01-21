@@ -63,7 +63,7 @@ def inctab(min):
     
     tab = tab+"%s" %(int(min))
     
-    tab=tab+ r'''} & \multicolumn{1}{p{0.5cm}|}{\textbf{Sun Plan.}} & \multicolumn{1}{c|}{\textbf{Aries}} & \multicolumn{1}{c||}{\textbf{Moon}} & \multicolumn{3}{c|}{\textit{\textbf{c and d corr}}}\\ 
+    tab=tab+ r'''} & \multicolumn{1}{p{0.5cm}|}{\textbf{Sun Plan.}} & \multicolumn{1}{c|}{\textbf{Aries}} & \multicolumn{1}{c||}{\textbf{Moon}} & \multicolumn{3}{c|}{\textit{\textbf{v and d corr}}}\\ 
     \hline'''
    
     sec = 0
