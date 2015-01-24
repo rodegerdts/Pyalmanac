@@ -2,7 +2,7 @@ Pyalmanac
 =========
 
 Pyalmanac is a Python script that creats the daily pages of the
-Nautical Almanac. These are tabels that are needed for selestial
+Nautical Almanac. These are tabels that are needed for celestial
 navigation with a Sekstant. Normally these tables must be bought every
 year as a Book. This little program is trying to do away with this
 inconveniance. Most of the heavy computing is done by the free Pyephem
