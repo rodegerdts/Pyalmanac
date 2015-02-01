@@ -17,24 +17,44 @@
 #     with this program; if not, write to the Free Software Foundation, Inc.,
 #     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-#import ephem
-#import math
-from alma_ephem import *
-from tables import *
+
+import tables
+import suntables 
 import os
 
 
 ##Main###
 year =  raw_input("Please enter the year you want to create the nautical almanac for:\n ")
-print "Creating the nautical almanac for the year %s" %year
-print "Please wait this can take a while."
-filename = "almanac%s.tex" %year
-outfile = open(filename, 'w')
-outfile.write(almanac(year))
-outfile.close()
-command = 'pdflatex %s' %filename
-print command
-os.system(command)
-#os.remove(filename)
-os.remove("almanac%s.log" %year)
-os.remove("almanac%s.aux" %year)
+s =  raw_input("""Do you want to create the full tables or just tables for the sun?:\n
+1	Full nautical almanac
+2	Just tables for the sun
+""")
+if s == "2":
+	print "Creating the sun tables only. \n The year %s" %year
+	print "Please wait this can take a while."
+	filename = "sunalmanac%s.tex" %year
+	outfile = open(filename, 'w')
+	outfile.write(suntables.almanac(year))
+	outfile.close()
+	command = 'pdflatex %s' %filename
+	os.system(command)
+	print "finished"
+	os.remove("sunalmanac%s.log" %year)
+	os.remove("sunalmanac%s.aux" %year)
+	os.remove(filename)
+elif s == "1":
+	print "Creating the nautical almanac for the year %s" %year
+	print "Please wait this can take a while."
+	filename = "almanac%s.tex" %year
+	outfile = open(filename, 'w')
+	outfile.write(tables.almanac(year))
+	outfile.close()
+	command = 'pdflatex %s' %filename
+	os.system(command)
+	print "finished"
+	os.remove(filename)
+	os.remove("almanac%s.log" %year)
+	os.remove("almanac%s.aux" %year)
+else:
+	print "Error! Choose either 1 or 2"
+	
