@@ -34,9 +34,12 @@ def time(date):
 
 def nadeg(deg):
     #changes ephem.angel (rad) to the format usually used in the nautical almanac. (dddÂ°mm.m')
+    theminus = ""
+    if deg < 0:
+    	theminus = "-"
     g = int(math.degrees(deg))
     m = (math.degrees(deg)-g)*60
-    gm = "%s°%04.1f" %(g,abs(m))
+    gm = "%s%s°%04.1f" %(theminus,abs(g),abs(m))
     return gm
  
  
