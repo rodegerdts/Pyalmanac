@@ -72,8 +72,8 @@ def starstab(date):
     for i in range(3):
         datex = str(ephem.date(date + i))
         m = m + '\\hline \n'
-        # Changed next line from datex[0:8], to display whole date
-        m = m + ''' %s & \\textbf{SHA} & \\textbf{Mer.pass} \\\ \n''' %datex[0:10]
+        # Changed next line from datex[0:8], to display whole date, splitting on space
+        m = m + ''' %s & \\textbf{SHA} & \\textbf{Mer.pass} \\\ \n''' %datex.split(' ', 1)[0]
         p = planetstransit(datex)
         m = m + 'Venus & %s & %s \\\ \n' %(p[0],p[1])
         m = m + 'Mars & %s & %s \\\ \n' %(p[2],p[3])
