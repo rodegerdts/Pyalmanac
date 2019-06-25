@@ -1,14 +1,43 @@
-#! /usr/bin/python
+#!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
+
+#   Copyright (C) 2014  Enno Rodegerdts
+#   Copyright (C) 2019  Andrew Bauer
+
+#  This program is free software; you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation; either version 2 of the License, or
+#     (at your option) any later version.
+# 
+#     This program is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+# 
+#     You should have received a copy of the GNU General Public License along
+#     with this program; if not, write to the Free Software Foundation, Inc.,
+#     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+import sys
+import os
 from math import *
 
-
-
 def degmin(deg):
-    #changes decimal degrees to the format usually used in the nautical almanac. (dddÂ°mm.m')
-    g = int(deg)
-    m = (deg-g)*60
-    gm = "%s°%04.1f" %(g,abs(m))
+    #changes decimal degrees to the format usually used in the nautical almanac. (ddd°mm.m')
+    theminus = ""
+    if deg < 0:
+        theminus = "-"
+    deg = abs(deg)
+    di = int(deg)		# degrees (integer)
+    # note: round() uses "Rounding Half To Even" strategy
+    mf = round((deg-di)*60, 1)	# minutes (float), rounded to 1 decimal place
+    mi = int(mf)			# minutes (integer)
+    if mi == 60:
+        mf -= 60
+        di += 1
+        if di == 360:
+            di = 0
+    gm = "%s%s°%04.1f" %(theminus,di,mf)
     return gm
 
 def decdeg(d,min):
@@ -185,7 +214,7 @@ def parallaxtab():
 		Hdeg += 1
 		
 	tab += r"""\hline 
-	\multicolumn{1}{|c|}{\textbf{HP}} & \multicolumn{18}{c|}{correction for HP per collum}\\
+	\multicolumn{1}{|c|}{\textbf{HP}} & \multicolumn{18}{c|}{correction for HP per column}\\
 	\hline
 	"""
 	hp = 54.3
@@ -253,11 +282,11 @@ def makelatex():
 	lx = lx + refractab()
 	lx = lx + parallaxtab()
 	lx = lx + diptab()
-	lx += r''' \newpage \end{scriptsize}
+	lx += r''' \end{scriptsize} \newpage
 	\begin{multicols}{2} \begin{scriptsize}
 	'''
 	lx = lx + venparallax()
-	lx = lx + r'''\end{scriptsize} 
+	lx = lx + r'''\end{scriptsize} \newpage
 	\section*{About these tables}
 	The preceding static tables are independent from the year. They differ from the tables found in the official paper versions of the Nautical almanac in to important considerations. 
 \begin{itemize}
@@ -294,18 +323,23 @@ and
 where $A$ is the azimuth angle, $L$ is the latitude, $d$ is the declination and $LHA$ is the local hour angle. The azimuth ($Z_n$) is given by the following rule:
 \begin{itemize}
       \item if the $LHA$ is greater than 180°, $Z_n=A$
-      \item if the $LHA$ is less than 180°, $Z_n = 360° - A$
+      \item if the $LHA$ is less than 180°, $Z_n = 360^\circ - A$
 \end{itemize}
 
 	\end{multicols} \end{document}'''
 	return lx
-    
-outfile = open("inc.tex", 'w')
+
+if sys.version_info[0] != 2:
+    raise Exception("This runs with Python 2.7")
+
+fn = "inc"
+filename = fn + ".tex"
+outfile = open(filename, 'w')
 outfile.write(makelatex())
 outfile.close()
-
-
-
-
-
-
+command = 'pdflatex %s' %filename
+os.system(command)
+print("finished")
+os.remove(fn + ".tex")
+os.remove(fn + ".log")
+os.remove(fn + ".aux")
