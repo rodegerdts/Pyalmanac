@@ -1,4 +1,4 @@
-# Pyalmanac 
+# Pyalmanac
 
 Pyalmanac is a Python 2.7 script that creates the daily pages of the Nautical Almanac. These are tabels that are needed for celestial navigation with a sextant. Although you are strongly advised to purchase the official Nautical Almanac, this program will reproduce the tables with no warranty or guarantee of accuracy.  
 
@@ -40,21 +40,37 @@ and the results have been crosschecked with USNO data to some extent.
 
 ## Requirements
 
-&nbsp;&nbsp;&nbsp;&nbsp;Most of the heavy computing is done by the free Pyephem library. Typesetting is done by TeX/LaTeX So before you can use this program you need to install:
+&nbsp;&nbsp;&nbsp;&nbsp;Most of the computation is done by the free Pyephem library.  
+&nbsp;&nbsp;&nbsp;&nbsp;Typesetting is done by TeX/LaTeX so you first need to install:
 
-* Python v2.x (2.6 or later ) python 3 will not work out of the box
+* Python v2.x (2.6 or later )
 * PyEphem
-* TeX/LaTeX
+* TeX/LaTeX&nbsp;&nbsp;or&nbsp;&nbsp;MiKTeX
   
 
-### INSTALLATION on Linux:
+### INSTALLATION on Windows 10:
 
-&nbsp;&nbsp;&nbsp;&nbsp;Install your platforms Python- and LaTeX distribution. Remember to chose python 2.7 minimum and install all develpment header files. Run at the command line:
+&nbsp;&nbsp;&nbsp;&nbsp;Install Python 2.7 and MiKTeX from https://miktex.org/
+&nbsp;&nbsp;&nbsp;&nbsp;Run at the command line:
 
 &nbsp;&nbsp;&nbsp;&nbsp;pip install pyephem
 
-&nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in any directory and start with:
+&nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in any directory and start with:  
+&nbsp;&nbsp;&nbsp;&nbsp;python pyalmanac
 
+&nbsp;&nbsp;&nbsp;&nbsp;However, if Python 3 is also installed, start with:
+&nbsp;&nbsp;&nbsp;&nbsp;py -2 pyalmanac
+
+
+### INSTALLATION on Linux:
+
+&nbsp;&nbsp;&nbsp;&nbsp;Install your platform#'s Python- and LaTeX distribution.  
+&nbsp;&nbsp;&nbsp;&nbsp;Remember to chose python 2.7 minimum and install all develpment header files.  
+&nbsp;&nbsp;&nbsp;&nbsp;Run at the command line:
+
+&nbsp;&nbsp;&nbsp;&nbsp;pip install pyephem
+
+&nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in any directory and start with:  
 &nbsp;&nbsp;&nbsp;&nbsp;python pyalmanac  
 &nbsp;&nbsp;&nbsp;&nbsp;or  
 &nbsp;&nbsp;&nbsp;&nbsp;./pyalmanac
@@ -62,17 +78,20 @@ and the results have been crosschecked with USNO data to some extent.
 
 ### INSTALLATION on MAC:
 
-&nbsp;&nbsp;&nbsp;&nbsp;Every Mac comes with python preinstalled. (Please choose the Python 3.7 version of Pyalmanac if Python 3.* is installed.) You need to install the PyEphem library to use Pyalmanac. Type the following commands at the commandline (terminal app):
+&nbsp;&nbsp;&nbsp;&nbsp;Every Mac comes with python preinstalled.  
+&nbsp;&nbsp;&nbsp;&nbsp;(Please choose the Python 3.7 version of Pyalmanac if Python 3.* is installed.)  
+&nbsp;&nbsp;&nbsp;&nbsp;You need to install the PyEphem library to use Pyalmanac.  
+&nbsp;&nbsp;&nbsp;&nbsp;Type the following commands at the commandline (terminal app):
 
 &nbsp;&nbsp;&nbsp;&nbsp;sudo easy_install pip
 &nbsp;&nbsp;&nbsp;&nbsp;pip install pyephem
 
-&nbsp;&nbsp;&nbsp;&nbsp;If this command fails your mac asks you if you would like to install the header files. Do so, you do not need to install the full IDE. Try again.
+&nbsp;&nbsp;&nbsp;&nbsp;If this command fails, your Mac asks you if you would like to install the header files.  
+&nbsp;&nbsp;&nbsp;&nbsp;Do so - you do not need to install the full IDE - and try again.
 
 &nbsp;&nbsp;&nbsp;&nbsp;Install TeX/LaTeX from http://www.tug.org/mactex/
 
-&nbsp;&nbsp;&nbsp;&nbsp;Now you are almost ready. Put the Pyalmanac files in any directory and start with 
-
+&nbsp;&nbsp;&nbsp;&nbsp;Now you are almost ready. Put the Pyalmanac files in any directory and start with:  
 &nbsp;&nbsp;&nbsp;&nbsp;python pyalmanac  
 &nbsp;&nbsp;&nbsp;&nbsp;or  
 &nbsp;&nbsp;&nbsp;&nbsp;./pyalmanac
