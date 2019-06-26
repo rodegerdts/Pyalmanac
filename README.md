@@ -3,7 +3,7 @@
 Pyalmanac is a Python 2.7 script that creates the daily pages of the Nautical Almanac. These are tabels that are needed for celestial navigation with a sextant. Although you are strongly advised to purchase the official Nautical Almanac, this program will reproduce the tables with no warranty or guarantee of accuracy.  
 
 NOTE: two scripts are included (both can be run): 'pyalmanac.py' and 'increments.py'  
-NOTE: a Python 3.7 script with identical functionality can be found at: (...)  
+NOTE: a Python 3.7 script with identical functionality can be found at: https://github.com/aendie/Py3almanac  
 NOTE: a Skyfield version of Pyalmanac is under development.
 
 This fork of the original code, which can be found at https://github.com/rodegerdts/Pyalmanac in general includes:
@@ -65,7 +65,7 @@ and the results have been crosschecked with USNO data to some extent.
 ### INSTALLATION on Linux:
 
 &nbsp;&nbsp;&nbsp;&nbsp;Install your platform#'s Python- and LaTeX distribution.  
-&nbsp;&nbsp;&nbsp;&nbsp;Remember to chose python 2.7 minimum and install all develpment header files.  
+&nbsp;&nbsp;&nbsp;&nbsp;Remember to choose python 2.7 minimum and install all development header files.  
 &nbsp;&nbsp;&nbsp;&nbsp;Run at the command line:
 
 &nbsp;&nbsp;&nbsp;&nbsp;**pip install pyephem**
