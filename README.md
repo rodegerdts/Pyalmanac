@@ -40,7 +40,7 @@ and the results have been crosschecked with USNO data to some extent.
 
 ## Requirements
 
-Most of the heavy computing is done by the free Pyephem library. Typesetting is done by TeX/LaTeX So before you can use this program you need to install:
+&nbsp;&nbsp;&nbsp;&nbsp;Most of the heavy computing is done by the free Pyephem library. Typesetting is done by TeX/LaTeX So before you can use this program you need to install:
 
 * Python v2.x (2.6 or later ) python 3 will not work out of the box
 * PyEphem
@@ -49,30 +49,30 @@ Most of the heavy computing is done by the free Pyephem library. Typesetting is 
 
 ### INSTALLATION on Linux:
 
-    Install your platforms Python- and LaTeX distribution. Remember to chose python 2.7 minimum and install all develpment header files. Run at the command line:
+&nbsp;&nbsp;&nbsp;&nbsp;Install your platforms Python- and LaTeX distribution. Remember to chose python 2.7 minimum and install all develpment header files. Run at the command line:
 
-    pip install pyephem
+&nbsp;&nbsp;&nbsp;&nbsp;pip install pyephem
 
-    Put the Pyalmanac files in any directory and start with:
+&nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in any directory and start with:
 
-    python pyalmanac  
-    or  
-    ./pyalmanac
+&nbsp;&nbsp;&nbsp;&nbsp;python pyalmanac  
+&nbsp;&nbsp;&nbsp;&nbsp;or  
+&nbsp;&nbsp;&nbsp;&nbsp;./pyalmanac
 
 
 ### INSTALLATION on MAC:
 
-    Every Mac comes with python preinstalled. (Please choose the Python 3.7 version of Pyalmanac if Python 3.* is installed.) You need to install the PyEphem library to use Pyalmanac. Type the following commands at the commandline (terminal app):
+&nbsp;&nbsp;&nbsp;&nbsp;Every Mac comes with python preinstalled. (Please choose the Python 3.7 version of Pyalmanac if Python 3.* is installed.) You need to install the PyEphem library to use Pyalmanac. Type the following commands at the commandline (terminal app):
 
-    sudo easy_install pip
-    pip install pyephem
+&nbsp;&nbsp;&nbsp;&nbsp;sudo easy_install pip
+&nbsp;&nbsp;&nbsp;&nbsp;pip install pyephem
 
-    If this command fails your mac asks you if you would like to install the header files. Do so, you do not need to install the full IDE. Try again.
+&nbsp;&nbsp;&nbsp;&nbsp;If this command fails your mac asks you if you would like to install the header files. Do so, you do not need to install the full IDE. Try again.
 
-    Install TeX/LaTeX from http://www.tug.org/mactex/
+&nbsp;&nbsp;&nbsp;&nbsp;Install TeX/LaTeX from http://www.tug.org/mactex/
 
-    Now you are almost ready. Put the Pyalmanac files in any directory and start with 
+&nbsp;&nbsp;&nbsp;&nbsp;Now you are almost ready. Put the Pyalmanac files in any directory and start with 
 
-    python pyalmanac  
-    or  
-    ./pyalmanac
+&nbsp;&nbsp;&nbsp;&nbsp;python pyalmanac  
+&nbsp;&nbsp;&nbsp;&nbsp;or  
+&nbsp;&nbsp;&nbsp;&nbsp;./pyalmanac
