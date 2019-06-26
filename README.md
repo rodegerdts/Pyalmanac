@@ -56,10 +56,10 @@ and the results have been crosschecked with USNO data to some extent.
 &nbsp;&nbsp;&nbsp;&nbsp;**pip install pyephem**
 
 &nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in any directory and start with:  
-&nbsp;&nbsp;&nbsp;&nbsp;**python pyalmanac**
+&nbsp;&nbsp;&nbsp;&nbsp;**python.exe pyalmanac.py**
 
 &nbsp;&nbsp;&nbsp;&nbsp;However, if Python 3 is also installed, start with:  
-&nbsp;&nbsp;&nbsp;&nbsp;**py -2 pyalmanac**
+&nbsp;&nbsp;&nbsp;&nbsp;**py -2 pyalmanac.py**
 
 
 ### INSTALLATION on Linux:
