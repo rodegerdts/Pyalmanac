@@ -50,16 +50,16 @@ and the results have been crosschecked with USNO data to some extent.
 
 ### INSTALLATION on Windows 10:
 
-&nbsp;&nbsp;&nbsp;&nbsp;Install Python 2.7 and MiKTeX from https://miktex.org/
+&nbsp;&nbsp;&nbsp;&nbsp;Install Python 2.7 and MiKTeX from https://miktex.org/  
 &nbsp;&nbsp;&nbsp;&nbsp;Run at the command line:
 
-&nbsp;&nbsp;&nbsp;&nbsp;pip install pyephem
+&nbsp;&nbsp;&nbsp;&nbsp;**pip install pyephem**
 
 &nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in any directory and start with:  
-&nbsp;&nbsp;&nbsp;&nbsp;python pyalmanac
+&nbsp;&nbsp;&nbsp;&nbsp;**python pyalmanac**
 
-&nbsp;&nbsp;&nbsp;&nbsp;However, if Python 3 is also installed, start with:
-&nbsp;&nbsp;&nbsp;&nbsp;py -2 pyalmanac
+&nbsp;&nbsp;&nbsp;&nbsp;However, if Python 3 is also installed, start with:  
+&nbsp;&nbsp;&nbsp;&nbsp;**py -2 pyalmanac**
 
 
 ### INSTALLATION on Linux:
@@ -68,12 +68,12 @@ and the results have been crosschecked with USNO data to some extent.
 &nbsp;&nbsp;&nbsp;&nbsp;Remember to chose python 2.7 minimum and install all develpment header files.  
 &nbsp;&nbsp;&nbsp;&nbsp;Run at the command line:
 
-&nbsp;&nbsp;&nbsp;&nbsp;pip install pyephem
+&nbsp;&nbsp;&nbsp;&nbsp;**pip install pyephem**
 
 &nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in any directory and start with:  
-&nbsp;&nbsp;&nbsp;&nbsp;python pyalmanac  
+&nbsp;&nbsp;&nbsp;&nbsp;**python pyalmanac**  
 &nbsp;&nbsp;&nbsp;&nbsp;or  
-&nbsp;&nbsp;&nbsp;&nbsp;./pyalmanac
+&nbsp;&nbsp;&nbsp;&nbsp;**./pyalmanac**
 
 
 ### INSTALLATION on MAC:
@@ -83,8 +83,8 @@ and the results have been crosschecked with USNO data to some extent.
 &nbsp;&nbsp;&nbsp;&nbsp;You need to install the PyEphem library to use Pyalmanac.  
 &nbsp;&nbsp;&nbsp;&nbsp;Type the following commands at the commandline (terminal app):
 
-&nbsp;&nbsp;&nbsp;&nbsp;sudo easy_install pip
-&nbsp;&nbsp;&nbsp;&nbsp;pip install pyephem
+&nbsp;&nbsp;&nbsp;&nbsp;**sudo easy_install pip**  
+&nbsp;&nbsp;&nbsp;&nbsp;**pip install pyephem**
 
 &nbsp;&nbsp;&nbsp;&nbsp;If this command fails, your Mac asks you if you would like to install the header files.  
 &nbsp;&nbsp;&nbsp;&nbsp;Do so - you do not need to install the full IDE - and try again.
@@ -92,6 +92,6 @@ and the results have been crosschecked with USNO data to some extent.
 &nbsp;&nbsp;&nbsp;&nbsp;Install TeX/LaTeX from http://www.tug.org/mactex/
 
 &nbsp;&nbsp;&nbsp;&nbsp;Now you are almost ready. Put the Pyalmanac files in any directory and start with:  
-&nbsp;&nbsp;&nbsp;&nbsp;python pyalmanac  
+&nbsp;&nbsp;&nbsp;&nbsp;**python pyalmanac**  
 &nbsp;&nbsp;&nbsp;&nbsp;or  
-&nbsp;&nbsp;&nbsp;&nbsp;./pyalmanac
+&nbsp;&nbsp;&nbsp;&nbsp;**./pyalmanac**
