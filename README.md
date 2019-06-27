@@ -4,9 +4,9 @@ Pyalmanac is a Python 2.7 script that creates the daily pages of the Nautical Al
 
 NOTE: two scripts are included (both can be run): 'pyalmanac.py' and 'increments.py'  
 NOTE: a Python 3.7 script with identical functionality can be found at: https://github.com/aendie/Py3almanac  
-NOTE: a Skyfield version of Pyalmanac is under development.
+NOTE: a [Skyfield](https://rhodesmill.org/skyfield/) version of Pyalmanac is under development.
 
-This fork of the original code, which can be found at https://github.com/rodegerdts/Pyalmanac in general includes:
+This fork of the original code, which can be found at https://github.com/rodegerdts/Pyalmanac, in general includes:
 
 * **various bugfixes** (in accordance with USNO data), e.g. ...  
      a declination of 20°60.0 now prints as 21°00.0;  
@@ -29,7 +29,7 @@ This fork of the original code, which can be found at https://github.com/rodeger
      Declinations/Latitudes are N/S instead of positive and negative;  
      Declinations are always printed with two digits for degrees;  
      line spacing (row padding) within the tables has been improved;  
-     table header improvements;  
+     minor table header improvements;  
      addition of the minutes symbol on the Moon’s v, d and HP data rows.
 
 * **a few typo corrections**
