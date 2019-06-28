@@ -639,7 +639,7 @@ def doublepage(date):
     page = r"""
     \sffamily
     \noindent
-    \textbf{%s, %s ,%s   (%s.,  %s.,  %s.)}
+    \textbf{%s, %s, %s   (%s.,  %s.,  %s.)}
     
     \begin{scriptsize}
 """ %(ephem.date(date).datetime().strftime("%B %d"),ephem.date(date+1).datetime().strftime("%d"),ephem.date(date+2).datetime().strftime("%d"),ephem.date(date).datetime().strftime("%a"),ephem.date(date+1).datetime().strftime("%a"),ephem.date(date+2).datetime().strftime("%a"))
