@@ -41,28 +41,32 @@ and the results have been crosschecked with USNO data to some extent.
 ## Requirements
 
 &nbsp;&nbsp;&nbsp;&nbsp;Most of the computation is done by the free Pyephem library.  
-&nbsp;&nbsp;&nbsp;&nbsp;Typesetting is done by TeX/LaTeX so you first need to install:
+&nbsp;&nbsp;&nbsp;&nbsp;Typesetting is done by LaTeX or MiKTeX so you first need to install:
 
-* Python v2.x (2.6 or later )
+* Python v2.x (2.6 or later)
 * PyEphem
 * TeX/LaTeX&nbsp;&nbsp;or&nbsp;&nbsp;MiKTeX
-  
 
-### INSTALLATION on Windows 10:
+&nbsp;&nbsp;&nbsp;&nbsp;**DEPRECATION:** Python 2.7 will reach the end of its life on January 1st, 2020.  
+&nbsp;&nbsp;&nbsp;&nbsp;Please upgrade your Python as Python 2.7 won't be maintained after that date.  
+&nbsp;&nbsp;&nbsp;&nbsp;A future version of pip will drop support for Python 2.7.
+
+### INSTALLATION GUIDELINES on Windows 10:
 
 &nbsp;&nbsp;&nbsp;&nbsp;Install Python 2.7 and MiKTeX from https://miktex.org/  
-&nbsp;&nbsp;&nbsp;&nbsp;Run at the command line:
+&nbsp;&nbsp;&nbsp;&nbsp;Using Command Prompt, go to your Python Scripts folder and run, e.g.:
 
+&nbsp;&nbsp;&nbsp;&nbsp;**cd C:\\Python27\\Scripts**  
 &nbsp;&nbsp;&nbsp;&nbsp;**pip install pyephem**
 
-&nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in any directory and start with:  
+&nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in any folder, go there and start with:  
 &nbsp;&nbsp;&nbsp;&nbsp;**python.exe pyalmanac.py**
 
 &nbsp;&nbsp;&nbsp;&nbsp;However, if Python 3 is also installed, start with:  
 &nbsp;&nbsp;&nbsp;&nbsp;**py -2 pyalmanac.py**
 
 
-### INSTALLATION on Linux:
+### INSTALLATION GUIDELINES on Linux:
 
 &nbsp;&nbsp;&nbsp;&nbsp;Install your platform#'s Python- and LaTeX distribution.  
 &nbsp;&nbsp;&nbsp;&nbsp;Remember to choose python 2.7 minimum and install all development header files.  
@@ -76,7 +80,7 @@ and the results have been crosschecked with USNO data to some extent.
 &nbsp;&nbsp;&nbsp;&nbsp;**./pyalmanac**
 
 
-### INSTALLATION on MAC:
+### INSTALLATION GUIDELINES on MAC:
 
 &nbsp;&nbsp;&nbsp;&nbsp;Every Mac comes with python preinstalled.  
 &nbsp;&nbsp;&nbsp;&nbsp;(Please choose the Python 3.7 version of Pyalmanac if Python 3.* is installed.)  
