@@ -322,7 +322,7 @@ def sunmoontab(date):
         else:			# Positive/Negative Declinations
             while h < 24:
                 eph = sunmoon(da)
-                line = "%s & %s & %s & %s & %s\' & %s & %s\' & %s\' \\\ \n" %(h,eph[0],eph[1],eph[2],eph[3],eph[4],eph[5],eph[6])
+                line = "%s & %s & %s & %s & %s & %s & %s & %s \\\ \n" %(h,eph[0],eph[1],eph[2],eph[3],eph[4],eph[5],eph[6])
                 tab = tab + line
                 h += 1
                 da = da+ephem.hour
