@@ -31,7 +31,7 @@ def time(date):
     tup = date.tuple()
     hr = tup[-3]
     # round >=30 seconds to next minute
-    min = tup[-2] + int(round(tup[-1]/60+0.00001))
+    min = tup[-2] + int(round((tup[-1]/60)+0.00001))
 #    nextday = False
     if min == 60:
         min = 0
@@ -47,7 +47,7 @@ def time(date):
 
 
 def nadeg(rad,fixedwidth=1):
-    # changes ephem.angle (rad) to the format usually used in the nautical almanac (ddd°mm.m').
+    # changes ephem.angle (rad) to the format usually used in the nautical almanac (ddd°mm.m) and returns a string object.
 	# the optional argument specifies the minimum width for degrees (only)
     theminus = ""
     if rad < 0:
@@ -70,8 +70,8 @@ def nadeg(rad,fixedwidth=1):
         else:
             gm = "%s%s°%04.1f" %(theminus,di,mf)
     return gm
- 
- 
+
+
 #List of navigational stars
 db = """\
 Alpheratz,f|S|B9,0:08:23.2|135.68,29:05:27|-162.95,2.07,2000,0
@@ -93,7 +93,7 @@ Alnilam,f|S|B0,5:36:12.8|1.49,-1:12:07|-1.06,1.69,2000,0
 Betelgeuse,f|S|M2,5:55:10.3|27.33,7:24:25|10.86,0.45,2000,0
 Canopus,f|S|F0,6:23:57.1|19.99,-52:41:45|23.67,-0.62,2000,0
 Sirius,f|S|A0,6:45:09.3|-546.01,-16:42:47|-1223.08,-1.44,2000,0
-Adara,f|S|B2,6:58:37.6|2.63,-28:58:20|2.29,1.50,2000,0
+Adhara,f|S|B2,6:58:37.6|2.63,-28:58:20|2.29,1.50,2000,0
 Procyon,f|S|F5,7:39:18.5|-716.57,5:13:39|-1034.58,0.40,2000,0
 Pollux,f|S|K0,7:45:19.4|-625.69,28:01:35|-45.95,1.16,2000,0
 Avior,f|S|K3,08:22:30.8|-25.34,-59:30:34.1|22.72,1.9,2000,0
@@ -331,7 +331,8 @@ def vdmean(date):
     
     return ds,sds,sdm,vv,dv,mv,vmars,dmars,mmars,vj,dj,mj,vsat,dsat,msat
 
-def twilight(date,lat):
+
+def twilight(date, lat):
     # Returns for given date and latitude(in full degrees):
     # naut. and civil twilight (before sunrise), sunrise, meridian passage, sunset, civil and nautical twilight (after sunset).
     # NOTE: 'twilight' is only called for every third day in the Full Almanac...
@@ -347,7 +348,7 @@ def twilight(date,lat):
     s.compute(date)
     r = s.radius
 
-    obs.horizon = ephem.degrees('-12')+r	# Nautical twilight...
+    obs.horizon = ephem.degrees('-12')+r	# Nautical twilight ...
     try:
         out[0] = time(obs.next_rising(s))	# begin
     except:
@@ -387,8 +388,8 @@ def twilight(date,lat):
     return out
 
 def moonrise(date,lat):
-    # returns moonrise and moonset for the given date and latitude plus 2 days:
-    # rise day 1, rise day 2, rise day 3, set day 1, set day 2, set day 3
+    # returns moonrise and moonset for the given date and latitude plus next 2 days:
+    #    rise day 1, rise day 2, rise day 3, set day 1, set day 2, set day 3
 
     latitude = ephem.degrees('%s:00:00.0' %lat)
     out  = ['--:--','--:--','--:--','--:--','--:--','--:--']	# first event
@@ -413,9 +414,15 @@ def moonrise(date,lat):
         nextr = obs.next_rising(m, start=firstrising)
         if nextr-obs.date < 1:
             out2[0] = time(nextr)		# note: overflow to 00:00 next day is correct here
+    except UnboundLocalError:
+        pass
+    except ephem.NeverUpError:
+        pass
+    except ephem.AlwaysUpError:
+        pass
     except Exception:
-        #print("Oops!",sys.exc_info()[0],"occured.")
-        sys.exc_clear()		# only Python 2
+        flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+        sys.exc_clear()		# only in Python 2
 
     obs.date = d
     try:
@@ -423,15 +430,21 @@ def moonrise(date,lat):
         if firstsetting-obs.date >= 1:
             raise ValueError, 'event next day'
         out[3] = time(firstsetting)		# note: overflow to 00:00 next day is correct here
-    except:
+    except Exception:
         out[3] = '--:--'
     try:
         nexts = obs.next_setting(m, start=firstsetting)
         if nexts-obs.date < 1:
             out2[3] = time(nexts)		# note: overflow to 00:00 next day is correct here
-    except:
-        #print("Oops!",sys.exc_info()[0],"occured.")
-        sys.exc_clear()		# only Python 2
+    except UnboundLocalError:
+        pass
+    except ephem.NeverUpError:
+        pass
+    except ephem.AlwaysUpError:
+        pass
+    except Exception:
+        flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+        sys.exc_clear()		# only in Python 2
 #-----------------------------------------------------------
     d = ephem.date(date + 1 - 30 * ephem.second)
     obs.date = d
@@ -441,15 +454,21 @@ def moonrise(date,lat):
         if firstrising-obs.date >= 1:
             raise ValueError, 'event next day'
         out[1] = time(firstrising)		# note: overflow to 00:00 next day is correct here
-    except:
+    except Exception:
         out[1] = '--:--'
     try:
         nextr = obs.next_rising(m, start=firstrising)
         if nextr-obs.date < 1:
             out2[1] = time(nextr)		# note: overflow to 00:00 next day is correct here
-    except:
-        #print("Oops!",sys.exc_info()[0],"occured.")
-        sys.exc_clear()		# only Python 2
+    except UnboundLocalError:
+        pass
+    except ephem.NeverUpError:
+        pass
+    except ephem.AlwaysUpError:
+        pass
+    except Exception:
+        flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+        sys.exc_clear()		# only in Python 2
 
     obs.date = d
     try:
@@ -457,15 +476,21 @@ def moonrise(date,lat):
         if firstsetting-obs.date >= 1:
             raise ValueError, 'event next day'
         out[4] = time(firstsetting)		# note: overflow to 00:00 next day is correct here
-    except:
+    except Exception:
         out[4] = '--:--'
     try:
         nexts = obs.next_setting(m, start=firstsetting)
         if nexts-obs.date < 1:
             out2[4] = time(nexts)		# note: overflow to 00:00 next day is correct here
-    except:
-        #print("Oops!",sys.exc_info()[0],"occured.")
-        sys.exc_clear()		# only Python 2
+    except UnboundLocalError:
+        pass
+    except ephem.NeverUpError:
+        pass
+    except ephem.AlwaysUpError:
+        pass
+    except Exception:
+        flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+        sys.exc_clear()		# only in Python 2
 #-----------------------------------------------------------
     d = ephem.date(date + 2 - 30 * ephem.second)
     obs.date = d
@@ -475,15 +500,21 @@ def moonrise(date,lat):
         if firstrising-obs.date >= 1:
             raise ValueError, 'event next day'
         out[2] = time(firstrising)		# note: overflow to 00:00 next day is correct here
-    except:
+    except Exception:
         out[2] = '--:--'
     try:
         nextr = obs.next_rising(m, start=firstrising)
         if nextr-obs.date < 1:
             out2[2] = time(nextr)		# note: overflow to 00:00 next day is correct here
-    except:
-        #print("Oops!",sys.exc_info()[0],"occured.")
-        sys.exc_clear()		# only Python 2
+    except UnboundLocalError:
+        pass
+    except ephem.NeverUpError:
+        pass
+    except ephem.AlwaysUpError:
+        pass
+    except Exception:
+        flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+        sys.exc_clear()		# only in Python 2
 
     obs.date = d
     try:
@@ -491,17 +522,32 @@ def moonrise(date,lat):
         if firstsetting-obs.date >= 1:
             raise ValueError, 'event next day'
         out[5] = time(firstsetting)		# note: overflow to 00:00 next day is correct here
-    except:
+    except Exception:
         out[5] = '--:--'
     try:
         nexts = obs.next_setting(m, start=firstsetting)
         if nexts-obs.date < 1:
             out2[5] = time(nexts)		# note: overflow to 00:00 next day is correct here
-    except:
-        #print("Oops!",sys.exc_info()[0],"occured.")
-        sys.exc_clear()		# only for Python 2
+    except UnboundLocalError:
+        pass
+    except ephem.NeverUpError:
+        pass
+    except ephem.AlwaysUpError:
+        pass
+    except Exception:
+        flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+        sys.exc_clear()		# only in Python 2
 
     return out, out2
+
+def flag_msg(msg):
+    if config.logfileopen:
+        # if open - write to log file
+        config.writeLOG(msg + '\n')
+    else:
+        # otherwise - print to console
+        print(msg)
+    return
 
 def ariestransit(date):
     # returns transit time of aries for given date
@@ -590,9 +636,12 @@ def equation_of_time(date):
     
     s.compute(date-0.1)
     obs.date = date-0.1
+
     eqt00 = ephem.hours(round((obs.next_antitransit(s)-date)*86400)/86400*2*math.pi)
     eqt00 = str(eqt00)[-8:-3]
+
     eqt12 = ephem.hours(round((obs.next_transit(s)-(date+0.5))*86400)/86400*2*math.pi)
     eqt12 = str(eqt12)[-8:-3]
 
     return eqt00,eqt12,transs,transm,antim,age,pct
+

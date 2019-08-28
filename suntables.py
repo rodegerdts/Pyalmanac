@@ -26,12 +26,12 @@ def suntab(date):
     tab = r'''\noindent
     \begin{tabular*}{0.2\textwidth}[t]{@{\extracolsep{\fill}}|c|rr|}
 '''
-    d = 0
-    while d < 3:
-        da = date+d
+    n = 0
+    while n < 3:
+        da = date + n
         tab = tab + r'''\hline 
         \multicolumn{1}{|c|}{\rule{0pt}{2.6ex}\textbf{%s}} &\multicolumn{1}{c}{\textbf{GHA}} &\multicolumn{1}{c|}{\textbf{Dec}}\\ 
-        \hline\rule{0pt}{2.4ex}\noindent
+        \hline\rule{0pt}{2.6ex}\noindent
 ''' %(ephem.date(da).datetime().strftime("%d"))
         h = 0
 
@@ -40,10 +40,10 @@ def suntab(date):
             hourlydata = [[] for i in range(24)]
             while h < 24:
                 hourlydata[h] = sunmoon(da)
-                da = da+ephem.hour
+                da = da + ephem.hour
                 h += 1
             # now print the data per hour
-            da = date+d
+            da = date + n
             h = 0
             slastNS = ''
 
@@ -62,29 +62,33 @@ def suntab(date):
 
                 line = "%s & %s & %s" %(h,eph[0],sdec)
                 lineterminator = "\\\ \n"
-                if (h+1)%6 == 0:
+                if h < 23 and (h+1)%6 == 0:
                     lineterminator = "\\\[2Pt] \n"
                 tab = tab + line + lineterminator
                 h += 1
-                da = da+ephem.hour
+                da = da + ephem.hour
+
         else:			# Positive/Negative Declinations
             while h < 24:
                 eph = sunmoon(da)
-                line = "%s & %s & %s \\\ \n" %(h,eph[0],eph[1])
-                tab = tab + line
+                line = "%s & %s & %s" %(h,eph[0],eph[1])
+                lineterminator = "\\\ \n"
+                if h < 23 and (h+1)%6 == 0:
+                    lineterminator = "\\\[2Pt] \n"
+                tab = tab + line + lineterminator
                 h += 1
-                da = da+ephem.hour
+                da = da + ephem.hour
 
-        vd = vdmean(date+d)
+        vd = vdmean(date + n)
         tab = tab + r"""\hline
         \rule{0pt}{2.4ex} & \multicolumn{1}{c}{SD.=%s} & \multicolumn{1}{c|}{d=%s} \\
         \hline
 """ %(vd[1],vd[0])
-        if d < 2:
+        if n < 2:
             # add space between tables...
             tab = tab + r"""\multicolumn{1}{c}{}\\[-0.5ex]"""
-        d = d + 1
-    tab = tab+r"""\end{tabular*}"""
+        n += 1
+    tab = tab + r"""\end{tabular*}"""
     return tab
     
     
@@ -95,9 +99,9 @@ def suntabm(date):
     \setlength{\tabcolsep}{4pt}
     \begin{tabular}[t]{@{}crr}
 '''
-    d = 0
-    while d < 3:
-        da = date+d
+    n = 0
+    while n < 3:
+        da = date + n
         tab = tab + r'''
     \multicolumn{1}{c}{\footnotesize{\textbf{%s}}} & 
     \multicolumn{1}{c}{\footnotesize{\textbf{GHA}}} &  
@@ -111,10 +115,10 @@ def suntabm(date):
             hourlydata = [[] for i in range(24)]
             while h < 24:
                 hourlydata[h] = sunmoon(da)
-                da = da+ephem.hour
+                da = da + ephem.hour
                 h += 1
             # now print the data per hour
-            da = date+d
+            da = date + n
             h = 0
             slastNS = ''
 
@@ -140,11 +144,12 @@ def suntabm(date):
                     tab = tab + r'''\rowcolor{LightCyan}
 '''
                 lineterminator = "\\\ \n"
-                if (h+1)%6 == 0:
+                if h < 23 and (h+1)%6 == 0:
                     lineterminator = "\\\[2Pt] \n"
                 tab = tab + line + lineterminator
                 h += 1
-                da = da+ephem.hour
+                da = da + ephem.hour
+
         else:			# Positive/Negative Declinations
             while h < 24:
                 band = int(h/6)
@@ -152,24 +157,27 @@ def suntabm(date):
                 eph = sunmoon(da)
                 line = r'''\color{blue} {%s} & 
 ''' %(h)
-                line = line + "%s & %s \\\ \n" %(eph[0],eph[1])
+                line = line + "%s & %s" %(eph[0],eph[1])
                 if group == 1:
                     tab = tab + r'''\rowcolor{LightCyan}
 '''
-                tab = tab + line
+                lineterminator = "\\\ \n"
+                if h < 23 and (h+1)%6 == 0:
+                    lineterminator = "\\\[2Pt] \n"
+                tab = tab + line + lineterminator
                 h += 1
-                da = da+ephem.hour
+                da = da + ephem.hour
 
-        vd = vdmean(date+d)
+        vd = vdmean(date + n)
         tab = tab + r"""\cmidrule{2-3}
         & \multicolumn{1}{c}{\footnotesize{SD.=%s}} & \multicolumn{1}{c}{\footnotesize{d=%s}} \\
         \cmidrule{2-3}
 """ %(vd[1],vd[0])
-        if d < 2:
+        if n < 2:
             # add space between tables...
             tab = tab + r"""\multicolumn{3}{c}{}\\[-1.5ex]
 """
-        d = d + 1
+        n += 1
     tab = tab + r"""
     \end{tabular}"""
     return tab
@@ -255,11 +263,11 @@ def almanac(first_day, pagenum):
 
     if config.tbls == "m" and config.decf != '+':	# USNO format for Declination
         alm = alm + r"""
-    \usepackage[ top=7mm, bottom=16mm, left=18mm, right=8mm ]{geometry}"""
+    \usepackage[ top=8mm, bottom=18mm, left=13mm, right=8mm ]{geometry}"""
 
     if config.tbls == "m" and config.decf == '+':	# Positive/Negative Declinations
         alm = alm + r"""
-    \usepackage[ top=10mm, bottom=18mm, left=18mm, right=8mm ]{geometry}"""
+    \usepackage[ top=8mm, bottom=18mm, left=17mm, right=11mm ]{geometry}"""
 
     if config.tbls == "m":
         alm = alm + r"""
@@ -268,7 +276,7 @@ def almanac(first_day, pagenum):
     \usepackage{booktabs}"""
     else:
         alm = alm + r"""
-    \usepackage[ top=21mm, bottom=21mm, left=18mm, right=8mm]{geometry}"""
+    \usepackage[ top=21mm, bottom=21mm, left=16mm, right=10mm]{geometry}"""
     
     alm = alm + r"""
     \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
@@ -315,7 +323,7 @@ def almanac(first_day, pagenum):
         alm = alm + r"""
         \begin{center} \large
         \emph{Author:}\\
-        Enno \textsc{Rodegerdts}
+        Enno \textsc{Rodegerdts}\\
 """
 
     alm = alm + r"""\end{center}
@@ -339,10 +347,10 @@ def almanac(first_day, pagenum):
 """
     if config.tbls == "m":
         alm = alm + r"""\vspace*{3cm}
-"""	
+"""
     else:
         alm = alm + r"""\vspace*{1.5cm}
-"""    
+"""
     alm = alm + r"""
     DIP corrects for height of eye over the surface. This value has to be subtracted from the sextant altitude ($H_s$). The  correction in degrees for height of eye in meters is given by the following formula: 
     \[d=0.0293\sqrt{m}\]

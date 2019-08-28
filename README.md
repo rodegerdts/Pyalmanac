@@ -36,7 +36,10 @@ This fork of the original code, which can be found at https://github.com/rodeger
 
 and the results have been crosschecked with USNO data to some extent.  
 (Constructive feedback is always appreciated.)
-  
+
+**UPDATE: 28.08.2019**
+
+This includes a minor bugfix, improved and standardised output formatting, and cosmetic enhancements to the code. The idea is to have the same output formatting for both the PyEphem-based and Skyfield-based versions. If both are opened in a PDF reader, then simply by switching between tabs will highlight the data that has changed. Also one can now generate multiple years of almanacs with a single run. And output messages can be sent to the console or written to a log file if the log file has been opened.
 
 ## Requirements
 

@@ -18,10 +18,11 @@
 #     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # define global variables
-# open/close an error log file
+# open/close a log file
 
 tbls = ''		# table style (global variable)
 decf = ''		# Declination format (global variable)
+logfileopen = False
 
 # list of latitudes to include for Sunrise/Sunset/Twilight/Moonrise/Moonset...
 lat = [72,70,68,66,64,62,60,58,56,54,52,50,45,40,35,30,20,10,0,-10,-20,-30,-35,-40,-45,-50,-52,-54,-56,-58,-60]
@@ -30,15 +31,18 @@ lat = [72,70,68,66,64,62,60,58,56,54,52,50,45,40,35,30,20,10,0,-10,-20,-30,-35,-
 def init():
     global errors
     errors = 0
-    global errorfile
-    errorfile = open('errorlist.log', 'w')
+    global logfile
+    logfile = open('debug.log', 'w')
+    global logfileopen
+    logfileopen = True
 
-# write to error log file
-def writeERR(text):
-    errorfile.write(text)
+# write to log file
+def writeLOG(text):
+    logfile.write(text)
     return
 
-# close error log file
-def closeERR():
-    errorfile.close()
+# close log file
+def closeLOG():
+    logfileopen = False
+    logfile.close()
     return
