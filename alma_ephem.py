@@ -141,7 +141,7 @@ def stellar(date):
     out = []
     for line in db.strip().split('\n'):
         st = ephem.readdb(line)
-        st.compute(date)
+        st.compute(date+0.5)    # calculate at noon
         out.append([st.name,nadeg(2*math.pi-ephem.degrees(st.g_ra).norm),nadeg(st.g_dec)])
     return out
 

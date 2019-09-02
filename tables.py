@@ -578,7 +578,7 @@ def twilighttab(date):
         moon, moon2 = moonrise(date,i)
         if not(double_events_found(moon,moon2)):
             tab = tab + "\\textbf{%s}" % hs + " " + "%s°" %(abs(i))
-            tab=tab+" & %s & %s & %s & %s & %s & %s \\\ \n" %(moon[0],moon[1],moon[2],moon[3],moon[4],moon[5])
+            tab = tab + " & %s & %s & %s & %s & %s & %s \\\ \n" %(moon[0],moon[1],moon[2],moon[3],moon[4],moon[5])
         else:
 # print a row with two moonrise/moonset events on the same day & latitude
             tab = tab + r"""\multirow{2}{*}{\textbf{%s} %s°}""" %(hs,abs(i))

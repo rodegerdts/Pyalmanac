@@ -4,7 +4,7 @@ Pyalmanac is a Python 2.7 script that creates the daily pages of the Nautical Al
 
 NOTE: two scripts are included (both can be run): 'pyalmanac.py' and 'increments.py'  
 NOTE: a Python 3.7 script with identical functionality can be found at: https://github.com/aendie/Py3almanac  
-NOTE: a [Skyfield](https://rhodesmill.org/skyfield/) version of Pyalmanac is under development.
+NOTE: a [Skyfield](https://rhodesmill.org/skyfield/) version of Pyalmanac is available here: https://github.com/aendie/SFalmanac-Py2
 
 This fork of the original code, which can be found at https://github.com/rodegerdts/Pyalmanac, in general includes:
 
