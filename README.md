@@ -3,6 +3,7 @@
 Pyalmanac is a Python 2.7 script that creates the daily pages of the Nautical Almanac. These are tables that are needed for celestial navigation with a sextant. Although you are strongly advised to purchase the official Nautical Almanac, this program will reproduce the tables with no warranty or guarantee of accuracy.  
 
 NOTE: two scripts are included (both can be run): 'pyalmanac.py' and 'increments.py'  
+NOTE: Pyalmanac contains it's own star database - it does not use the version supplied with PyEphem, hence updating from 3.7.6 to 3.7.7 is harmless. Star names are chosen to comply with Nautical Almanacs.  
 NOTE: a Python 3.7 script with identical functionality can be found at: https://github.com/aendie/Pyalmanac-Py3  
 NOTE: a [Skyfield](https://rhodesmill.org/skyfield/) version of Pyalmanac is available here: https://github.com/aendie/SFalmanac-Py2
 
