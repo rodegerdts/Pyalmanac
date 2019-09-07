@@ -1,6 +1,8 @@
 # Pyalmanac-Py2
 
-Pyalmanac is a Python 2.7 script that creates the daily pages of the Nautical Almanac. These are tables that are needed for celestial navigation with a sextant. Although you are strongly advised to purchase the official Nautical Almanac, this program will reproduce the tables with no warranty or guarantee of accuracy.  
+Pyalmanac is a Python 2.7 script that creates the daily pages of the Nautical Almanac. These are tables that are needed for celestial navigation with a sextant. Although you are strongly advised to purchase the official Nautical Almanac, this program will reproduce the tables with no warranty or guarantee of accuracy.
+
+Pyalmanac-Py2 was developed based on the original Pyalmanac by Enno Rodegerdts. Various improvements, enhancements and bugfixes (listed below) are implemented. Pyalmanac contains its own star database (similar to the database in PyEphem 3.7.6), however the accuracy was poor. It is updated with data from the Hipparcos Catalogue and the GHA/Dec data now matches a sample page from a Nautical Almanac exactly or at the most is within 0°0.1', which is very good.
 
 NOTE: two scripts are included (both can be run): 'pyalmanac.py' and 'increments.py'  
 NOTE: Pyalmanac contains it's own star database - it does not use the version supplied with PyEphem, hence updating from 3.7.6 to 3.7.7 is harmless. Star names are chosen to comply with Nautical Almanacs.  
@@ -10,28 +12,29 @@ NOTE: a [Skyfield](https://rhodesmill.org/skyfield/) version of Pyalmanac is ava
 This fork of the original code, which can be found at https://github.com/rodegerdts/Pyalmanac, in general includes:
 
 * **various bugfixes** (in accordance with USNO data), e.g. ...  
-     a declination of 20°60.0 now prints as 21°00.0;  
-     the same applies to times ('03:60' now prints as '04:00');  
-     incorrect date display in the **SHA and Mer.pass** section;  
-     some incorrect/missing dates for sunrise/sunset or moonrise/moonset;  
-     a few incorrect dates for Moon (upper) Transit or Antitransit (lower);  
-     incorrect times (by 1 minute) for Moon (upper) Transit or Antitransit (lower) due to truncation instead of rounding (506 such cases in 2019);  
-     a Mer. Pass. of '6:15:' now prints correctly as '06:15';  
-     an event occuring within 30 seconds before midnight now lists as 00:00 the next day.
+     - a declination of 20°60.0 now prints as 21°00.0;  
+     - the same applies to times ('03:60' now prints as '04:00');  
+     - incorrect date display in the **SHA and Mer.pass** section;  
+     - some incorrect/missing dates for sunrise/sunset or moonrise/moonset;  
+     - a few incorrect dates for Moon (upper) Transit or Antitransit (lower);  
+     - incorrect times (by 1 minute) for Moon (upper) Transit or Antitransit (lower) due to truncation instead of rounding (506 such cases in 2019);  
+     - a Mer. Pass. of '6:15:' now prints correctly as '06:15';  
+     - an event occuring within 30 seconds before midnight now lists as 00:00 the next day.
 
 * **enhanced functionality**, e.g. ...  
-     user input checks are performed when entering the requested data;  
-     a brief version of the tables can be created instead of the whole year;  
-     a '**modern**' table format in addition to the 'traditional' format layout;  
-     **three Moonrise/Moonset** events per day can be shown (e.g. on 7th July 2019 at 70°N);  
-     temporary files are deleted after running 'increments.py'.
+     - more accurate star database (based on the Hipparcos Catalogue);  
+     - user input checks are performed when entering the requested data;  
+     - a brief version of the tables can be created instead of the whole year;  
+     - a '**modern**' table format in addition to the 'traditional' format layout;  
+     - **three Moonrise/Moonset** events per day can be shown (e.g. on 7th July 2019 at 70°N);  
+     - temporary files are deleted after running 'increments.py'.
 
 * **cosmetic improvements**, e.g. ...  
-     Declinations/Latitudes are N/S instead of positive and negative;  
-     Declinations are always printed with two digits for degrees;  
-     line spacing (row padding) within the tables has been improved;  
-     minor table header improvements;  
-     addition of the minutes symbol on the Moon’s v, d and HP data rows.
+     - Declinations/Latitudes are N/S instead of positive and negative;  
+     - Declinations are always printed with two digits for degrees;  
+     - line spacing (row padding) within the tables has been improved;  
+     - minor table header improvements;  
+     - addition of the minutes symbol on the Moon’s v, d and HP data rows.
 
 * **a few typo corrections**
 
