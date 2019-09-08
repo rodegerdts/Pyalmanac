@@ -75,7 +75,7 @@ This includes a minor bugfix, improved and standardised output formatting, and c
 
 ### INSTALLATION GUIDELINES on Linux:
 
-&nbsp;&nbsp;&nbsp;&nbsp;Install your platform#'s Python- and LaTeX distribution.  
+&nbsp;&nbsp;&nbsp;&nbsp;Install your platform's Python- and LaTeX distribution.  
 &nbsp;&nbsp;&nbsp;&nbsp;Remember to choose python 2.7 minimum and install all development header files.  
 &nbsp;&nbsp;&nbsp;&nbsp;Run at the command line:
 
