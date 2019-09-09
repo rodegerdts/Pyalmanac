@@ -18,7 +18,7 @@
 # 
 #     You should have received a copy of the GNU General Public License along
 #     with this program; if not, write to the Free Software Foundation, Inc.,
-#     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. 
+#     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import ephem
 import math
@@ -342,14 +342,15 @@ def twilight(date, lat):
     # NOTE: 'twilight' is only called for every third day in the Full Almanac...
     #       ...therefore daily tracking of the sun state is impossible.
 
-    latitude = ephem.degrees('%s:00:00.0' %lat)
     out = [0,0,0,0,0,0,0]
     obs = ephem.Observer()
+    latitude = ephem.degrees('%s:00:00.0' %lat)
     obs.lat = latitude
-    obs.date = date
+    d = ephem.date(date - 30 * ephem.second)    # search from 30 seconds before midnight
+    obs.date = d
     obs.pressure = 0
     s = ephem.Sun(obs)
-    s.compute(date)
+    s.compute(d)
     r = s.radius
 
     obs.horizon = ephem.degrees('-12')+r	# Nautical twilight ...
@@ -357,36 +358,37 @@ def twilight(date, lat):
         out[0] = time(obs.next_rising(s))	# begin
     except:
         out[0] = '--:--'
-    obs.date = date
+    obs.date = d
     try:
         out[6] = time(obs.next_setting(s))	# end
     except:
         out[6] = '--:--'
 #-----------------------------------------------------------
     obs.horizon = ephem.degrees('-6')+r		# Civil twilight...
-    obs.date = date
+    obs.date = d
     try:
         out[1] = time(obs.next_rising(s))	# begin
     except:
         out[1] = '--:--'
-    obs.date = date
+    obs.date = d
     try:
         out[5] = time(obs.next_setting(s))	# end
     except:
         out[5] = '--:--'
 #-----------------------------------------------------------
     obs.horizon = '-0:34'
-    obs.date = date
+    obs.date = d
     try:
         out[2] = time(obs.next_rising(s))	# sunrise
     except:
         out[2] = '--:--'
-    obs.date = date
+    obs.date = d
     try:
         out[4] = time(obs.next_setting(s))	# sunset
     except:
         out[4] = '--:--'
-    obs.date = date
+#-----------------------------------------------------------
+    obs.date = d
     out[3] = time(obs.next_transit(s))
     
     return out
@@ -395,10 +397,10 @@ def moonrise(date,lat):
     # returns moonrise and moonset for the given date and latitude plus next 2 days:
     #    rise day 1, rise day 2, rise day 3, set day 1, set day 2, set day 3
 
-    latitude = ephem.degrees('%s:00:00.0' %lat)
     out  = ['--:--','--:--','--:--','--:--','--:--','--:--']	# first event
     out2 = ['--:--','--:--','--:--','--:--','--:--','--:--']	# second event on same day (rare)
     obs = ephem.Observer()
+    latitude = ephem.degrees('%s:00:00.0' %lat)
     obs.lat = latitude
     obs.pressure = 0
     m = ephem.Moon(obs)
@@ -407,6 +409,8 @@ def moonrise(date,lat):
     d = ephem.date(date - 30 * ephem.second)
     obs.date = d
     m.compute(d)
+
+    # Moonrise/Moonset on 1st. day ...
     try:
         firstrising = obs.next_rising(m)
         if firstrising-obs.date >= 1:
@@ -450,6 +454,7 @@ def moonrise(date,lat):
         flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
         sys.exc_clear()		# only in Python 2
 #-----------------------------------------------------------
+    # Moonrise/Moonset on 2nd. day ...
     d = ephem.date(date + 1 - 30 * ephem.second)
     obs.date = d
     m.compute(d)
@@ -496,6 +501,7 @@ def moonrise(date,lat):
         flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
         sys.exc_clear()		# only in Python 2
 #-----------------------------------------------------------
+    # Moonrise/Moonset on 3rd. day ...
     d = ephem.date(date + 2 - 30 * ephem.second)
     obs.date = d
     m.compute(d)
