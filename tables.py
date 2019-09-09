@@ -523,6 +523,7 @@ def twilighttab(date):
                 tab = tab + r"""\rule{0pt}{2.6ex}
 """
         lasthemisph = hemisph
+        # day+1 to calculate for the second day (three days are printed on one page)
         twi = twilight(date+1,i)
         line = "\\textbf{%s}" % hs + " " + "%s°" %(abs(i))
         line = line + " & %s & %s & %s & %s & %s & %s \\\ \n" %(twi[0],twi[1],twi[2],twi[4],twi[5],twi[6])
@@ -693,11 +694,10 @@ def doublepage(date):
     
 def pages(date, p):
     # make 'p' doublepages beginning with date
-    d = ephem.date(date)
     out = ''
     for i in range(p):
-        out = out + doublepage(d)
-        d = d + 3
+        out = out + doublepage(date)
+        date += 3
     return out
     
     
@@ -794,9 +794,8 @@ def almanac(first_day, pagenum):
     \end{titlepage}
 """
     first_day = r"""%s/%s/%s""" %(year,mth,day)
-    y = ephem.Date(first_day)
-    #y = ephem.date(str(year))
-    alm = alm + pages(y,pagenum)
+    date = ephem.Date(first_day)    # date to float
+    alm = alm + pages(date,pagenum)
     alm = alm + '\end{document}'
     return alm
 
