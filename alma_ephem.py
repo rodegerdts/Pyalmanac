@@ -77,7 +77,7 @@ def nadeg(rad,fixedwidth=1):
 # The format corresponds to an XEphem database file:
 # http://www.clearskyinstitute.com/xephem/help/xephem.html#mozTocId468501
 
-db = """\
+db = """
 Alpheratz,f|S|B9,0:08:23.26|137.46,29:05:25.55|-163.44,2.04,2000,0
 Ankaa,f|S|K0,0:26:17.05|233.05,-42:18:21.55|-356.30,2.55,2000,0
 Schedar,f|S|K0,0:40:30.44|50.88,56:32:14.39|-32.13,2.41,2000,0
