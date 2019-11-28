@@ -46,34 +46,29 @@ def planetstab(date):
             # now print the data per hour
             da = date + n
             h = 0
-            vlastNS = ''
-            mlastNS = ''
-            jlastNS = ''
-            slastNS = ''
             while h < 24:
                 eph = hourlydata[h]
+                if h > 0:
+                    preveph = hourlydata[h-1]
+                else:
+                    preveph = hourlydata[0]		# hour -1 = hour 0
                 if h < 23:
                     nexteph = hourlydata[h+1]
                 else:
                     nexteph = hourlydata[23]	# hour 24 = hour 23
 
                 # format declination checking for hemisphere change
-                vdec, vNS = NSdeg(eph[2],False,h)
-                if vNS != vlastNS or math.copysign(1.0,eph[9]) != math.copysign(1.0,nexteph[9]):
-                    vdec, vNS = NSdeg(eph[2],False,h,True)	# force NS
-                mdec, mNS = NSdeg(eph[4],False,h)
-                if mNS != mlastNS or math.copysign(1.0,eph[10]) != math.copysign(1.0,nexteph[10]):
-                    mdec, mNS = NSdeg(eph[4],False,h,True)	# force NS
-                jdec, jNS = NSdeg(eph[6],False,h)
-                if jNS != jlastNS or math.copysign(1.0,eph[11]) != math.copysign(1.0,nexteph[11]):
-                    jdec, jNS = NSdeg(eph[6],False,h,True)	# force NS
-                sdec, sNS = NSdeg(eph[8],False,h)
-                if sNS != slastNS or math.copysign(1.0,eph[12]) != math.copysign(1.0,nexteph[12]):
-                    sdec, sNS = NSdeg(eph[8],False,h,True)	# force NS
-                vlastNS = vNS
-                mlastNS = mNS
-                jlastNS = jNS
-                slastNS = sNS
+                printNS, printDEG = declCompare(preveph[9],eph[9],nexteph[9],h)
+                vdec = NSdecl(eph[2],h,printNS,printDEG,False)
+
+                printNS, printDEG = declCompare(preveph[10],eph[10],nexteph[10],h)
+                mdec = NSdecl(eph[4],h,printNS,printDEG,False)
+
+                printNS, printDEG = declCompare(preveph[11],eph[11],nexteph[11],h)
+                jdec = NSdecl(eph[6],h,printNS,printDEG,False)
+
+                printNS, printDEG = declCompare(preveph[12],eph[12],nexteph[12],h)
+                sdec = NSdecl(eph[8],h,printNS,printDEG,False)
 
                 line = "%s & %s & %s & %s & %s & %s & %s & %s & %s & %s" %(h,eph[0],eph[1],vdec,eph[3],mdec,eph[5],jdec,eph[7],sdec)
                 lineterminator = "\\\ \n"
@@ -140,36 +135,31 @@ def planetstabm(date):
             # now print the data per hour
             da = date + n
             h = 0
-            vlastNS = ''
-            mlastNS = ''
-            jlastNS = ''
-            slastNS = ''
             while h < 24:
                 band = int(h/6)
                 group = band % 2
                 eph = hourlydata[h]
+                if h > 0:
+                    preveph = hourlydata[h-1]
+                else:
+                    preveph = hourlydata[0]		# hour -1 = hour 0
                 if h < 23:
                     nexteph = hourlydata[h+1]
                 else:
                     nexteph = hourlydata[23]	# hour 24 = hour 23
 
                 # format declination checking for hemisphere change
-                vdec, vNS = NSdeg(eph[2],True,h)
-                if vNS != vlastNS or math.copysign(1.0,eph[9]) != math.copysign(1.0,nexteph[9]):
-                    vdec, vNS = NSdeg(eph[2],True,h,True)	# force NS
-                mdec, mNS = NSdeg(eph[4],True,h)
-                if mNS != mlastNS or math.copysign(1.0,eph[10]) != math.copysign(1.0,nexteph[10]):
-                    mdec, mNS = NSdeg(eph[4],True,h,True)	# force NS
-                jdec, jNS = NSdeg(eph[6],True,h)
-                if jNS != jlastNS or math.copysign(1.0,eph[11]) != math.copysign(1.0,nexteph[11]):
-                    jdec, jNS = NSdeg(eph[6],True,h,True)	# force NS
-                sdec, sNS = NSdeg(eph[8],True,h)
-                if sNS != slastNS or math.copysign(1.0,eph[12]) != math.copysign(1.0,nexteph[12]):
-                    sdec, sNS = NSdeg(eph[8],True,h,True)	# force NS
-                vlastNS = vNS
-                mlastNS = mNS
-                jlastNS = jNS
-                slastNS = sNS
+                printNS, printDEG = declCompare(preveph[9],eph[9],nexteph[9],h)
+                vdec = NSdecl(eph[2],h,printNS,printDEG,True)
+
+                printNS, printDEG = declCompare(preveph[10],eph[10],nexteph[10],h)
+                mdec = NSdecl(eph[4],h,printNS,printDEG,True)
+
+                printNS, printDEG = declCompare(preveph[11],eph[11],nexteph[11],h)
+                jdec = NSdecl(eph[6],h,printNS,printDEG,True)
+
+                printNS, printDEG = declCompare(preveph[12],eph[12],nexteph[12],h)
+                sdec = NSdecl(eph[8],h,printNS,printDEG,True)
 
                 line = r'''\color{blue} {%s} & 
 ''' %(h)
@@ -295,23 +285,25 @@ def sunmoontab(date):
             # now print the data per hour
             da = date + n
             h = 0
-            slastNS = ''
             mlastNS = ''
             while h < 24:
                 eph = hourlydata[h]
+                if h > 0:
+                    preveph = hourlydata[h-1]
+                else:
+                    preveph = hourlydata[0]		# hour -1 = hour 0
                 if h < 23:
                     nexteph = hourlydata[h+1]
                 else:
                     nexteph = hourlydata[23]	# hour 24 = hour 23
 
                 # format declination checking for hemisphere change
-                sdec, sNS = NSdeg(eph[1],False,h)
-                if sNS != slastNS or math.copysign(1.0,eph[7]) != math.copysign(1.0,nexteph[7]):
-                    sdec, sNS = NSdeg(eph[1],False,h,True)	# force N/S
+                printNS, printDEG = declCompare(preveph[7],eph[7],nexteph[7],h)
+                sdec = NSdecl(eph[1],h,printNS,printDEG,False)
+
                 mdec, mNS = NSdeg(eph[4],False,h)
                 if mNS != mlastNS or math.copysign(1.0,eph[8]) != math.copysign(1.0,nexteph[8]):
                     mdec, mNS = NSdeg(eph[4],False,h,True)	# force N/S
-                slastNS = sNS
                 mlastNS = mNS
 
                 line = "%s & %s & %s & %s & %s & %s & %s & %s" %(h,eph[0],sdec,eph[2],eph[3],mdec,eph[5],eph[6])
@@ -377,10 +369,13 @@ def sunmoontabm(date):
             # now print the data per hour
             da = date + n
             h = 0
-            slastNS = ''
             mlastNS = ''
             while h < 24:
                 eph = hourlydata[h]
+                if h > 0:
+                    preveph = hourlydata[h-1]
+                else:
+                    preveph = hourlydata[0]		# hour -1 = hour 0
                 if h < 23:
                     nexteph = hourlydata[h+1]
                 else:
@@ -389,13 +384,12 @@ def sunmoontabm(date):
                 group = band % 2
 
                 # format declination checking for hemisphere change
-                sdec, sNS = NSdeg(eph[1],True,h)
-                if sNS != slastNS or math.copysign(1.0,eph[7]) != math.copysign(1.0,nexteph[7]):
-                    sdec, sNS = NSdeg(eph[1],True,h,True)	# force NS
+                printNS, printDEG = declCompare(preveph[7],eph[7],nexteph[7],h)
+                sdec = NSdecl(eph[1],h,printNS,printDEG,True)
+
                 mdec, mNS = NSdeg(eph[4],True,h)
                 if mNS != mlastNS or math.copysign(1.0,eph[8]) != math.copysign(1.0,nexteph[8]):
                     mdec, mNS = NSdeg(eph[4],True,h,True)	# force NS
-                slastNS = sNS
                 mlastNS = mNS
 
                 line = r'''\color{blue} {%s} & 
@@ -439,6 +433,81 @@ def sunmoontabm(date):
     \end{tabular}
     \quad\quad"""
     return tab
+
+##NEW##
+def declCompare(prev_rad, curr_rad, next_rad, hr):
+    # for Declinations only...
+    # decide if to print N/S; decide if to print degrees
+    # note: the first three arguments are PyEphem angles in radians
+    prNS = False
+    prDEG = False
+    psign = math.copysign(1.0,prev_rad)
+    csign = math.copysign(1.0,curr_rad)
+    nsign = math.copysign(1.0,next_rad)
+    pdeg = abs(math.degrees(prev_rad))
+    cdeg = abs(math.degrees(curr_rad))
+    ndeg = abs(math.degrees(next_rad))
+    pdegi = int(pdeg)
+    cdegi = int(cdeg)
+    ndegi = int(ndeg)
+    pmin = round((pdeg-pdegi)*60, 1)	# minutes (float), rounded to 1 decimal place
+    cmin = round((cdeg-cdegi)*60, 1)	# minutes (float), rounded to 1 decimal place
+    nmin = round((ndeg-ndegi)*60, 1)	# minutes (float), rounded to 1 decimal place
+    pmini = int(pmin)
+    cmini = int(cmin)
+    nmini = int(nmin)
+    if pmini == 60:
+        pmin -= 60
+        pdegi += 1
+    if cmini == 60:
+        cmin -= 60
+        cdegi += 1
+    if nmini == 60:
+        nmin -= 60
+        ndegi += 1
+    # now we have the values in degrees+minutes as printed
+
+    if hr%6 == 0:
+        prNS = True			# print N/S for hour = 0, 6, 12, 18
+    else:
+        if psign != csign:
+            prNS = True		# print N/S if previous sign different
+    if hr < 23:
+        if csign != nsign:
+            prNS = True		# print N/S if next sign different
+    if prNS == False:
+        if pdegi != cdegi:
+            prDEG = True	# print degrees if changed since previous value
+        if cdegi != ndegi:
+            prDEG = True	# print degrees if next value is changed
+    else:
+        prDEG= True			# print degrees is N/S to be printed
+    return prNS, prDEG
+
+##NEW##
+def NSdecl(deg, hr, printNS, printDEG, modernFMT):
+    # reformat degrees latitude to Ndd°mm.m or Sdd°mm.m
+    if deg[0:1] == '-':
+        hemisph = "S"
+        deg = deg[1:]
+    else:
+        hemisph = "N"
+    if not(printDEG):
+        deg = deg[4:]	# skip the degrees (always dd°mm.m) - note: the degree symbol '°' is two bytes long
+        if (hr+3)%6 == 0:
+            deg = r'''\raisebox{0.24ex}{\boldmath$\cdot$~\boldmath$\cdot$~~}''' + deg
+    if modernFMT:
+        if printNS or hr%6 == 0:
+            sdeg = "\\textcolor{blue}{%s}" %hemisph + deg
+        else:
+            sdeg = deg
+    else:
+        if printNS or hr%6 == 0:
+            sdeg = "\\textbf{%s}" %hemisph + deg
+        else:
+            sdeg = deg
+    #print("sdeg: ", sdeg)
+    return sdeg
 
 
 def NSdeg(deg, modern=False, hr=0, forceNS=False):
@@ -732,31 +801,32 @@ def almanac(first_day, pagenum):
 
     \begin{document}
 
+    % for the title page only...
+    \newgeometry{ top=21mm, bottom=15mm, left=12mm, right=8mm}
     \begin{titlepage}
 """
-    if config.tbls == "m":
-        alm = alm + r'''\vspace*{2cm}'''
 
     alm = alm + r"""
     \begin{center}
      
-    \textsc{\Large Generated by PyAlmanac}\\[1.5cm]
+    \textsc{\Large Generated by PyAlmanac}\\[0.7cm]
 
-    \includegraphics[width=0.45\textwidth]{./Sky-large}\\[1cm]
+    % TRIM values: left bottom right top
+    \includegraphics[clip, trim=5mm 8cm 5mm 21mm, width=0.8\textwidth]{./A4chartNorth_P.pdf}\\[0.8cm]
 
     \textsc{\huge The Nautical Almanac}\\[0.7cm]
 """
     if pagenum == 122:
         alm = alm + r"""
-        \HRule \\[0.6cm]
-        { \Huge \bfseries %s}\\[0.4cm]
-        \HRule \\[1.5cm]
+        \HRule \\[0.5cm]
+        { \Huge \bfseries %s}\\[0.2cm]
+        \HRule \\
 """ %(year)
     else:
         alm = alm + r"""
-        \HRule \\[0.6cm]
-        { \Huge \bfseries from %s.%s.%s}\\[0.4cm]
-        \HRule \\[1.5cm]
+        \HRule \\[0.5cm]
+        { \Huge \bfseries from %s.%s.%s}\\[0.2cm]
+        \HRule \\
 """ %(day,mth,year)
 
     if config.tbls == "m":
@@ -771,15 +841,15 @@ def almanac(first_day, pagenum):
         alm = alm + r"""
         \begin{center} \large
         \emph{Author:}\\
-        Enno \textsc{Rodegerdts}\\
+        Enno \textsc{Rodegerdts}\\[6Pt]
+        \emph{Enhancements:}\\
+        Andrew \textsc{Bauer}
 """
 
     alm = alm + r"""\end{center}
 
-    \vfill
-
     {\large \today}
-    \HRule \\[0.6cm]
+    \HRule \\[0.2cm]
     \end{center}
     
     \begin{description}\footnotesize
@@ -792,6 +862,7 @@ def almanac(first_day, pagenum):
     \end{description}
     
     \end{titlepage}
+    \restoregeometry    % so it does not affect the rest of the pages
 """
     first_day = r"""%s/%s/%s""" %(year,mth,day)
     date = ephem.Date(first_day)    # date to float

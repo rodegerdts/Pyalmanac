@@ -45,20 +45,21 @@ def suntab(date):
             # now print the data per hour
             da = date + n
             h = 0
-            slastNS = ''
 
             while h < 24:
                 eph = hourlydata[h]
+                if h > 0:
+                    preveph = hourlydata[h-1]
+                else:
+                    preveph = hourlydata[0]		# hour -1 = hour 0
                 if h < 23:
                     nexteph = hourlydata[h+1]
                 else:
                     nexteph = hourlydata[23]	# hour 24 = hour 23
 
                 # format declination checking for hemisphere change
-                sdec, sNS = NSdeg(eph[1],False,h)
-                if sNS != slastNS or math.copysign(1.0,eph[7]) != math.copysign(1.0,nexteph[7]):
-                    sdec, sNS = NSdeg(eph[1],False,h,True)	# force N/S
-                slastNS = sNS
+                printNS, printDEG = declCompare(preveph[7],eph[7],nexteph[7],h)
+                sdec = NSdecl(eph[1],h,printNS,printDEG,False)
 
                 line = "%s & %s & %s" %(h,eph[0],sdec)
                 lineterminator = "\\\ \n"
@@ -120,22 +121,23 @@ def suntabm(date):
             # now print the data per hour
             da = date + n
             h = 0
-            slastNS = ''
 
             while h < 24:
                 band = int(h/6)
                 group = band % 2
                 eph = hourlydata[h]
+                if h > 0:
+                    preveph = hourlydata[h-1]
+                else:
+                    preveph = hourlydata[0]		# hour -1 = hour 0
                 if h < 23:
                     nexteph = hourlydata[h+1]
                 else:
                     nexteph = hourlydata[23]	# hour 24 = hour 23
 
                 # format declination checking for hemisphere change
-                sdec, sNS = NSdeg(eph[1],True,h)
-                if sNS != slastNS or math.copysign(1.0,eph[7]) != math.copysign(1.0,nexteph[7]):
-                    sdec, sNS = NSdeg(eph[1],True,h,True)	# force N/S
-                slastNS = sNS
+                printNS, printDEG = declCompare(preveph[7],eph[7],nexteph[7],h)
+                sdec = NSdecl(eph[1],h,printNS,printDEG,True)
 
                 line = r'''\color{blue} {%s} & 
 ''' %(h)
@@ -182,25 +184,80 @@ def suntabm(date):
     \end{tabular}"""
     return tab
     
+##NEW##
+def declCompare(prev_rad, curr_rad, next_rad, hr):
+    # for Declinations only...
+    # decide if to print N/S; decide if to print degrees
+    # note: the first three arguments are PyEphem angles in radians
+    prNS = False
+    prDEG = False
+    psign = math.copysign(1.0,prev_rad)
+    csign = math.copysign(1.0,curr_rad)
+    nsign = math.copysign(1.0,next_rad)
+    pdeg = abs(math.degrees(prev_rad))
+    cdeg = abs(math.degrees(curr_rad))
+    ndeg = abs(math.degrees(next_rad))
+    pdegi = int(pdeg)
+    cdegi = int(cdeg)
+    ndegi = int(ndeg)
+    pmin = round((pdeg-pdegi)*60, 1)	# minutes (float), rounded to 1 decimal place
+    cmin = round((cdeg-cdegi)*60, 1)	# minutes (float), rounded to 1 decimal place
+    nmin = round((ndeg-ndegi)*60, 1)	# minutes (float), rounded to 1 decimal place
+    pmini = int(pmin)
+    cmini = int(cmin)
+    nmini = int(nmin)
+    if pmini == 60:
+        pmin -= 60
+        pdegi += 1
+    if cmini == 60:
+        cmin -= 60
+        cdegi += 1
+    if nmini == 60:
+        nmin -= 60
+        ndegi += 1
+    # now we have the values in degrees+minutes as printed
 
-def NSdeg(deg,modern=False,hr=0,forceNS=False):
+    if hr%6 == 0:
+        prNS = True			# print N/S for hour = 0, 6, 12, 18
+    else:
+        if psign != csign:
+            prNS = True		# print N/S if previous sign different
+    if hr < 23:
+        if csign != nsign:
+            prNS = True		# print N/S if next sign different
+    if prNS == False:
+        if pdegi != cdegi:
+            prDEG = True	# print degrees if changed since previous value
+        if cdegi != ndegi:
+            prDEG = True	# print degrees if next value is changed
+    else:
+        prDEG= True			# print degrees is N/S to be printed
+    return prNS, prDEG
+
+##NEW##
+def NSdecl(deg, hr, printNS, printDEG, modernFMT):
     # reformat degrees latitude to Ndd°mm.m or Sdd°mm.m
     if deg[0:1] == '-':
         hemisph = "S"
         deg = deg[1:]
     else:
         hemisph = "N"
-    if modern:
-        if forceNS or hr%6 == 0:
+    if not(printDEG):
+        deg = deg[4:]	# skip the degrees (always dd°mm.m) - note: the degree symbol '°' is two bytes long
+        if (hr+3)%6 == 0:
+            deg = r'''\raisebox{0.24ex}{\boldmath$\cdot$~\boldmath$\cdot$~~}''' + deg
+    if modernFMT:
+        if printNS or hr%6 == 0:
             sdeg = "\\textcolor{blue}{%s}" %hemisph + deg
         else:
             sdeg = deg
     else:
-        if forceNS or hr%6 == 0:
+        if printNS or hr%6 == 0:
             sdeg = "\\textbf{%s}" %hemisph + deg
         else:
             sdeg = deg
-    return sdeg, hemisph
+    #print("sdeg: ", sdeg)
+    return sdeg
 
     
 def page(date):

@@ -6,7 +6,7 @@ Pyalmanac-Py2 was developed based on the original Pyalmanac by Enno Rodegerdts. 
 
 NOTE: two scripts are included (both can be run): 'pyalmanac.py' and 'increments.py'  
 NOTE: Pyalmanac contains it's own star database - it does not use the version supplied with PyEphem, hence updating from 3.7.6 to 3.7.7 is harmless. Star names are chosen to comply with Nautical Almanacs.  
-NOTE: a Python 3.7 script with identical functionality can be found at: https://github.com/aendie/Pyalmanac-Py3  
+NOTE: a Python 3 script with identical functionality can be found at: https://github.com/aendie/Pyalmanac-Py3  
 NOTE: a [Skyfield](https://rhodesmill.org/skyfield/) version of Pyalmanac is available here: https://github.com/aendie/SFalmanac-Py2
 
 This fork of the original code, which can be found at https://github.com/rodegerdts/Pyalmanac, in general includes:
@@ -41,9 +41,15 @@ This fork of the original code, which can be found at https://github.com/rodeger
 and the results have been crosschecked with USNO data to some extent.  
 (Constructive feedback is always appreciated.)
 
-**UPDATE: 28.08.2019**
+**UPDATE: Aug 2019**
 
 This includes a minor bugfix, improved and standardised output formatting, and cosmetic enhancements to the code. The idea is to have the same output formatting for both the PyEphem-based and Skyfield-based versions. If both are opened in a PDF reader, then simply by switching between tabs will highlight the data that has changed. Also one can now generate multiple years of almanacs with a single run. And output messages can be sent to the console or written to a log file if the log file has been opened.
+
+**UPDATE: Nov 2019**
+
+Declination formatting has been changed to the standard used in Nautical Almanacs. In each 6-hour block of declinations, the degrees value is only printed on the first line if it doesn't change. It is printed whenever the degrees value changes. The fourth line has two dots indicating "ditto". This applies to all planet declinations and for the sun's declination, but not to the moon's declination as this is continuously changing.
+
+This also includes some very minor changes and an improved title page for the full almanac with a star chart that indicates the northern navigational stars.
 
 ## Requirements
 
@@ -61,10 +67,12 @@ This includes a minor bugfix, improved and standardised output formatting, and c
 ### INSTALLATION GUIDELINES on Windows 10:
 
 &nbsp;&nbsp;&nbsp;&nbsp;Install Python 2.7 and MiKTeX from https://miktex.org/  
-&nbsp;&nbsp;&nbsp;&nbsp;Using Command Prompt, go to your Python Scripts folder and run, e.g.:
+&nbsp;&nbsp;&nbsp;&nbsp;Run Command Prompt as Administrator, go to your Python Scripts folder and execute, e.g.:
 
 &nbsp;&nbsp;&nbsp;&nbsp;**cd C:\\Python27\\Scripts**  
 &nbsp;&nbsp;&nbsp;&nbsp;**pip install pyephem**
+
+&nbsp;&nbsp;&nbsp;&nbsp;NOTE: if Python 3 is already installed, you need to be in the Scripts folder - otherwise the Py3 version of pip will execute.
 
 &nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in any folder, go there and start with:  
 &nbsp;&nbsp;&nbsp;&nbsp;**python.exe pyalmanac.py**
