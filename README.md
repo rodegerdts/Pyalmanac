@@ -98,7 +98,7 @@ This also includes some very minor changes and an improved title page for the fu
 ### INSTALLATION GUIDELINES on MAC:
 
 &nbsp;&nbsp;&nbsp;&nbsp;Every Mac comes with python preinstalled.  
-&nbsp;&nbsp;&nbsp;&nbsp;(Please choose the Python 3.7 version of Pyalmanac if Python 3.* is installed.)  
+&nbsp;&nbsp;&nbsp;&nbsp;(Please choose the Python 3 version of Pyalmanac if Python 3.* is installed.)  
 &nbsp;&nbsp;&nbsp;&nbsp;You need to install the PyEphem library to use Pyalmanac.  
 &nbsp;&nbsp;&nbsp;&nbsp;Type the following commands at the commandline (terminal app):
 
