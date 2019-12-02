@@ -393,18 +393,19 @@ def twilight(date, lat):
     
     return out
 
-def moonrise(date,lat):
+def moonrise(date, lat):
     # returns moonrise and moonset for the given date and latitude plus next 2 days:
     #    rise day 1, rise day 2, rise day 3, set day 1, set day 2, set day 3
 
     out  = ['--:--','--:--','--:--','--:--','--:--','--:--']	# first event
     out2 = ['--:--','--:--','--:--','--:--','--:--','--:--']	# second event on same day (rare)
+
     obs = ephem.Observer()
     latitude = ephem.degrees('%s:00:00.0' %lat)
     obs.lat = latitude
     obs.pressure = 0
     obs.horizon = '-0:34'
-    d = ephem.date(date - 30 * ephem.second)
+    d = ephem.date(date) - 30 * ephem.second    # search from 30 seconds before midnight
     obs.date = d
     m = ephem.Moon(obs)
     m.compute(d)
