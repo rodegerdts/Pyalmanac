@@ -403,11 +403,10 @@ def moonrise(date,lat):
     latitude = ephem.degrees('%s:00:00.0' %lat)
     obs.lat = latitude
     obs.pressure = 0
-    m = ephem.Moon(obs)
     obs.horizon = '-0:34'
-
     d = ephem.date(date - 30 * ephem.second)
     obs.date = d
+    m = ephem.Moon(obs)
     m.compute(d)
 
     # Moonrise/Moonset on 1st. day ...

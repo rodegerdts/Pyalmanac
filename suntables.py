@@ -299,11 +299,10 @@ def page(date):
     
 def pages(date, p):
     # make 'p' pages beginning with date
-    d = ephem.date(date)
     out = ''
     for i in range(p):
-        out = out + page(d)
-        d = d + 15
+        out = out + page(date)
+        date += 15
     return out
     
     

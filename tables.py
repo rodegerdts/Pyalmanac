@@ -239,7 +239,7 @@ def starstab(date):
             & & \multicolumn{1}{r|}{} \\\ \n""" %datestr
         else:
             m = m + (" \\textbf{%s} & \\textbf{SHA} & \\textbf{Mer.pass} \\\ \n" %datestr)
-        datex = str(ephem.date(date + i))
+        datex = ephem.date(date + i)    # MODIFIED
         p = planetstransit(datex)
         m = m + 'Venus & %s & %s \\\ \n' %(p[0],p[1])
         m = m + 'Mars & %s & %s \\\ \n' %(p[2],p[3])
@@ -334,7 +334,7 @@ def sunmoontab(date):
             # add space between tables...
             tab = tab + r"""\multicolumn{7}{c}{}\\[-1.5ex]"""
         n += 1
-    tab = tab+r"""\end{tabular*}"""
+    tab = tab + r"""\end{tabular*}"""
     return tab
 
 
@@ -488,10 +488,10 @@ def declCompare(prev_rad, curr_rad, next_rad, hr):
 def NSdecl(deg, hr, printNS, printDEG, modernFMT):
     # reformat degrees latitude to Ndd°mm.m or Sdd°mm.m
     if deg[0:1] == '-':
-        hemisph = "S"
+        hemisph = 'S'
         deg = deg[1:]
     else:
-        hemisph = "N"
+        hemisph = 'N'
     if not(printDEG):
         deg = deg[4:]	# skip the degrees (always dd°mm.m) - note: the degree symbol '°' is two bytes long
         if (hr+3)%6 == 0:
@@ -513,10 +513,10 @@ def NSdecl(deg, hr, printNS, printDEG, modernFMT):
 def NSdeg(deg, modern=False, hr=0, forceNS=False):
     # reformat degrees latitude to Ndd°mm.m or Sdd°mm.m
     if deg[0:1] == '-':
-        hemisph = "S"
+        hemisph = 'S'
         deg = deg[1:]
     else:
-        hemisph = "N"
+        hemisph = 'N'
     if modern:
         if forceNS or hr%6 == 0:
             sdeg = "\\textcolor{blue}{%s}" %hemisph + deg
@@ -581,9 +581,9 @@ def twilighttab(date):
     j = 5
     for i in config.lat:
         if i >= 0:
-            hemisph = "N"
+            hemisph = 'N'
         else:
-            hemisph = "S"
+            hemisph = 'S'
         if not(i in latNS):
             hs = ""
         else:
@@ -634,9 +634,9 @@ def twilighttab(date):
     j = 5
     for i in config.lat:
         if i >= 0:
-            hemisph = "N"
+            hemisph = 'N'
         else:
-            hemisph = "S"
+            hemisph = 'S'
         if not(i in latNS):
             hs = ""
         else:
