@@ -51,7 +51,7 @@ def nadeg(rad,fixedwidth=1):
 	# the optional argument specifies the minimum width for degrees (only)
     theminus = ""
     if rad < 0:
-    	theminus = "-"
+    	theminus = '-'
     df = abs(math.degrees(rad))	# convert radians to degrees (float)
     di = int(df)			# degrees (integer)
     # note: round() uses "Rounding Half To Even" strategy
@@ -405,7 +405,7 @@ def moonrise(date, lat):
     obs.lat = latitude
     obs.pressure = 0
     obs.horizon = '-0:34'
-    d = ephem.date(date) - 30 * ephem.second    # search from 30 seconds before midnight
+    d = ephem.date(date - 30 * ephem.second)    # search from 30 seconds before midnight
     obs.date = d
     m = ephem.Moon(obs)
     m.compute(d)
@@ -568,8 +568,8 @@ def ariestransit(date):
     trans = ephem.hours(2*math.pi-sid/1.00273790935)
 #    obs.date = date + trans/(2*math.pi) #turns ephem.angle (time) into ephem date
     hhmm = str(trans)[0:5]	# can return "h:mm:"
-    if hhmm[1:2] == ":":	# check if single digit hours
-        hhmm = "0" + hhmm[0:4]
+    if hhmm[1:2] == ':':	# check if single digit hours
+        hhmm = '0' + hhmm[0:4]
     return hhmm
     
 def planetstransit(date):
@@ -654,4 +654,3 @@ def equation_of_time(date):
     eqt12 = str(eqt12)[-8:-3]
 
     return eqt00,eqt12,transs,transm,antim,age,pct
-
