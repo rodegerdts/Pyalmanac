@@ -40,7 +40,7 @@ def planetstab(date):
             # first populate an array of 24 hours with all data
             hourlydata = [[] for i in range(24)]
             while h < 24:
-                hourlydata[h] = planets(da)
+                hourlydata[h] = planetsGHA(da)
                 da = da + ephem.hour
                 h += 1
             # now print the data per hour
@@ -80,7 +80,7 @@ def planetstab(date):
 
         else:			# Positive/Negative Declinations
             while h < 24:
-                eph = planets(da)
+                eph = planetsGHA(da)
                 line = "%s & %s & %s & %s & %s & %s & %s & %s & %s & %s" %(h,eph[0],eph[1],eph[2],eph[3],eph[4],eph[5],eph[6],eph[7],eph[8])
                 lineterminator = "\\\ \n"
                 if h < 23 and (h+1)%6 == 0:
@@ -89,12 +89,12 @@ def planetstab(date):
                 h += 1
                 da = da + ephem.hour
 
-        vd = vdmean(date + n)
+        vd = vdm_planets(date + n)
         tab = tab + r"""\hline 
         \multicolumn{2}{|c|}{\rule{0pt}{2.4ex}Mer.pass.:%s} &  \multicolumn{2}{c|}{v%s d%s m%s}& \multicolumn{2}{c|}{v%s d%s m%s} & \multicolumn{2}{c|}{v%s d%s m%s} & \multicolumn{2}{c|}{v%s d%s m%s}\\ 
         \hline
         \multicolumn{10}{c}{}\\
-""" %(ariestransit(date + n),vd[3],vd[4],vd[5],vd[6],vd[7],vd[8],vd[9],vd[10],vd[11],vd[12],vd[13],vd[14])
+""" %(ariestransit(date + n),vd[0],vd[1],vd[2],vd[3],vd[4],vd[5],vd[6],vd[7],vd[8],vd[9],vd[10],vd[11])
         n += 1
 
     tab = tab + r"""\end{tabular*}
@@ -129,7 +129,7 @@ def planetstabm(date):
             # first populate an array of 24 hours with all data
             hourlydata = [[] for i in range(24)]
             while h < 24:
-                hourlydata[h] = planets(da)
+                hourlydata[h] = planetsGHA(da)
                 da = da+ephem.hour
                 h += 1
             # now print the data per hour
@@ -175,7 +175,7 @@ def planetstabm(date):
             while h < 24:
                 band = int(h/6)
                 group = band % 2
-                eph = planets(da)
+                eph = planetsGHA(da)
                 line = r'''\color{blue} {%s} & 
 ''' %(h)
                 line = line + "%s && %s & %s && %s & %s && %s & %s && %s & %s\\\ \n" %(eph[0],eph[1],eph[2],eph[3],eph[4],eph[5],eph[6],eph[7],eph[8])
@@ -186,7 +186,7 @@ def planetstabm(date):
                 h += 1
                 da = da + ephem.hour
 
-        vd = vdmean(date + n)
+        vd = vdm_planets(date + n)
         tab = tab + r"""\cmidrule{1-2} \cmidrule{4-5} \cmidrule{7-8} \cmidrule{10-11} \cmidrule{13-14} 
         \multicolumn{2}{c}{\footnotesize{Mer.pass.:%s}} && 
         \multicolumn{2}{c}{\footnotesize{v%s d%s m%s}} && 
@@ -194,7 +194,7 @@ def planetstabm(date):
         \multicolumn{2}{c}{\footnotesize{v%s d%s m%s}} && 
         \multicolumn{2}{c}{\footnotesize{v%s d%s m%s}}\\ 
         \cmidrule{1-2} \cmidrule{4-5} \cmidrule{7-8} \cmidrule{10-11} \cmidrule{13-14}
-""" %(ariestransit(date + n),vd[3],vd[4],vd[5],vd[6],vd[7],vd[8],vd[9],vd[10],vd[11],vd[12],vd[13],vd[14])
+""" %(ariestransit(date + n),vd[0],vd[1],vd[2],vd[3],vd[4],vd[5],vd[6],vd[7],vd[8],vd[9],vd[10],vd[11])
         if n < 2:
             tab = tab + r"""\multicolumn{10}{c}{}\\
 """
@@ -325,7 +325,7 @@ def sunmoontab(date):
                 h += 1
                 da = da + ephem.hour
 
-        vd = vdmean(date + n)
+        vd = sun_moon_SD(date + n)
         tab = tab + r"""\hline
     \rule{0pt}{2.4ex} & \multicolumn{1}{c}{SD.=%s} & \multicolumn{1}{c|}{d=%s} & \multicolumn{5}{c|}{S.D.=%s} \\
     \hline
@@ -418,7 +418,7 @@ def sunmoontabm(date):
                 h += 1
                 da = da + ephem.hour
 
-        vd = vdmean(date + n)
+        vd = sun_moon_SD(date + n)
         tab = tab + r"""\cmidrule{2-3} \cmidrule{5-9}
         \multicolumn{1}{c}{} & \multicolumn{1}{c}{\footnotesize{SD.=%s}} & 
         \multicolumn{1}{c}{\footnotesize{d=%s}} && \multicolumn{5}{c}{\footnotesize{S.D.=%s}} \\
@@ -434,7 +434,7 @@ def sunmoontabm(date):
     \quad\quad"""
     return tab
 
-##NEW##
+
 def declCompare(prev_rad, curr_rad, next_rad, hr):
     # for Declinations only...
     # decide if to print N/S; decide if to print degrees
@@ -484,7 +484,7 @@ def declCompare(prev_rad, curr_rad, next_rad, hr):
         prDEG= True			# print degrees is N/S to be printed
     return prNS, prDEG
 
-##NEW##
+
 def NSdecl(deg, hr, printNS, printDEG, modernFMT):
     # reformat degrees latitude to Ndd°mm.m or Sdd°mm.m
     if deg[0:1] == '-':
@@ -593,7 +593,7 @@ def twilighttab(date):
 """
         lasthemisph = hemisph
         # day+1 to calculate for the second day (three days are printed on one page)
-        twi = twilight(date+1,i)
+        twi = twilight(date+1, i, hemisph)
         line = "\\textbf{%s}" % hs + " " + "%s°" %(abs(i))
         line = line + " & %s & %s & %s & %s & %s & %s \\\ \n" %(twi[0],twi[1],twi[2],twi[4],twi[5],twi[6])
         tab = tab + line
@@ -645,7 +645,7 @@ def twilighttab(date):
                 tab = tab + r"""\rule{0pt}{2.6ex}
 """
         lasthemisph = hemisph
-        moon, moon2 = moonrise(date,i)
+        moon, moon2 = moonrise_set(date,i)
         if not(double_events_found(moon,moon2)):
             tab = tab + "\\textbf{%s}" % hs + " " + "%s°" %(abs(i))
             tab = tab + " & %s & %s & %s & %s & %s & %s \\\ \n" %(moon[0],moon[1],moon[2],moon[3],moon[4],moon[5])
@@ -798,7 +798,7 @@ def almanac(first_day, pagenum):
     alm = alm + r"""
     \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
     \usepackage[pdftex]{graphicx}	% for \includegraphics
-
+    \usepackage{tikz}				% for \draw  (load after 'graphicx')
     \begin{document}
 
     % for the title page only...

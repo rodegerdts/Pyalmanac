@@ -51,6 +51,10 @@ Declination formatting has been changed to the standard used in Nautical Almanac
 
 This also includes some very minor changes and an improved title page for the full almanac with a star chart that indicates the northern navigational stars.
 
+**UPDATE: Jan 2020**
+
+The Nautical Almanac tables now indicate if the sun never sets or never rises; similarly if the moon never sets or never rises. The constant "search_next_rising_sun" in **config.py** determines how the *SunNeverSets* or *SunNeverRises* state is calculated. The code also has cosmetic improvements.
+
 ## Requirements
 
 &nbsp;&nbsp;&nbsp;&nbsp;Most of the computation is done by the free Pyephem library.  
@@ -63,6 +67,7 @@ This also includes some very minor changes and an improved title page for the fu
 &nbsp;&nbsp;&nbsp;&nbsp;**DEPRECATION:** Python 2.7 will reach the end of its life on January 1st, 2020.  
 &nbsp;&nbsp;&nbsp;&nbsp;Please upgrade your Python as Python 2.7 won't be maintained after that date.  
 &nbsp;&nbsp;&nbsp;&nbsp;A future version of pip will drop support for Python 2.7.
+
 
 ### INSTALLATION GUIDELINES on Windows 10:
 

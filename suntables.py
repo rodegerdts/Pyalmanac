@@ -80,7 +80,7 @@ def suntab(date):
                 h += 1
                 da = da + ephem.hour
 
-        vd = vdmean(date + n)
+        vd = sun_moon_SD(date + n)
         tab = tab + r"""\hline
         \rule{0pt}{2.4ex} & \multicolumn{1}{c}{SD.=%s} & \multicolumn{1}{c|}{d=%s} \\
         \hline
@@ -170,7 +170,7 @@ def suntabm(date):
                 h += 1
                 da = da + ephem.hour
 
-        vd = vdmean(date + n)
+        vd = sun_moon_SD(date + n)
         tab = tab + r"""\cmidrule{2-3}
         & \multicolumn{1}{c}{\footnotesize{SD.=%s}} & \multicolumn{1}{c}{\footnotesize{d=%s}} \\
         \cmidrule{2-3}
@@ -183,8 +183,8 @@ def suntabm(date):
     tab = tab + r"""
     \end{tabular}"""
     return tab
-    
-##NEW##
+
+
 def declCompare(prev_rad, curr_rad, next_rad, hr):
     # for Declinations only...
     # decide if to print N/S; decide if to print degrees
@@ -234,14 +234,14 @@ def declCompare(prev_rad, curr_rad, next_rad, hr):
         prDEG= True			# print degrees is N/S to be printed
     return prNS, prDEG
 
-##NEW##
+
 def NSdecl(deg, hr, printNS, printDEG, modernFMT):
     # reformat degrees latitude to Ndd°mm.m or Sdd°mm.m
     if deg[0:1] == '-':
-        hemisph = "S"
+        hemisph = 'S'
         deg = deg[1:]
     else:
-        hemisph = "N"
+        hemisph = 'N'
     if not(printDEG):
         deg = deg[4:]	# skip the degrees (always dd°mm.m) - note: the degree symbol '°' is two bytes long
         if (hr+3)%6 == 0:
@@ -383,9 +383,9 @@ def almanac(first_day, pagenum):
 """
 
     alm = alm + r"""\end{center}
-     
+
     \vfill
-     
+
     {\large \today}
     \HRule \\[0.6cm]
     \end{center}
