@@ -105,7 +105,7 @@ if s in set(['1', '2', '3', '4']):
         for yearint in range(int(yearfr),int(yearto)+1):
             start = time.time()
             year = "%4d" %yearint
-            msg = "\nCreating the nautical almanac for the year %s" %year
+            msg = "\nCreating the nautical almanac for the year %s" %(year)
             print(msg)
             first_day = datetime.date(yearint, 1, 1)
             filename = "almanac%s%s.tex" %(ff,year+DecFmt)
