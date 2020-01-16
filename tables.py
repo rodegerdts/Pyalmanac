@@ -867,6 +867,6 @@ def almanac(first_day, pagenum):
     first_day = r"""%s/%s/%s""" %(year,mth,day)
     date = ephem.Date(first_day)    # date to float
     alm = alm + pages(date,pagenum)
-    alm = alm + '\end{document}'
+    alm = alm + "\end{document}"
     return alm
 

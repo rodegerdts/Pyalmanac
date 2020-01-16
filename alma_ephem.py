@@ -623,20 +623,22 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
     except Exception:
         out[0] = '--:--'
         lastevent = 0
-    try:
-        nextr = obs.next_rising(m, start=firstrising)
-        if nextr-obs.date < 1:
-            out2[0] = time(nextr)		# note: overflow to 00:00 next day is correct here
-            lastevent = nextr
-    except UnboundLocalError:
-        pass
-    except ephem.NeverUpError:
-        pass
-    except ephem.AlwaysUpError:
-        pass
-    except Exception:
-        flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
-        sys.exc_clear()		# only in Python 2
+
+    if out[0] != '--:--':
+        try:
+            nextr = obs.next_rising(m, start=firstrising)
+            if nextr-obs.date < 1:
+                out2[0] = time(nextr)		# note: overflow to 00:00 next day is correct here
+                lastevent = nextr
+        except UnboundLocalError:
+            pass
+        except ephem.NeverUpError:
+            pass
+        except ephem.AlwaysUpError:
+            pass
+        except Exception:
+            flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            sys.exc_clear()		# only in Python 2
 
     obs.date = d
     try:
@@ -649,21 +651,23 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
             moonvisible[i] = False
     except Exception:
         out[3] = '--:--'
-    try:
-        nexts = obs.next_setting(m, start=firstsetting)
-        if nexts-obs.date < 1:
-            out2[3] = time(nexts)		# note: overflow to 00:00 next day is correct here
-        if nexts > lastevent:
-            moonvisible[i] = False
-    except UnboundLocalError:
-        pass
-    except ephem.NeverUpError:
-        pass
-    except ephem.AlwaysUpError:
-        pass
-    except Exception:
-        flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
-        sys.exc_clear()		# only in Python 2
+
+    if out[3] != '--:--':
+        try:
+            nexts = obs.next_setting(m, start=firstsetting)
+            if nexts-obs.date < 1:
+                out2[3] = time(nexts)		# note: overflow to 00:00 next day is correct here
+            if nexts > lastevent:
+                moonvisible[i] = False
+        except UnboundLocalError:
+            pass
+        except ephem.NeverUpError:
+            pass
+        except ephem.AlwaysUpError:
+            pass
+        except Exception:
+            flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            sys.exc_clear()		# only in Python 2
 
     if out[0] == '--:--' and out[3] == '--:--':	# if neither moonrise nor moonset...
         if moonvisible[i] == None:
@@ -685,20 +689,22 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
     except Exception:
         out[1] = '--:--'
         lastevent = 0
-    try:
-        nextr = obs.next_rising(m, start=firstrising)
-        if nextr-obs.date < 1:
-            out2[1] = time(nextr)		# note: overflow to 00:00 next day is correct here
-            lastevent = nextr
-    except UnboundLocalError:
-        pass
-    except ephem.NeverUpError:
-        pass
-    except ephem.AlwaysUpError:
-        pass
-    except Exception:
-        flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
-        sys.exc_clear()		# only in Python 2
+
+    if out[1] != '--:--':
+        try:
+            nextr = obs.next_rising(m, start=firstrising)
+            if nextr-obs.date < 1:
+                out2[1] = time(nextr)		# note: overflow to 00:00 next day is correct here
+                lastevent = nextr
+        except UnboundLocalError:
+            pass
+        except ephem.NeverUpError:
+            pass
+        except ephem.AlwaysUpError:
+            pass
+        except Exception:
+            flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            sys.exc_clear()		# only in Python 2
 
     obs.date = d
     try:
@@ -711,21 +717,23 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
             moonvisible[i] = False
     except Exception:
         out[4] = '--:--'
-    try:
-        nexts = obs.next_setting(m, start=firstsetting)
-        if nexts-obs.date < 1:
-            out2[4] = time(nexts)		# note: overflow to 00:00 next day is correct here
-        if nexts > lastevent:
-            moonvisible[i] = False
-    except UnboundLocalError:
-        pass
-    except ephem.NeverUpError:
-        pass
-    except ephem.AlwaysUpError:
-        pass
-    except Exception:
-        flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
-        sys.exc_clear()		# only in Python 2
+
+    if out[4] != '--:--':
+        try:
+            nexts = obs.next_setting(m, start=firstsetting)
+            if nexts-obs.date < 1:
+                out2[4] = time(nexts)		# note: overflow to 00:00 next day is correct here
+            if nexts > lastevent:
+                moonvisible[i] = False
+        except UnboundLocalError:
+            pass
+        except ephem.NeverUpError:
+            pass
+        except ephem.AlwaysUpError:
+            pass
+        except Exception:
+            flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            sys.exc_clear()		# only in Python 2
 
     if out[1] == '--:--' and out[4] == '--:--':	# if neither moonrise nor moonset...
         if moonvisible[i] == None:
@@ -747,20 +755,22 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
     except Exception:
         out[2] = '--:--'
         lastevent = 0
-    try:
-        nextr = obs.next_rising(m, start=firstrising)
-        if nextr-obs.date < 1:
-            out2[2] = time(nextr)		# note: overflow to 00:00 next day is correct here
-            lastevent = nextr
-    except UnboundLocalError:
-        pass
-    except ephem.NeverUpError:
-        pass
-    except ephem.AlwaysUpError:
-        pass
-    except Exception:
-        flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
-        sys.exc_clear()		# only in Python 2
+
+    if out[2] != '--:--':
+        try:
+            nextr = obs.next_rising(m, start=firstrising)
+            if nextr-obs.date < 1:
+                out2[2] = time(nextr)		# note: overflow to 00:00 next day is correct here
+                lastevent = nextr
+        except UnboundLocalError:
+            pass
+        except ephem.NeverUpError:
+            pass
+        except ephem.AlwaysUpError:
+            pass
+        except Exception:
+            flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            sys.exc_clear()		# only in Python 2
 
     obs.date = d
     try:
@@ -773,21 +783,23 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
             moonvisible[i] = False
     except Exception:
         out[5] = '--:--'
-    try:
-        nexts = obs.next_setting(m, start=firstsetting)
-        if nexts-obs.date < 1:
-            out2[5] = time(nexts)		# note: overflow to 00:00 next day is correct here
-        if nexts > lastevent:
-            moonvisible[i] = False
-    except UnboundLocalError:
-        pass
-    except ephem.NeverUpError:
-        pass
-    except ephem.AlwaysUpError:
-        pass
-    except Exception:
-        flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
-        sys.exc_clear()		# only in Python 2
+
+    if out[5] != '--:--':
+        try:
+            nexts = obs.next_setting(m, start=firstsetting)
+            if nexts-obs.date < 1:
+                out2[5] = time(nexts)		# note: overflow to 00:00 next day is correct here
+            if nexts > lastevent:
+                moonvisible[i] = False
+        except UnboundLocalError:
+            pass
+        except ephem.NeverUpError:
+            pass
+        except ephem.AlwaysUpError:
+            pass
+        except Exception:
+            flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            sys.exc_clear()		# only in Python 2
 
     if out[2] == '--:--' and out[5] == '--:--':	# if neither moonrise nor moonset...
         if moonvisible[i] == None:
