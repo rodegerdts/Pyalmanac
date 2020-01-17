@@ -38,7 +38,7 @@ degree_sign= u'\N{DEGREE SIGN}'
 #   internal methods
 #----------------------
 
-def time(date): 
+def hhmm(date):
     # turn an ephem.date (float) into a time string formatted hh:mm
     tup = date.tuple()
     hr = tup[-3]
@@ -301,24 +301,24 @@ def planetstransit(date):   # used in starstab
     obs.date = date
     ephem_venus.compute(date)
     vsha = nadeg(2*math.pi-ephem.degrees(ephem_venus.g_ra).norm)
-    vtrans = time(obs.next_transit(ephem_venus))
+    vtrans = hhmm(obs.next_transit(ephem_venus))
     hpvenus = "%0.1f" %((math.tan(6371/(ephem_venus.earth_distance*149597870.7)))*60*180/math.pi)
     
     obs.date = date
     ephem_mars.compute(date)
     marssha = nadeg(2*math.pi-ephem.degrees(ephem_mars.g_ra).norm)
-    marstrans = time(obs.next_transit(ephem_mars))
+    marstrans = hhmm(obs.next_transit(ephem_mars))
     hpmars = "%0.1f" %((math.tan(6371/(ephem_mars.earth_distance*149597870.7)))*60*180/math.pi)
 
     obs.date = date
     ephem_jupiter.compute(date)
     jsha = nadeg(2*math.pi-ephem.degrees(ephem_jupiter.g_ra).norm)
-    jtrans = time(obs.next_transit(ephem_jupiter))
+    jtrans = hhmm(obs.next_transit(ephem_jupiter))
     
     obs.date = date
     ephem_saturn.compute(date)
     satsha = nadeg(2*math.pi-ephem.degrees(ephem_saturn.g_ra).norm)
-    sattrans = time(obs.next_transit(ephem_saturn))
+    sattrans = hhmm(obs.next_transit(ephem_saturn))
     
     return [vsha,vtrans,marssha,marstrans,jsha,jtrans,satsha,sattrans,hpmars,hpvenus]
 
@@ -429,12 +429,12 @@ def twilight(date, lat, hemisph):   # used in twilighttab (section 1)
 
     obs.horizon = ephem.degrees('-12')+r	# Nautical twilight ...
     try:
-        out[0] = time(obs.next_rising(s))	# begin
+        out[0] = hhmm(obs.next_rising(s))	# begin
     except:
         out[0] = '--:--'
     obs.date = d
     try:
-        out[6] = time(obs.next_setting(s))	# end
+        out[6] = hhmm(obs.next_setting(s))	# end
     except:
         out[6] = '--:--'
     if out[0] == '--:--' and out[6] == '--:--':	# if neither begin nor end...
@@ -448,12 +448,12 @@ def twilight(date, lat, hemisph):   # used in twilighttab (section 1)
     obs.horizon = ephem.degrees('-6')+r		# Civil twilight...
     obs.date = d
     try:
-        out[1] = time(obs.next_rising(s))	# begin
+        out[1] = hhmm(obs.next_rising(s))	# begin
     except:
         out[1] = '--:--'
     obs.date = d
     try:
-        out[5] = time(obs.next_setting(s))	# end
+        out[5] = hhmm(obs.next_setting(s))	# end
     except:
         out[5] = '--:--'
     if out[1] == '--:--' and out[5] == '--:--':	# if neither begin nor end...
@@ -467,12 +467,12 @@ def twilight(date, lat, hemisph):   # used in twilighttab (section 1)
     obs.horizon = '-0:34'
     obs.date = d
     try:
-        out[2] = time(obs.next_rising(s))	# sunrise
+        out[2] = hhmm(obs.next_rising(s))	# sunrise
     except:
         out[2] = '--:--'
     obs.date = d
     try:
-        out[4] = time(obs.next_setting(s))	# sunset
+        out[4] = hhmm(obs.next_setting(s))	# sunset
     except:
         out[4] = '--:--'
     if out[2] == '--:--' and out[4] == '--:--':	# if neither sunrise nor sunset...
@@ -484,7 +484,7 @@ def twilight(date, lat, hemisph):   # used in twilighttab (section 1)
         out[4] = yn
 #-----------------------------------------------------------
     obs.date = d
-    out[3] = time(obs.next_transit(s))
+    out[3] = hhmm(obs.next_transit(s))
     
     return out
 
@@ -617,10 +617,10 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         firstrising = obs.next_rising(m)
         if firstrising-obs.date >= 1:
             raise ValueError, 'event next day'
-        out[0] = time(firstrising)		# note: overflow to 00:00 next day is correct here
+        out[0] = hhmm(firstrising)		# note: overflow to 00:00 next day is correct here
         lastevent = firstrising
         moonvisible[i] = True
-    except Exception:
+    except Exception:                   # includes NeverUpError and AlwaysUpError
         out[0] = '--:--'
         lastevent = 0
 
@@ -628,7 +628,7 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         try:
             nextr = obs.next_rising(m, start=firstrising)
             if nextr-obs.date < 1:
-                out2[0] = time(nextr)		# note: overflow to 00:00 next day is correct here
+                out2[0] = hhmm(nextr)   # note: overflow to 00:00 next day is correct here
                 lastevent = nextr
         except UnboundLocalError:
             pass
@@ -645,18 +645,18 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         firstsetting = obs.next_setting(m)
         if firstsetting-obs.date >= 1:
             raise ValueError, 'event next day'
-        out[3] = time(firstsetting)		# note: overflow to 00:00 next day is correct here
+        out[3] = hhmm(firstsetting)		# note: overflow to 00:00 next day is correct here
         if firstsetting > lastevent:
             lastevent = firstsetting
             moonvisible[i] = False
-    except Exception:
+    except Exception:                   # includes NeverUpError and AlwaysUpError
         out[3] = '--:--'
 
     if out[3] != '--:--':
         try:
             nexts = obs.next_setting(m, start=firstsetting)
             if nexts-obs.date < 1:
-                out2[3] = time(nexts)		# note: overflow to 00:00 next day is correct here
+                out2[3] = hhmm(nexts)	# note: overflow to 00:00 next day is correct here
             if nexts > lastevent:
                 moonvisible[i] = False
         except UnboundLocalError:
@@ -683,10 +683,10 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         firstrising = obs.next_rising(m)
         if firstrising-obs.date >= 1:
             raise ValueError, 'event next day'
-        out[1] = time(firstrising)		# note: overflow to 00:00 next day is correct here
+        out[1] = hhmm(firstrising)		# note: overflow to 00:00 next day is correct here
         lastevent = firstrising
         moonvisible[i] = True
-    except Exception:
+    except Exception:                   # includes NeverUpError and AlwaysUpError
         out[1] = '--:--'
         lastevent = 0
 
@@ -694,7 +694,7 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         try:
             nextr = obs.next_rising(m, start=firstrising)
             if nextr-obs.date < 1:
-                out2[1] = time(nextr)		# note: overflow to 00:00 next day is correct here
+                out2[1] = hhmm(nextr)	# note: overflow to 00:00 next day is correct here
                 lastevent = nextr
         except UnboundLocalError:
             pass
@@ -711,18 +711,18 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         firstsetting = obs.next_setting(m)
         if firstsetting-obs.date >= 1:
             raise ValueError, 'event next day'
-        out[4] = time(firstsetting)		# note: overflow to 00:00 next day is correct here
+        out[4] = hhmm(firstsetting)		# note: overflow to 00:00 next day is correct here
         if firstsetting > lastevent:
             lastevent = firstsetting
             moonvisible[i] = False
-    except Exception:
+    except Exception:                   # includes NeverUpError and AlwaysUpError
         out[4] = '--:--'
 
     if out[4] != '--:--':
         try:
             nexts = obs.next_setting(m, start=firstsetting)
             if nexts-obs.date < 1:
-                out2[4] = time(nexts)		# note: overflow to 00:00 next day is correct here
+                out2[4] = hhmm(nexts)	# note: overflow to 00:00 next day is correct here
             if nexts > lastevent:
                 moonvisible[i] = False
         except UnboundLocalError:
@@ -749,10 +749,10 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         firstrising = obs.next_rising(m)
         if firstrising-obs.date >= 1:
             raise ValueError, 'event next day'
-        out[2] = time(firstrising)		# note: overflow to 00:00 next day is correct here
+        out[2] = hhmm(firstrising)		# note: overflow to 00:00 next day is correct here
         lastevent = firstrising
         moonvisible[i] = True
-    except Exception:
+    except Exception:                   # includes NeverUpError and AlwaysUpError
         out[2] = '--:--'
         lastevent = 0
 
@@ -760,7 +760,7 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         try:
             nextr = obs.next_rising(m, start=firstrising)
             if nextr-obs.date < 1:
-                out2[2] = time(nextr)		# note: overflow to 00:00 next day is correct here
+                out2[2] = hhmm(nextr)	# note: overflow to 00:00 next day is correct here
                 lastevent = nextr
         except UnboundLocalError:
             pass
@@ -777,18 +777,18 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         firstsetting = obs.next_setting(m)
         if firstsetting-obs.date >= 1:
             raise ValueError, 'event next day'
-        out[5] = time(firstsetting)		# note: overflow to 00:00 next day is correct here
+        out[5] = hhmm(firstsetting)		# note: overflow to 00:00 next day is correct here
         if firstsetting > lastevent:
             lastevent = firstsetting
             moonvisible[i] = False
-    except Exception:
+    except Exception:                   # includes NeverUpError and AlwaysUpError
         out[5] = '--:--'
 
     if out[5] != '--:--':
         try:
             nexts = obs.next_setting(m, start=firstsetting)
             if nexts-obs.date < 1:
-                out2[5] = time(nexts)		# note: overflow to 00:00 next day is correct here
+                out2[5] = hhmm(nexts)	# note: overflow to 00:00 next day is correct here
             if nexts > lastevent:
                 moonvisible[i] = False
         except UnboundLocalError:
@@ -905,15 +905,15 @@ def equation_of_time(date): # used in twilighttab (section 3)
 
     next_s_tr = obs.next_transit(ephem_sun,start=d)
     if next_s_tr - obs.date < 1:
-        transs = time(next_s_tr)
+        transs = hhmm(next_s_tr)
 
     next_m_atr = obs.next_antitransit(ephem_moon,start=d)
     if next_m_atr - obs.date < 1:
-        antim = time(next_m_atr)
+        antim = hhmm(next_m_atr)
 
     next_m_tr = obs.next_transit(ephem_moon,start=d)
     if next_m_tr - obs.date < 1:
-        transm = time(next_m_tr)
+        transm = hhmm(next_m_tr)
 
 #-----------------------------
     obs = ephem.Observer()
