@@ -53,8 +53,8 @@ This also includes some very minor changes and an improved title page for the fu
 
 **UPDATE: Jan 2020**
 
-The Nautical Almanac tables now indicate if the sun never sets or never rises; similarly if the moon never sets or never rises. The constant "search_next_rising_sun" in **config.py** determines how the *SunNeverSets* or *SunNeverRises* state is calculated. The code also has cosmetic improvements.
-P.S. Don't be irritated by the *Overfull \hbox in paragraph...* messages. There is a tiny bug in pdfTeX (included in MiKTeX) that needs to be fixed.
+The Nautical Almanac tables now indicate if the sun never sets or never rises; similarly if the moon never sets or never rises. The constant "search_next_rising_sun" in **config.py** determines how the *SunNeverSets* or *SunNeverRises* state is calculated. The code also has cosmetic improvements.  
+P.S. The *Overfull \hbox in paragraph...* messages can be ignored - the PDF is correctly generated.
 
 ## Requirements
 
