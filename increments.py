@@ -260,14 +260,23 @@ def makelatex():
 	\pagestyle{scrheadings}
 	\clearscrheadfoot
 	\chead{\large \textbf{Increments and Corrections}}
-    \usepackage[utf8x]{inputenc}
+    \usepackage[utf8]{inputenc}
     \usepackage[english]{babel}
     \usepackage{fontenc}
     \usepackage{array, multicol, blindtext}
     \usepackage[landscape,headsep=0mm, headheight=5mm, top=15mm, bottom=15mm, left=8mm, right=8mm]{geometry}
 	\newcommand{\HRule}{\rule{\linewidth}{0.9mm}}
 	\usepackage[pdftex]{graphicx}
+    \DeclareUnicodeCharacter{00B0}{\ensuremath{{}^\circ}}
 \begin{document}
+% ----------------------
+% CAUTION: the next 2 lines suppress Overfull \hbox (badness 10000) messages
+\hbadness=10000
+\newcount\hbadness
+% CAUTION: the next 2 lines suppress Overfull \hbox (too wide) messages below 6.5Pt
+\hfuzz=6.5Pt
+\newdimen\hfuzz
+% ----------------------
 \begin{scriptsize}"""
 	lx = lx + allinctabs()
 	lx = lx + refractab()
