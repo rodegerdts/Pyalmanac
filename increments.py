@@ -1,14 +1,42 @@
-#! /usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+
+#   Copyright (C) 2014  Enno Rodegerdts
+
+#  This program is free software; you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation; either version 2 of the License, or
+#     (at your option) any later version.
+# 
+#     This program is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+# 
+#     You should have received a copy of the GNU General Public License along
+#     with this program; if not, write to the Free Software Foundation, Inc.,
+#     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+import sys
+import os
 from math import *
 
-
-
 def degmin(deg):
-    #changes decimal degrees to the format usually used in the nautical almanac. (dddÂ°mm.m')
-    g = int(deg)
-    m = (deg-g)*60
-    gm = "%s°%04.1f" %(g,abs(m))
+    #changes decimal degrees to the format usually used in the nautical almanac. (ddd°mm.m')
+    theminus = ""
+    if deg < 0:
+        theminus = u'-'
+    deg = abs(deg)
+    di = int(deg)		# degrees (integer)
+    # note: round() uses "Rounding Half To Even" strategy
+    mf = round((deg-di)*60, 1)	# minutes (float), rounded to 1 decimal place
+    mi = int(mf)			# minutes (integer)
+    if mi == 60:
+        mf -= 60
+        di += 1
+        if di == 360:
+            di = 0
+    gm = u'%s%s°%04.1f' %(theminus,di,mf)
     return gm
 
 def decdeg(d,min):
@@ -53,7 +81,6 @@ def vcorr(m,v):
 	corr=round(v*h,1)
 	return corr
 
-
 def inctab(min):
     """generates a latex table for increments"""
     tab = r'''\noindent
@@ -68,7 +95,7 @@ def inctab(min):
    
     sec = 0
     while sec < 60:
-        line = "%s & %s & %s & %s & %s - %s & %s - %s & %s - %s \\\ \n" %(sec,suninc(min,sec),ariesinc(min,sec),mooninc(min,sec),str(round(0.1*sec,1)),vcorr(min,0.1*sec),str(round(6+0.1*sec,1)),vcorr(min,6+0.1*sec),str(round(12+0.1*sec,1)),vcorr(min,12+0.1*sec))
+        line = u"%s & %s & %s & %s & %s - %s & %s - %s & %s - %s \\\ \n" %(sec,suninc(min,sec),ariesinc(min,sec),mooninc(min,sec),str(round(0.1*sec,1)),vcorr(min,0.1*sec),str(round(6+0.1*sec,1)),vcorr(min,6+0.1*sec),str(round(12+0.1*sec,1)),vcorr(min,12+0.1*sec))
         tab = tab + line
         sec += 1
         
@@ -85,7 +112,6 @@ def allinctabs():
 		min += 1
 	return tab
 
-
 def dip(meter):
 	dip=60*0.0293*sqrt(meter)
 	return dip
@@ -100,7 +126,7 @@ def diptab():
 	\hline
 	'''
 	while meter < 25.5:
-		line = "%s &  %.1f & %.1f\\\ \n" %(meter, dip(meter), meter/0.3084)
+		line = u"%s &  %.1f & %.1f\\\ \n" %(meter, dip(meter), meter/0.3084)
 		tab = tab + line
 		meter += 0.5
 	tab = tab + r"""\hline
@@ -108,8 +134,6 @@ def diptab():
 	"""
 	
 	return tab
-	
-
 
 def refrac(h):
 	r = 1/tan((h+7.31/(h+4.4))/180*pi)
@@ -125,22 +149,21 @@ def refractab():
 	\hline
 	'''
 	while ho < 20:
-		line = "%s° &  %.1f\\\ \n" %(ho, refrac(ho))
+		line = u"%s° &  %.1f\\\ \n" %(ho, refrac(ho))
 		tab = tab + line
 		ho += 0.5
 	while ho < 40:
-		line = "%s° &  %.1f\\\ \n" %(ho, refrac(ho))
+		line = u"%s° &  %.1f\\\ \n" %(ho, refrac(ho))
 		tab = tab + line
 		ho += 1
 	while ho < 90:
-		line = "%s° &  %.1f\\\ \n" %(ho, refrac(ho))
+		line = u"%s° &  %.1f\\\ \n" %(ho, refrac(ho))
 		tab = tab + line
 		ho += 5
 	tab = tab + r"""\hline
 	\end{tabular}
 	"""
 	return tab
-
 
 def parallax(hp, deg, min):
 	#returns parallax in dec minutes from horizontal parallax, and Ha
@@ -159,43 +182,43 @@ def parallaxtab():
 	d = 0
 	line = "\\textbf{$H_{a}$} "
 	while d<90:
-		line += "& \multicolumn{1}{>{\hspace{-4pt}}c<{\hspace{-4pt}}|}{\\textbf{%s-%s°}}" %(d, d+5)
+		line += u"& \multicolumn{1}{>{\hspace{-4pt}}c<{\hspace{-4pt}}|}{\\textbf{%s-%s°}}" %(d, d+5)
 		d+= 5
-	line += " \\\ \n \\hline"
+	line += u" \\\ \n \\hline"
 	tab += line
 	
 	while Hdeg < 5 :
 		line = " ´ "
 		dd = Hdeg
 		while dd < 90:
-			line += "& \multicolumn{1}{l}{\\textbf{%s°}}" %(dd)
+			line += u"& \multicolumn{1}{l}{\\textbf{%s°}}" %(dd)
 			dd += 5
-		line += "\\vline \\\ \n"
+		line += u"\\vline \\\ \n"
 		tab = tab + line
 		Hmin=0
 		while Hmin < 60:
 			dd = Hdeg
-			line = "\\textbf{%s} " %(Hmin)
+			line = u"\\textbf{%s} " %(Hmin)
 			while dd < 90:
-				line += " & %.1f " %(parallax(HP,dd,Hmin))
+				line += u" & %.1f " %(parallax(HP,dd,Hmin))
 				dd += 5
-			line += "\\\ \n"
+			line += u"\\\ \n"
 			tab = tab + line
 			Hmin += 10	
 		Hdeg += 1
 		
 	tab += r"""\hline 
-	\multicolumn{1}{|c|}{\textbf{HP}} & \multicolumn{18}{c|}{correction for HP per collum}\\
+	\multicolumn{1}{|c|}{\textbf{HP}} & \multicolumn{18}{c|}{correction for HP per column}\\
 	\hline
 	"""
 	hp = 54.3
 	while hp<61.5:
-		line = "\\textbf{ %.1f} " %(hp)
+		line = u"\\textbf{ %.1f} " %(hp)
 		d = 2
 		while d<90:
-			line += "& %.1f " %(parallax(hp, d, 30) - parallax(54, d, 30))
+			line += u"& %.1f " %(parallax(hp, d, 30) - parallax(54, d, 30))
 			d += 5
-		line += "\\\ \n"
+		line += u"\\\ \n"
 		tab += line
 		hp += 0.3
 			
@@ -218,46 +241,51 @@ def venparallax():
 	"""
 	while Hdeg<90:
 		hp = 0.1
-		line = "\\textbf{ %s°} " %(Hdeg)
+		line = u"\\textbf{ %s°} " %(Hdeg)
 		while hp < 0.7:
-			line += "& %.1f " %(parallax(hp, Hdeg, 0))
+			line += u"& %.1f " %(parallax(hp, Hdeg, 0))
 			hp += 0.1
-		line += "\\\ \n"
+		line += u"\\\ \n"
 		tab += line
 		Hdeg += 10		
 	tab = tab + r"""\hline
 	\end{tabular}
 	"""
 	return tab
-	
-	
-	
-	
-	
+
 def makelatex():
 	lx = r"""\documentclass[ 10pt, twoside, a4paper]{scrreprt}
 	\usepackage[automark]{scrpage2}
 	\pagestyle{scrheadings}
 	\clearscrheadfoot
 	\chead{\large \textbf{Increments and Corrections}}
-    \usepackage[utf8x]{inputenc}
+    \usepackage[utf8]{inputenc}
     \usepackage[english]{babel}
     \usepackage{fontenc}
     \usepackage{array, multicol, blindtext}
     \usepackage[landscape,headsep=0mm, headheight=5mm, top=15mm, bottom=15mm, left=8mm, right=8mm]{geometry}
 	\newcommand{\HRule}{\rule{\linewidth}{0.9mm}}
 	\usepackage[pdftex]{graphicx}
+    \DeclareUnicodeCharacter{00B0}{\ensuremath{{}^\circ}}
 \begin{document}
+% ----------------------
+% CAUTION: the next 2 lines suppress Overfull \hbox (badness 10000) messages
+\hbadness=10000
+\newcount\hbadness
+% CAUTION: the next 2 lines suppress Overfull \hbox (too wide) messages below 6.5Pt
+\hfuzz=6.5Pt
+\newdimen\hfuzz
+% ----------------------
 \begin{scriptsize}"""
 	lx = lx + allinctabs()
 	lx = lx + refractab()
 	lx = lx + parallaxtab()
 	lx = lx + diptab()
-	lx += r''' \newpage \end{scriptsize}
+	lx += r''' \end{scriptsize} \newpage
 	\begin{multicols}{2} \begin{scriptsize}
 	'''
 	lx = lx + venparallax()
-	lx = lx + r'''\end{scriptsize} 
+	lx = lx + r'''\end{scriptsize} \newpage
 	\section*{About these tables}
 	The preceding static tables are independent from the year. They differ from the tables found in the official paper versions of the Nautical almanac in to important considerations. 
 \begin{itemize}
@@ -294,18 +322,23 @@ and
 where $A$ is the azimuth angle, $L$ is the latitude, $d$ is the declination and $LHA$ is the local hour angle. The azimuth ($Z_n$) is given by the following rule:
 \begin{itemize}
       \item if the $LHA$ is greater than 180°, $Z_n=A$
-      \item if the $LHA$ is less than 180°, $Z_n = 360° - A$
+      \item if the $LHA$ is less than 180°, $Z_n = 360^\circ - A$
 \end{itemize}
 
 	\end{multicols} \end{document}'''
 	return lx
     
-outfile = open("inc.tex", 'w')
+if sys.version_info[0] != 3:
+    raise Exception("Must be using Python 3")
+
+fn = "inc"
+filename = fn + ".tex"
+outfile = open(filename, mode="w", encoding="utf8")
 outfile.write(makelatex())
 outfile.close()
-
-
-
-
-
-
+command = 'pdflatex %s' %filename
+os.system(command)
+print("finished")
+os.remove(fn + ".tex")
+os.remove(fn + ".log")
+os.remove(fn + ".aux")
