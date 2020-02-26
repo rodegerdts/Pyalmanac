@@ -18,7 +18,7 @@ I, Andrew Bauer, wish to thank Enno Rodegerdts for permission to update his GitH
 Two versions (other than Pyalmanac) are available here: https://github.com/aendie
 
 * **Pyalmanac** is the fastest with "somewhat limited" accuracy that is sufficient for nautical navigation.  
-* **SFalmanac** is the slowest and most accurate; almost entirely based on *Skyfield*. *PyEphem* is only used for planet magnitudes (because these are not in Skyfield).  
+* **SFalmanac** is the slowest and most accurate; almost entirely based on *Skyfield*. *PyEphem* is only used for planet magnitudes (because these are not in *Skyfield*).  
 * **Skyalmanac** is a hybrid version that is significantly faster than SFalmanac. *PyEphem* is used for planet magnitudes and for all planet transits, sunrise and sunset calculations as well as moonrise and moonset.  
 
 PyEphem  website: https://rhodesmill.org/pyephem/  
