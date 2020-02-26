@@ -6,7 +6,7 @@ This version of Pyalmanac was developed by Andrew Bauer based on the original Py
 Pyalmanac contains its own star database (similar to the database in PyEphem 3.7.6), however the accuracy was poor. It is updated with data from the Hipparcos Catalogue and the GHA/Dec data now matches a sample page from a Nautical Almanac typically within 0°0.1'.
 
 NOTE: two scripts are included (both can be run): 'pyalmanac.py' and 'increments.py'  
-NOTE: Pyalmanac contains it's own star database - it does not use the version supplied with PyEphem, hence updating from 3.7.6 to 3.7.7 is harmless. Star names are chosen to comply with Nautical Almanacs.  
+NOTE: Pyalmanac contains its own star database - it does not use the version supplied with PyEphem, hence updating from 3.7.6 to 3.7.7 is harmless. Star names are chosen to comply with Nautical Almanacs.  
 NOTE: if required, a Python 2.7 script with identical functionality can be found at: https://github.com/aendie/Pyalmanac-Py2  
 
 **ACKNOWLEDGEMENTS**
