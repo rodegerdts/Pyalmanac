@@ -25,7 +25,7 @@ def degmin(deg):
     #changes decimal degrees to the format usually used in the nautical almanac. (ddd°mm.m')
     theminus = ""
     if deg < 0:
-        theminus = u'-'
+        theminus = "-"
     deg = abs(deg)
     di = int(deg)		# degrees (integer)
     # note: round() uses "Rounding Half To Even" strategy
@@ -36,7 +36,7 @@ def degmin(deg):
         di += 1
         if di == 360:
             di = 0
-    gm = u'%s%s°%04.1f' %(theminus,di,mf)
+    gm = "{}{}$^\circ${:04.1f}".format(theminus,di,mf)
     return gm
 
 def decdeg(d,min):
@@ -88,14 +88,14 @@ def inctab(min):
     \hline
     {\tiny m} \textbf{'''
     
-    tab = tab+"%s" %(int(min))
+    tab = tab+"{}".format(int(min))
     
     tab=tab+ r'''} & \multicolumn{1}{p{0.5cm}|}{\textbf{Sun Plan.}} & \multicolumn{1}{c|}{\textbf{Aries}} & \multicolumn{1}{c||}{\textbf{Moon}} & \multicolumn{3}{c|}{\textit{\textbf{v and d corr}}}\\ 
     \hline'''
    
     sec = 0
     while sec < 60:
-        line = u"%s & %s & %s & %s & %s - %s & %s - %s & %s - %s \\\ \n" %(sec,suninc(min,sec),ariesinc(min,sec),mooninc(min,sec),str(round(0.1*sec,1)),vcorr(min,0.1*sec),str(round(6+0.1*sec,1)),vcorr(min,6+0.1*sec),str(round(12+0.1*sec,1)),vcorr(min,12+0.1*sec))
+        line = "{} & {} & {} & {} & {} - {} & {} - {} & {} - {} \\\ \n".format(sec,suninc(min,sec),ariesinc(min,sec),mooninc(min,sec),str(round(0.1*sec,1)),vcorr(min,0.1*sec),str(round(6+0.1*sec,1)),vcorr(min,6+0.1*sec),str(round(12+0.1*sec,1)),vcorr(min,12+0.1*sec))
         tab = tab + line
         sec += 1
         
@@ -126,7 +126,7 @@ def diptab():
 	\hline
 	'''
 	while meter < 25.5:
-		line = u"%s &  %.1f & %.1f\\\ \n" %(meter, dip(meter), meter/0.3084)
+		line = "{} &  {:.1f} & {:.1f}\\\ \n".format(meter, dip(meter), meter/0.3084)
 		tab = tab + line
 		meter += 0.5
 	tab = tab + r"""\hline
@@ -149,15 +149,15 @@ def refractab():
 	\hline
 	'''
 	while ho < 20:
-		line = u"%s° &  %.1f\\\ \n" %(ho, refrac(ho))
+		line = "{}$^\circ$ &  {:.1f}\\\ \n".format(ho, refrac(ho))
 		tab = tab + line
 		ho += 0.5
 	while ho < 40:
-		line = u"%s° &  %.1f\\\ \n" %(ho, refrac(ho))
+		line = "{}$^\circ$ &  {:.1f}\\\ \n".format(ho, refrac(ho))
 		tab = tab + line
 		ho += 1
 	while ho < 90:
-		line = u"%s° &  %.1f\\\ \n" %(ho, refrac(ho))
+		line = "{}$^\circ$ &  {:.1f}\\\ \n".format(ho, refrac(ho))
 		tab = tab + line
 		ho += 5
 	tab = tab + r"""\hline
@@ -180,29 +180,29 @@ def parallaxtab():
 	\hline
 	'''
 	d = 0
-	line = "\\textbf{$H_{a}$} "
+	line = r"\textbf{$H_{a}$} "
 	while d<90:
-		line += u"& \multicolumn{1}{>{\hspace{-4pt}}c<{\hspace{-4pt}}|}{\\textbf{%s-%s°}}" %(d, d+5)
+		line += r"& \multicolumn{{1}}{{>{{\hspace{{-4pt}}}}c<{{\hspace{{-4pt}}}}|}}{{\textbf{{{}-{}$^\circ$}}}}".format(d, d+5)
 		d+= 5
-	line += u" \\\ \n \\hline"
+	line += " \\\ \n \\hline"
 	tab += line
 	
 	while Hdeg < 5 :
 		line = " ´ "
 		dd = Hdeg
 		while dd < 90:
-			line += u"& \multicolumn{1}{l}{\\textbf{%s°}}" %(dd)
+			line += r"& \multicolumn{{1}}{{l}}{{\textbf{{{}$^\circ$}}}}".format(dd)
 			dd += 5
-		line += u"\\vline \\\ \n"
+		line += "\\vline \\\ \n"
 		tab = tab + line
 		Hmin=0
 		while Hmin < 60:
 			dd = Hdeg
-			line = u"\\textbf{%s} " %(Hmin)
+			line = r"\textbf{{{}}} ".format(Hmin)
 			while dd < 90:
-				line += u" & %.1f " %(parallax(HP,dd,Hmin))
+				line += " & {:.1f} ".format(parallax(HP,dd,Hmin))
 				dd += 5
-			line += u"\\\ \n"
+			line += "\\\ \n"
 			tab = tab + line
 			Hmin += 10	
 		Hdeg += 1
@@ -213,12 +213,12 @@ def parallaxtab():
 	"""
 	hp = 54.3
 	while hp<61.5:
-		line = u"\\textbf{ %.1f} " %(hp)
+		line = r"\textbf{{ {:.1f}}} ".format(hp)
 		d = 2
 		while d<90:
-			line += u"& %.1f " %(parallax(hp, d, 30) - parallax(54, d, 30))
+			line += "& {:.1f} ".format(parallax(hp, d, 30) - parallax(54, d, 30))
 			d += 5
-		line += u"\\\ \n"
+		line += "\\\ \n"
 		tab += line
 		hp += 0.3
 			
@@ -241,11 +241,11 @@ def venparallax():
 	"""
 	while Hdeg<90:
 		hp = 0.1
-		line = u"\\textbf{ %s°} " %(Hdeg)
+		line = r"\textbf{{ {}$^\circ$}} ".format(Hdeg)
 		while hp < 0.7:
-			line += u"& %.1f " %(parallax(hp, Hdeg, 0))
+			line += "& {:.1f} ".format(parallax(hp, Hdeg, 0))
 			hp += 0.1
-		line += u"\\\ \n"
+		line += "\\\ \n"
 		tab += line
 		Hdeg += 10		
 	tab = tab + r"""\hline
@@ -253,9 +253,10 @@ def venparallax():
 	"""
 	return tab
 
+
 def makelatex():
 	lx = r"""\documentclass[ 10pt, twoside, a4paper]{scrreprt}
-	\usepackage[automark]{scrpage2}
+	\usepackage[automark]{scrlayer-scrpage}
 	\pagestyle{scrheadings}
 	\clearscrheadfoot
 	\chead{\large \textbf{Increments and Corrections}}
@@ -266,7 +267,7 @@ def makelatex():
     \usepackage[landscape,headsep=0mm, headheight=5mm, top=15mm, bottom=15mm, left=8mm, right=8mm]{geometry}
 	\newcommand{\HRule}{\rule{\linewidth}{0.9mm}}
 	\usepackage[pdftex]{graphicx}
-    \DeclareUnicodeCharacter{00B0}{\ensuremath{{}^\circ}}
+    %\DeclareUnicodeCharacter{00B0}{\ensuremath{{}^\circ}}
 \begin{document}
 % ----------------------
 % CAUTION: the next 2 lines suppress Overfull \hbox (badness 10000) messages
@@ -287,56 +288,56 @@ def makelatex():
 	lx = lx + venparallax()
 	lx = lx + r'''\end{scriptsize} \newpage
 	\section*{About these tables}
-	The preceding static tables are independent from the year. They differ from the tables found in the official paper versions of the Nautical almanac in to important considerations. 
+	The preceding static tables are independent from the year. They differ from the tables found in the official paper versions of the Nautical almanac in two important considerations. 
 \begin{itemize}
-      \item My tables are not arranged as /textit{critical} tables. So chose the value that fits best to your value and interpolate in the rare cases where this should be necessary.
+      \item My tables are not arranged as \textit{critical} tables. So chose the value that fits best to your value and interpolate in the rare cases where this should be necessary.
       \item My tables do not combine multiple corrections as some tables in the paper Nautical Almanac do. Each correction has to be applied separately. 
     \end{itemize}
 All tables that are specific for a year are contained in the Nautical Almanac daily pages for the corresponding year.
-\subsubsection*{increments}
+\subsubsection*{Increments}
 The large increment table is is nothing but a linear interpolation between the tabulated values in the daily pages of the Nautical almanac. This table is basically identical with the official one.
 \subsubsection*{DIP}
-The DIP table corrects for hight of eye over the surface. This value has to be subtracted from the sextant altitude ($H_s$). The  correction in degrees for hight of eye in meters is given by the following formula: 
+The DIP table corrects for height of eye over the surface. This value has to be subtracted from the sextant altitude ($H_s$). The  correction in degrees for height of eye in meters is given by the following formula: 
 \[d=0.0293\sqrt{m}\]
 This is the first correction (apart from index error) that has to be applied to the measured altitude.
 \subsubsection*{Refraction}
-The next correction is for refraction in the earths atmosphere. As usual this table is correct for 10°C and a pressure of 1010hPa. This correction has to be applied to apparent altitude ($H_a$). The exat values can be calculated by the following formula.
+The next correction is for refraction in the earth's atmosphere. As usual this table is correct for 10$^\circ$C and a pressure of 1010 hPa. This correction has to be applied to apparent altitude ($H_a$). The exact values can be calculated by the following formula.
 \[R_0=\cot \left( H_a + \frac{7.31}{H_a+4.4}\right)\]
-For other than standard conditions calculate a correction factor for $R_0$ by: \[f=\frac{0.28P}{T+273}\] where $P$ is the pressure in hectopascal and $T$ is the temperature in °C. No table is given for this correction so far.
+For other than standard conditions, calculate a correction factor for $R_0$ by: \[f=\frac{0.28P}{T+273}\] where $P$ is the pressure in hectopascal and $T$ is the temperature in $^\circ$C. No table is given for this correction so far.
 \subsubsection*{Parallax}
-For moon sight and if necessary for Mars and Venus a parallax correction is necessary. For Mars and Venus the horizontal parallax ($HP$) is never more than 0.5’ and can be omitted if this kind of precision is not necessary. The parallax ($P$) can be calculated from horizontal parallax ($HP$ ) and observed altitude $H_o$ with the following formula:
-\[P=\cos{HP}\]
-The table for the moon gives the parallax for a horizontal parallax of 54’ which is the lowest value for the moon. For all other values the value in the lower half of the table has to be added. Note that this table is only for parallax and does not correct for refraction and semidiameter. For all moon and sun sights semidiameter has to be added for lower limb sight and subtracted for upper limb sights. The value for HP and semidiameter is tabulated in the daily pages. The smaler parallax table is for parallax of Venus and Mars.
+For moon sight (and if necessary for Mars and Venus) a parallax correction is necessary. For Mars and Venus the horizontal parallax ($HP$) is never more than 0.5' and can be omitted if this kind of precision is not necessary. The parallax ($P$) can be calculated from horizontal parallax ($HP$) and observed altitude $H_o$ with the following formula:
+\[P=\cos({HP})\]
+The table for the moon gives the parallax for a horizontal parallax of 54' which is the lowest value for the moon. For all other values, the value in the lower half of the table has to be added. Note that this table is only for parallax and does not correct for refraction and semidiameter. For all moon and sun sights, semidiameter has to be added for lower limb sights and subtracted for upper limb sights. The value for HP and semidiameter is tabulated in the daily pages. The smaller parallax table is for parallax of Venus and Mars.
 \subsubsection*{Altitude correction}
 To correct your sextant altitude $H_s$ do the following:
 Calculate $H_a$ by
- \[H_a= H_s+I-dip\] 
-Where $I$ is the sextants index error. Than calculate the observed altitude $H_o$ by
+ \[H_a= H_s+I-d\] 
+Where $I$ is the sextant's index error and $d$ is DIP. Then calculate the observed altitude $H_o$ by
 \[H_o= H_a-R+P\pm SD\]
 where $R$ is refraction, $P$ is parallax and $SD$ is the semidiameter.
-\subsubsection*{Sight reduktion}
-Sight reduction tables can be downloaded for the US governments internet pages. Search for HO-229 or HO-249.  These values can also be calculated with to, relatively simple, formulas
+\subsubsection*{Sight reduction}
+Sight reduction tables can be downloaded from the US government's internet pages. Search for HO-229 or HO-249.  These values can also be calculated with two, relatively simple, formulas:
 \[ \sin H_c= \sin L \sin d + \cos L \cos d \cos LHA\]
 and
 \[\cos A = \frac{\sin d - \sin L \sin H_c}{\cos L \cos H_c}\]
 where $A$ is the azimuth angle, $L$ is the latitude, $d$ is the declination and $LHA$ is the local hour angle. The azimuth ($Z_n$) is given by the following rule:
 \begin{itemize}
-      \item if the $LHA$ is greater than 180°, $Z_n=A$
-      \item if the $LHA$ is less than 180°, $Z_n = 360^\circ - A$
+      \item if the $LHA$ is greater than $180^\circ$,\quad$Z_n=A$
+      \item if the $LHA$ is less than $180^\circ$,\quad$Z_n = 360^\circ - A$
 \end{itemize}
 
 	\end{multicols} \end{document}'''
 	return lx
-    
+
 if sys.version_info[0] != 3:
-    raise Exception("Must be using Python 3")
+    raise Exception("This runs with Python 3")
 
 fn = "inc"
 filename = fn + ".tex"
 outfile = open(filename, mode="w", encoding="utf8")
 outfile.write(makelatex())
 outfile.close()
-command = 'pdflatex %s' %filename
+command = 'pdflatex {}'.format(filename)
 os.system(command)
 print("finished")
 os.remove(fn + ".tex")

@@ -32,7 +32,7 @@ ephem_venus   = ephem.Venus()
 ephem_mars    = ephem.Mars()
 ephem_jupiter = ephem.Jupiter()
 ephem_saturn  = ephem.Saturn()
-degree_sign= u'\N{DEGREE SIGN}'
+#degree_sign= u'\N{DEGREE SIGN}'
 
 #----------------------
 #   internal methods
@@ -51,7 +51,7 @@ def hhmm(date):
         if hr == 24:
             hr = 0
 #            nextday = True	# time rounded up into next day
-    time = u'%02d:%02d' %(hr,min)
+    time = '{:02d}:{:02d}'.format(hr,min)    # time = "%02d:%02d" %(hr,min)
 #    return time, nextday
     # NOTE: this function could easily return the information that rounding
     #       flipped into the next day, however this is not required here.
@@ -74,12 +74,12 @@ def nadeg(rad, fixedwidth=1):
         if di == 360:
             di = 0
     if fixedwidth == 2:
-        gm = u"%s%02i°%04.1f" %(theminus,di,mf)
+        gm = "{}{:02d}$^\circ${:04.1f}".format(theminus,di,mf)
     else:
         if fixedwidth == 3:
-            gm = u"%s%03i°%04.1f" %(theminus,di,mf)
+            gm = "{}{:03d}$^\circ${:04.1f}".format(theminus,di,mf)
         else:
-            gm = u"%s%s°%04.1f" %(theminus,di,mf)
+            gm = "{}{}$^\circ${:04.1f}".format(theminus,di,mf)
     return gm
 
 def flag_msg(msg):
@@ -120,7 +120,7 @@ def sunmoon(date):          # used in suntab(m), sunmoontab(m)
     
     #calculate the moons horizontal paralax
     deg = ephem.degrees(ephem_moon.radius/0.272805950305)
-    hp = u"%0.1f'" %(deg*360*30/ephem.pi)
+    hp = "{:0.1f}'".format(deg*360*30/ephem.pi)
     
     #calculate v and d by advancing the time with one hour.
     ephem_moon.compute(date-0.5*ephem.hour,epoch=date-0.5*ephem.hour)
@@ -131,9 +131,9 @@ def sunmoon(date):          # used in suntab(m), sunmoontab(m)
     obs.date = date + 0.5 * ephem.hour
     rghap = ephem.degrees(obs.sidereal_time()-ephem_moon.g_ra).norm
     deg = ephem.degrees(ephem.degrees(rghap-rgha).norm-ephem.degrees('14:19:00'))
-    vm = u"%0.1f'" %(deg*360*30/ephem.pi)
+    vm = "{:0.1f}'".format(deg*360*30/ephem.pi)
     deg = ephem.degrees(ephem_moon.g_dec-rdec)
-    dm = u"%0.1f'" %(deg*360*30/ephem.pi)
+    dm = "{:0.1f}'".format(deg*360*30/ephem.pi)
     
     # degs, degm have been added for the sunmooontab function
     return ghas,decs,gham,vm,decm,dm,hp,degs,degm
@@ -150,13 +150,13 @@ def sun_moon_SD(date):      # used in suntab(m), sunmoontab(m)
     ephem_sun.compute(date+ephem.hour)
     obs.date = date+ephem.hour
     deg = ephem.degrees(ephem_sun.g_dec-dec)
-    ds = u"%0.1f" %(deg*360*30/ephem.pi)
-    sds = u"%0.1f" %(ephem_sun.radius*360*30/ephem.pi)
+    ds = "{:0.1f}".format(deg*360*30/ephem.pi)
+    sds = "{:0.1f}".format(ephem_sun.radius*360*30/ephem.pi)
     
     #Moon
     # compute semi-diameter of moon (in minutes)
     ephem_moon.compute(date)
-    sdm = u"%0.1f" %(ephem_moon.radius*360*30/ephem.pi)
+    sdm = "{:0.1f}".format(ephem_moon.radius*360*30/ephem.pi)
     
     return ds,sds,sdm
 
@@ -227,10 +227,10 @@ def vdm_planets(date):      # used in planetstab(m)
     obs.date = date+ephem.hour
     ghap = ephem.degrees(obs.sidereal_time()-ephem_venus.g_ra).norm
     deg = ephem.degrees(ghap-gha).norm-ephem.degrees('15:00:00')
-    vvenus = u"%0.1f" %(deg*360*30/ephem.pi)
+    vvenus = "{:0.1f}".format(deg*360*30/ephem.pi)
     deg = ephem.degrees(ephem_venus.g_dec-dec)
-    dvenus = u"%0.1f" %(deg*360*30/ephem.pi)
-    mvenus = u"%0.1f" %(ephem_venus.mag)
+    dvenus = "{:0.1f}".format(deg*360*30/ephem.pi)
+    mvenus = "{:0.1f}".format(ephem_venus.mag)
     
     #Mars
     obs.date = date
@@ -241,10 +241,10 @@ def vdm_planets(date):      # used in planetstab(m)
     obs.date = date+ephem.hour
     ghap = ephem.degrees(obs.sidereal_time()-ephem_mars.g_ra).norm
     deg = ephem.degrees(ephem.degrees(ghap-gha).norm-ephem.degrees('15:00:00'))
-    vmars = u"%0.1f" %(deg*360*30/ephem.pi)
+    vmars = "{:0.1f}".format(deg*360*30/ephem.pi)
     deg = ephem.degrees(ephem_mars.g_dec-dec)
-    dmars = u"%0.1f" %(deg*360*30/ephem.pi)
-    mmars = u"%0.1f" %(ephem_mars.mag)
+    dmars = "{:0.1f}".format(deg*360*30/ephem.pi)
+    mmars = "{:0.1f}".format(ephem_mars.mag)
     
     #Jupiter
     obs.date = date
@@ -255,10 +255,10 @@ def vdm_planets(date):      # used in planetstab(m)
     obs.date = date+ephem.hour
     ghap = ephem.degrees(obs.sidereal_time()-ephem_jupiter.g_ra).norm
     deg = ephem.degrees(ephem.degrees(ghap-gha).norm-ephem.degrees('15:00:00'))
-    vjup = u"%0.1f" %(deg*360*30/ephem.pi)
+    vjup = "{:0.1f}".format(deg*360*30/ephem.pi)
     deg = ephem.degrees(ephem_jupiter.g_dec-dec)
-    djup = u"%0.1f" %(deg*360*30/ephem.pi)
-    mjup = u"%0.1f" %(ephem_jupiter.mag)
+    djup = "{:0.1f}".format(deg*360*30/ephem.pi)
+    mjup = "{:0.1f}".format(ephem_jupiter.mag)
     
     #Saturn
     obs.date = date
@@ -269,10 +269,10 @@ def vdm_planets(date):      # used in planetstab(m)
     obs.date = date+ephem.hour
     ghap = ephem.degrees(obs.sidereal_time()-ephem_saturn.g_ra).norm
     deg = ephem.degrees(ephem.degrees(ghap-gha).norm-ephem.degrees('15:00:00'))
-    vsat = u"%0.1f" %(deg*360*30/ephem.pi)
+    vsat = "{:0.1f}".format(deg*360*30/ephem.pi)
     deg = ephem.degrees(ephem_saturn.g_dec-dec)
-    dsat = u"%0.1f" %(deg*360*30/ephem.pi)
-    msat = u"%0.1f" %(ephem_saturn.mag)
+    dsat = "{:0.1f}".format(deg*360*30/ephem.pi)
+    msat = "{:0.1f}".format(ephem_saturn.mag)
     
     return vvenus,dvenus,mvenus,vmars,dmars,mmars,vjup,djup,mjup,vsat,dsat,msat
 
@@ -302,13 +302,13 @@ def planetstransit(date):   # used in starstab
     ephem_venus.compute(date)
     vsha = nadeg(2*math.pi-ephem.degrees(ephem_venus.g_ra).norm)
     vtrans = hhmm(obs.next_transit(ephem_venus))
-    hpvenus = u"%0.1f" %((math.tan(6371/(ephem_venus.earth_distance*149597870.7)))*60*180/math.pi)
+    hpvenus = "{:0.1f}".format((math.tan(6371/(ephem_venus.earth_distance*149597870.7)))*60*180/math.pi)
     
     obs.date = date
     ephem_mars.compute(date)
     marssha = nadeg(2*math.pi-ephem.degrees(ephem_mars.g_ra).norm)
     marstrans = hhmm(obs.next_transit(ephem_mars))
-    hpmars = u"%0.1f" %((math.tan(6371/(ephem_mars.earth_distance*149597870.7)))*60*180/math.pi)
+    hpmars = "{:0.1f}".format((math.tan(6371/(ephem_mars.earth_distance*149597870.7)))*60*180/math.pi)
 
     obs.date = date
     ephem_jupiter.compute(date)
@@ -418,7 +418,7 @@ def twilight(date, lat, hemisph):   # used in twilighttab (section 1)
     mth = ephem.date(date).triple()[1]
     out = [0,0,0,0,0,0,0]
     obs = ephem.Observer()
-    latitude = ephem.degrees('%s:00:00.0' %lat)
+    latitude = ephem.degrees('{}:00:00.0'.format(lat))
     obs.lat = latitude
     d = ephem.date(date - 30 * ephem.second)    # search from 30 seconds before midnight
     obs.date = d
@@ -494,7 +494,7 @@ def getsunstate(d, lat, h):
     # note: the first parameter 'd' is an ephem date at midnight
     # note: getsunstate is called when there is neither a sunrise nor a sunset on 'd'
     i = config.lat.index(lat)
-    latitude = ephem.degrees('%s:00:00.0' %lat)
+    latitude = ephem.degrees('{}:00:00.0'.format(lat))
     obs = ephem.Observer()
     #d = ephem.date(date - 30 * ephem.second)
     obs.pressure = 0
@@ -530,7 +530,7 @@ def getsunstate(d, lat, h):
         sunup = True
         #sunvisible[i][h] = True
     except Exception:
-        flag_msg("Oops! sun nextR %s: %s occured, line: %s" %(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+        flag_msg("Oops! sun nextR {}: {} occured, line: {}".format(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
         #sys.exc_clear()		# only in Python 2
 
     obs.date = d
@@ -548,7 +548,7 @@ def getsunstate(d, lat, h):
             sunup = True
             #sunvisible[i][h] = True
         except Exception:
-            flag_msg("Oops! sun nextS %s: %s occured, line: %s" %(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            flag_msg("Oops! sun nextS {}: {} occured, line: {}".format(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
             #sys.exc_clear()		# only in Python 2
 
     if not(err):	# note - "err == True" *is* expected...
@@ -558,7 +558,7 @@ def getsunstate(d, lat, h):
         if nextrising > nextsetting:
             sunup = True
             #sunvisible[i][h] = True
-        #print("%s" %i, nextrising, nextsetting, sunvisible[i][h])
+        #print("{}".format(i), nextrising, nextsetting, sunvisible[i][h])
 
     # return the current sunstate
     out = '--:--'
@@ -577,12 +577,12 @@ def midnightsun(mth, hemisph):
     sunup = False
     if mth > 3 and mth < 10:    # if April to September inclusive
         sunup = True
-    if hemisph == u'S':
+    if hemisph == 'S':
         sunup = not(sunup)
     if sunup == True:
-        out = r'\begin{tikzpicture}\draw (0,0) rectangle (12pt,4pt);\end{tikzpicture}'
+        out = r'''\begin{tikzpicture}\draw (0,0) rectangle (12pt,4pt);\end{tikzpicture}'''
     else:
-        out = r'\rule{12Pt}{4Pt}'
+        out = r'''\rule{12Pt}{4Pt}'''
     return out
 
 #-------------------------
@@ -603,7 +603,7 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
     out2 = ['--:--','--:--','--:--','--:--','--:--','--:--']	# second event on same day (rare)
 
     obs = ephem.Observer()
-    latitude = ephem.degrees('%s:00:00.0' %lat)
+    latitude = ephem.degrees('{}:00:00.0'.format(lat))
     obs.lat = latitude
     obs.pressure = 0
     obs.horizon = '-0:34'
@@ -611,7 +611,7 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
     obs.date = d
     m = ephem.Moon(obs)
     m.compute(d)
-
+#-----------------------------------------------------------
     # Moonrise/Moonset on 1st. day ...
     try:
         firstrising = obs.next_rising(m)
@@ -628,7 +628,7 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         try:
             nextr = obs.next_rising(m, start=firstrising)
             if nextr-obs.date < 1:
-                out2[0] = hhmm(nextr)	# note: overflow to 00:00 next day is correct here
+                out2[0] = hhmm(nextr)   # note: overflow to 00:00 next day is correct here
                 lastevent = nextr
         except UnboundLocalError:
             pass
@@ -637,7 +637,7 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         except ephem.AlwaysUpError:
             pass
         except Exception:
-            flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            flag_msg("Oops! {} occured, line: {}".format(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
             #sys.exc_clear()		# only in Python 2
 
     obs.date = d
@@ -666,7 +666,7 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         except ephem.AlwaysUpError:
             pass
         except Exception:
-            flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            flag_msg("Oops! {} occured, line: {}".format(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
             #sys.exc_clear()		# only in Python 2
 
     if out[0] == '--:--' and out[3] == '--:--':	# if neither moonrise nor moonset...
@@ -703,7 +703,7 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         except ephem.AlwaysUpError:
             pass
         except Exception:
-            flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            flag_msg("Oops! {} occured, line: {}".format(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
             #sys.exc_clear()		# only in Python 2
 
     obs.date = d
@@ -732,7 +732,7 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         except ephem.AlwaysUpError:
             pass
         except Exception:
-            flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            flag_msg("Oops! {} occured, line: {}".format(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
             #sys.exc_clear()		# only in Python 2
 
     if out[1] == '--:--' and out[4] == '--:--':	# if neither moonrise nor moonset...
@@ -769,7 +769,7 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         except ephem.AlwaysUpError:
             pass
         except Exception:
-            flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            flag_msg("Oops! {} occured, line: {}".format(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
             #sys.exc_clear()		# only in Python 2
 
     obs.date = d
@@ -798,7 +798,7 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         except ephem.AlwaysUpError:
             pass
         except Exception:
-            flag_msg("Oops! %s occured, line: %s" %(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            flag_msg("Oops! {} occured, line: {}".format(sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
             #sys.exc_clear()		# only in Python 2
 
     if out[2] == '--:--' and out[5] == '--:--':	# if neither moonrise nor moonset...
@@ -816,7 +816,7 @@ def getmoonstate(d, lat):
     # note: getmoonstate is called when there is neither a moonrise nor a moonset on 'd'
 
     i = config.lat.index(lat)
-    latitude = ephem.degrees('%s:00:00.0' %lat)
+    latitude = ephem.degrees('{}:00:00.0'.format(lat))
     obs = ephem.Observer()
     #d = ephem.date(date - 30 * ephem.second)
     obs.pressure = 0
@@ -840,7 +840,7 @@ def getmoonstate(d, lat):
         #print("nr AlwaysUp")
         moonvisible[i] = True
     except Exception:
-        flag_msg("Oops! moon nextR %s: %s occured, line: %s" %(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+        flag_msg("Oops! moon nextR {}: {} occured, line: {}".format(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
         #sys.exc_clear()		# only in Python 2
 
     obs.date = d
@@ -856,7 +856,7 @@ def getmoonstate(d, lat):
             #print("ns AlwaysUp")
             moonvisible[i] = True
         except Exception:
-            flag_msg("Oops! moon nextS %s: %s occured, line: %s" %(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            flag_msg("Oops! moon nextS {}: {} occured, line: {}".format(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
             #sys.exc_clear()		# only in Python 2
 
     if not(err):	# note - "err == True" *is* expected...
@@ -864,7 +864,7 @@ def getmoonstate(d, lat):
         moonvisible[i] = False
         if nextrising > nextsetting:
             moonvisible[i] = True
-        #print("%s" %i, nextrising, nextsetting, moonvisible[i])
+        #print("{}".format(i), nextrising, nextsetting, moonvisible[i])
     return
 
 ##NEW##
@@ -872,14 +872,14 @@ def moonstate(ndx):
     # return the current moonstate (if known)
     out = '--:--'
     if moonvisible[ndx] == True:
-        #out = u'UP'
+        #out = 'UP'
         #out = r'\framebox(12,4){}'
         #out = r'{\setlength{\fboxrule}{0.8pt}\setlength{\fboxsep}{0pt}\fbox{\makebox(12,4){}}}'
         #out = r'{\setlength{\fboxrule}{0.8pt}\fbox{\parbox[c][0pt]{0pt}{ }}}'
         #out = r'\includegraphics[scale=1.0]{./moonup.jpg}'
         out = r'\begin{tikzpicture}\draw (0,0) rectangle (12pt,4pt);\end{tikzpicture}'
     if moonvisible[ndx] == False:
-        #out = u'DOWN'
+        #out = 'DOWN'
         out = r'\rule{12Pt}{4Pt}'
     return out
 

@@ -22,6 +22,7 @@
 
 tbls = ''		# table style (global variable)
 decf = ''		# Declination format (global variable)
+pgsz = 'A4'     # page size 'A4' or 'Letter' (global variable)
 logfileopen = False
 search_next_rising_sun = True   # 'False' = base it only on month and hemisphere
 
