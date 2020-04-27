@@ -57,7 +57,7 @@ the [old](https://docs.python.org/2/library/stdtypes.html#string-formatting) sty
 &nbsp;&nbsp;&nbsp;&nbsp;**py -3 pyalmanac.py**
 
 
-### INSTALLATION GUIDELINES on Ubuntu 19.10:
+### INSTALLATION GUIDELINES on Ubuntu 19.10 or 20.04:
 
 &nbsp;&nbsp;&nbsp;&nbsp;Ubuntu 19 and higher come with Python 3 preinstalled,  
 &nbsp;&nbsp;&nbsp;&nbsp;however pip may need to be installed:  
