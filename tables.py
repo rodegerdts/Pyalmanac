@@ -844,7 +844,7 @@ def almanac(first_day, pagenum):
         if config.tbls == "m":
             tm = "10mm"
             bm = "15mm"
-            lm = "11mm"
+            lm = "10mm"
             rm = "10mm"
     else:
         paper = "letterpaper"
