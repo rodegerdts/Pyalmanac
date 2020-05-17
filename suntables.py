@@ -274,7 +274,7 @@ def NSdecl(deg, hr, printNS, printDEG, modernFMT):
 def page(date):
     # creates a page(15 days) of the Sun almanac
     page = r'''
-%% ------------------ N E W   P A G E ------------------
+% ------------------ N E W   P A G E ------------------
 \newpage
 \sffamily
 \noindent
