@@ -1,5 +1,28 @@
 # Pyalmanac (Python 3 version)
 
+**'End of Life' ANNOUNCEMENT**
+
+Pyalmanac is nearing the end of its useful days. Almanacs generated after the next few
+years should not be used for navigational purposes. SFalmanac (or Skyalmanac with
+some restrictions regarding the accuracy of sunset/twilight/sunrise and moonrise/moonset)
+are the new norm as these are based on the more accurate algorithms currently employed
+in the NASA JPL HORIZONS System (the same algorithms are implemented in Skyfield).
+
+Pyalmanac is implemented using PyEphem, which in turn uses XEphem that is based on the
+VSOP87D algorithms. XEphem is also 'end of life' as no further updates are planned,
+however the major discrepancies are related to the projected speed of Earth's rotation.
+The discrepancies in GHA between PyEphem and Skyfield can be summarized thus:
+
+* in 2020:&nbsp;&nbsp; 00.1 to 00.3 arcMINUTES GHA too high
+* in 2030:&nbsp;&nbsp; 02.3 to 02.9 arcMINUTES GHA too high
+* in 2050:&nbsp;&nbsp; 12.7 to 13.3 arcMINUTES GHA too high
+* in 2100:&nbsp;&nbsp; 38.9 to 39.5 arcMINUTES GHA too high
+* in 2200:&nbsp;&nbsp; 93.2 to 93.8 arcMINUTES GHA too high
+
+The GHA discrepancy applies to the sun, moon, the First Point of Aries and all planets.
+
+**Description**
+
 Pyalmanac is a **Python 3** script that creates the daily pages of the Nautical Almanac. These are tables that are needed for celestial navigation with a sextant. Although you are strongly advised to purchase the official Nautical Almanac, this program will reproduce the tables with no warranty or guarantee of accuracy.
 
 This version of Pyalmanac was developed by Andrew Bauer based on the original Pyalmanac by Enno Rodegerdts. Various improvements, enhancements and bugfixes have been included. 
@@ -19,7 +42,7 @@ Two versions (other than Pyalmanac) are available here: https://github.com/aendi
 
 * **Pyalmanac** is the fastest with "somewhat limited" accuracy that is sufficient for nautical navigation.  
 * **SFalmanac** is the slowest and most accurate; almost entirely based on *Skyfield*. *PyEphem* is only used for planet magnitudes (because these are not in *Skyfield*).  
-* **Skyalmanac** is a hybrid version that is significantly faster than SFalmanac. *PyEphem* is used for planet magnitudes and for all planet transits, sunrise and sunset calculations as well as moonrise and moonset.  
+* **Skyalmanac** is a hybrid version that is significantly faster than SFalmanac. *PyEphem* is used for planet magnitudes and for all planet transits, sunrise, twilight and sunset calculations as well as moonrise and moonset.  
 
 PyEphem  website: https://rhodesmill.org/pyephem/  
 Skyfield website: https://rhodesmill.org/skyfield/
@@ -28,6 +51,10 @@ Skyfield website: https://rhodesmill.org/skyfield/
 
 A new parameter in *config.py* enables one to choose between A4 and Letter-sized pages. A [new approach](https://docs.python.org/3/whatsnew/3.0.html#pep-3101-a-new-approach-to-string-formatting) to string formatting has been implemented:
 the [old](https://docs.python.org/2/library/stdtypes.html#string-formatting) style Python string formatting syntax has been replaced by the [new](https://docs.python.org/3/library/string.html#format-string-syntax) style string formatting syntax. 
+
+**UPDATE: Jun 2020**
+
+The Equation Of Time is shaded whenever EoT is negative indicating that apparent solar time is slow compared to mean solar time (mean solar time > apparent solar time).
 
 ## Requirements
 

@@ -927,10 +927,17 @@ def equation_of_time(date): # used in twilighttab (section 3)
     ephem_sun.compute(date-0.1)
     obs.date = date-0.1
 
-    eqt00 = ephem.hours(round((obs.next_antitransit(ephem_sun)-date)*86400)*2*math.pi/86400)
+    # round to the second; convert back to days
+    x = round((obs.next_antitransit(ephem_sun)-date)*86400)*2*math.pi/86400
+    eqt00 = ephem.hours(x)
     eqt00 = str(eqt00)[-8:-3]
+    if x >= 0:
+        eqt00 = r"\colorbox{{lightgray!80}}{{{}}}".format(eqt00)
 
-    eqt12 = ephem.hours(round((obs.next_transit(ephem_sun)-(date+0.5))*86400)*2*math.pi/86400)
+    y = round((obs.next_transit(ephem_sun)-(date+0.5))*86400)*2*math.pi/86400
+    eqt12 = ephem.hours(y)
     eqt12 = str(eqt12)[-8:-3]
+    if y >= 0:
+        eqt12 = r"\colorbox{{lightgray!80}}{{{}}}".format(eqt12)
 
     return eqt00,eqt12,transs,transm,antim,age,pct

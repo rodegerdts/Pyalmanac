@@ -892,6 +892,7 @@ def almanac(first_day, pagenum):
 %\showboxbreadth=50  % use for logging
 %\showboxdepth=50    % use for logging
 %\DeclareUnicodeCharacter{00B0}{\ensuremath{{}^\circ}}
+\setlength\fboxsep{1.5pt}       % ONLY used by \colorbox in alma_ephem.py
 \begin{document}'''
 
     alm = alm + r'''
