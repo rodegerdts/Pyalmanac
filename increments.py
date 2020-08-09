@@ -305,8 +305,8 @@ The next correction is for refraction in the earth's atmosphere. As usual this t
 \[R_0=\cot \left( H_a + \frac{7.31}{H_a+4.4}\right)\]
 For other than standard conditions, calculate a correction factor for $R_0$ by: \[f=\frac{0.28P}{T+273}\] where $P$ is the pressure in hectopascal and $T$ is the temperature in $^\circ$C. No table is given for this correction so far.
 \subsubsection*{Parallax}
-For moon sight (and if necessary for Mars and Venus) a parallax correction is necessary. For Mars and Venus the horizontal parallax ($HP$) is never more than 0.5' and can be omitted if this kind of precision is not necessary. The parallax ($P$) can be calculated from horizontal parallax ($HP$) and observed altitude $H_o$ with the following formula:
-\[P=\cos({HP})\]
+For moon sight (and if necessary for Mars and Venus) a parallax correction is necessary. For Mars and Venus the horizontal parallax ($HP$) is never more than 0.5' and can be omitted if this kind of precision is not necessary. The parallax ($P$) can be calculated from horizontal parallax ($HP$) and apparent altitude $H_a$ with the following formula:
+\[P={HP} \times \cos(H_a)\]
 The table for the moon gives the parallax for a horizontal parallax of 54' which is the lowest value for the moon. For all other values, the value in the lower half of the table has to be added. Note that this table is only for parallax and does not correct for refraction and semidiameter. For all moon and sun sights, semidiameter has to be added for lower limb sights and subtracted for upper limb sights. The value for HP and semidiameter is tabulated in the daily pages. The smaller parallax table is for parallax of Venus and Mars.
 \subsubsection*{Altitude correction}
 To correct your sextant altitude $H_s$ do the following:
