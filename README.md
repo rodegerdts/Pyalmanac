@@ -65,6 +65,11 @@ The Equation Of Time is shaded whenever EoT is negative indicating that apparent
 * PyEphem
 * TeX/LaTeX&nbsp;&nbsp;or&nbsp;&nbsp;MiKTeX&nbsp;&nbsp;or&nbsp;&nbsp;TeX Live
 
+## Files required in the execution folder:
+
+* &ast;.py
+* Ra.jpg
+* A4chartNorth_P.pdf
 
 ### INSTALLATION GUIDELINES on Windows 10:
 
