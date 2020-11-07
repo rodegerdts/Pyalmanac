@@ -11,13 +11,13 @@ in the NASA JPL HORIZONS System (the same algorithms are implemented in Skyfield
 Pyalmanac is implemented using PyEphem, which in turn uses XEphem that is based on the
 VSOP87D algorithms. XEphem is also 'end of life' as no further updates are planned,
 however the major discrepancies are related to the projected speed of Earth's rotation.
-The discrepancies in GHA between PyEphem and Skyfield can be summarized thus:
+The discrepancies in GHA between PyEphem and Skyfield 1.31 can be summarized thus:
 
-* in 2020:&nbsp;&nbsp; 00.1 to 00.3 arcMINUTES GHA too high
-* in 2030:&nbsp;&nbsp; 02.3 to 02.9 arcMINUTES GHA too high
-* in 2050:&nbsp;&nbsp; 12.7 to 13.3 arcMINUTES GHA too high
-* in 2100:&nbsp;&nbsp; 38.9 to 39.5 arcMINUTES GHA too high
-* in 2200:&nbsp;&nbsp; 93.2 to 93.8 arcMINUTES GHA too high
+* in 2020:&nbsp;&nbsp; 00.0 to 00.1 arcMINUTES GHA too high
+* in 2030:&nbsp;&nbsp; 04.0 to 04.8 arcMINUTES GHA too high
+* in 2050:&nbsp;&nbsp; 13.9 to 14.9 arcMINUTES GHA too high
+* in 2100:&nbsp;&nbsp; 38.0 to 40.2 arcMINUTES GHA too high
+* in 2200:&nbsp;&nbsp; 90.1 to 94.1 arcMINUTES GHA too high
 
 The GHA discrepancy applies to the sun, moon, the First Point of Aries and all planets.
 
