@@ -62,7 +62,7 @@ The Equation Of Time is shaded whenever EoT is negative indicating that apparent
 &nbsp;&nbsp;&nbsp;&nbsp;Typesetting is done by MiKTeX or TeX Live so you first need to install:
 
 * Python v3.4 or higher (the latest version is recommended)
-* PyEphem
+* Ephem
 * TeX/LaTeX&nbsp;&nbsp;or&nbsp;&nbsp;MiKTeX&nbsp;&nbsp;or&nbsp;&nbsp;TeX Live
 
 ## Files required in the execution folder:
@@ -73,17 +73,18 @@ The Equation Of Time is shaded whenever EoT is negative indicating that apparent
 
 ### INSTALLATION GUIDELINES on Windows 10:
 
-&nbsp;&nbsp;&nbsp;&nbsp;Install Python 3.8 (add python.exe to path)  
-&nbsp;&nbsp;&nbsp;&nbsp;Install MiKTeX 2.9 from https://miktex.org/  
+&nbsp;&nbsp;&nbsp;&nbsp;Install Python 3.9 (add python.exe to path)  
+&nbsp;&nbsp;&nbsp;&nbsp;Install MiKTeX 20.11 from https://miktex.org/  
 &nbsp;&nbsp;&nbsp;&nbsp;When MiKTeX first runs it will require installation of additional packages.  
 &nbsp;&nbsp;&nbsp;&nbsp;Run Command Prompt as Administrator, go to your Python folder and execute, e.g.:
 
-&nbsp;&nbsp;&nbsp;&nbsp;**cd C:\\Python38-32**  
-&nbsp;&nbsp;&nbsp;&nbsp;**pip install --upgrade pip**  
+&nbsp;&nbsp;&nbsp;&nbsp;**cd C:\\Python39**  
+&nbsp;&nbsp;&nbsp;&nbsp;**pip3 install --upgrade pip**  
 &nbsp;&nbsp;&nbsp;&nbsp;... for a first install:  
-&nbsp;&nbsp;&nbsp;&nbsp;**pip install pyephem**  
+&nbsp;&nbsp;&nbsp;&nbsp;**pip3 uninstall pyephem**  
+&nbsp;&nbsp;&nbsp;&nbsp;**pip3 install ephem**  
 &nbsp;&nbsp;&nbsp;&nbsp;... if already installed, check for upgrade explicitly:  
-&nbsp;&nbsp;&nbsp;&nbsp;**pip install --upgrade pyephem**  
+&nbsp;&nbsp;&nbsp;&nbsp;**pip3 install --upgrade ephem**  
 
 &nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in a new folder, run Command Prompt and start with:  
 &nbsp;&nbsp;&nbsp;&nbsp;**py -3 pyalmanac.py**
@@ -99,7 +100,8 @@ The Equation Of Time is shaded whenever EoT is negative indicating that apparent
 &nbsp;&nbsp;&nbsp;&nbsp;**sudo apt install texlive-latex-extra**
 
 &nbsp;&nbsp;&nbsp;&nbsp;Install the required astronomical library:  
-&nbsp;&nbsp;&nbsp;&nbsp;**pip3 install pyephem**
+&nbsp;&nbsp;&nbsp;&nbsp;**pip3 uninstall pyephem**  
+&nbsp;&nbsp;&nbsp;&nbsp;**pip3 install ephem**
 
 &nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in a folder and start with:  
 &nbsp;&nbsp;&nbsp;&nbsp;**python3 pyalmanac.py**  
@@ -113,7 +115,8 @@ The Equation Of Time is shaded whenever EoT is negative indicating that apparent
 &nbsp;&nbsp;&nbsp;&nbsp;Type the following commands at the commandline (terminal app):
 
 &nbsp;&nbsp;&nbsp;&nbsp;**sudo easy_install pip**  
-&nbsp;&nbsp;&nbsp;&nbsp;**pip install pyephem**
+&nbsp;&nbsp;&nbsp;&nbsp;**pip uninstall pyephem**  
+&nbsp;&nbsp;&nbsp;&nbsp;**pip install ephem**  
 
 &nbsp;&nbsp;&nbsp;&nbsp;If this command fails, your Mac asks you if you would like to install the header files.  
 &nbsp;&nbsp;&nbsp;&nbsp;Do so - you do not need to install the full IDE - and try again.
