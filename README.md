@@ -73,13 +73,14 @@ The Equation Of Time is shaded whenever EoT is negative indicating that apparent
 
 ### INSTALLATION GUIDELINES on Windows 10:
 
-&nbsp;&nbsp;&nbsp;&nbsp;Install Python 3.9 (add python.exe to path)  
-&nbsp;&nbsp;&nbsp;&nbsp;Install MiKTeX 20.11 from https://miktex.org/  
+&nbsp;&nbsp;&nbsp;&nbsp;Install Python 3.9.1 (should be in the system environment variable PATH, e.g. )  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**C:\\Python39\Scripts;C:\\Python39;** .....  
+&nbsp;&nbsp;&nbsp;&nbsp;Install MiKTeX 21.1 from https://miktex.org/  
 &nbsp;&nbsp;&nbsp;&nbsp;When MiKTeX first runs it will require installation of additional packages.  
 &nbsp;&nbsp;&nbsp;&nbsp;Run Command Prompt as Administrator, go to your Python folder and execute, e.g.:
 
 &nbsp;&nbsp;&nbsp;&nbsp;**cd C:\\Python39**  
-&nbsp;&nbsp;&nbsp;&nbsp;**pip3 install --upgrade pip**  
+&nbsp;&nbsp;&nbsp;&nbsp;**python.exe -m pip install --upgrade pip**  
 &nbsp;&nbsp;&nbsp;&nbsp;... for a first install:  
 &nbsp;&nbsp;&nbsp;&nbsp;**pip3 uninstall pyephem**  
 &nbsp;&nbsp;&nbsp;&nbsp;**pip3 install ephem**  
@@ -89,6 +90,14 @@ The Equation Of Time is shaded whenever EoT is negative indicating that apparent
 &nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in a new folder, run Command Prompt and start with:  
 &nbsp;&nbsp;&nbsp;&nbsp;**py -3 pyalmanac.py**
 
+&nbsp;&nbsp;&nbsp;&nbsp;If using MiKTeX 21 or higher, running **py -3 increments.py** will probably fail with  
+&nbsp;&nbsp;&nbsp;&nbsp;**! TeX capacity exceeded, sorry [main memory size=3000000].**  
+&nbsp;&nbsp;&nbsp;&nbsp;To resolve this problem (assuming MiKTeX has been installed for all users),  
+&nbsp;&nbsp;&nbsp;&nbsp;open a Command Prompt as Administrator and enter:  
+&nbsp;&nbsp;&nbsp;&nbsp;**initexmf --admin --edit-config-file=pdflatex**  
+&nbsp;&nbsp;&nbsp;&nbsp;This opens **pdflatex.ini** in Notepad. Add the following line:  
+&nbsp;&nbsp;&nbsp;&nbsp;**extra_mem_top = 1000000**  
+&nbsp;&nbsp;&nbsp;&nbsp;and save the file. Problem solved. For more details go [here](https://tex.stackexchange.com/questions/438902/how-to-increase-memory-size-for-xelatex-in-miktex/438911#438911)
 
 ### INSTALLATION GUIDELINES on Ubuntu 19.10 or 20.04:
 
