@@ -8,10 +8,10 @@ some restrictions regarding the accuracy of sunset/twilight/sunrise and moonrise
 are the new norm as these are based on the more accurate algorithms currently employed
 in the NASA JPL HORIZONS System (the same algorithms are implemented in Skyfield).
 
-Pyalmanac is implemented using PyEphem, which in turn uses XEphem that is based on the
+Pyalmanac is implemented using Ephem (originally named PyEphem), which in turn uses XEphem that is based on the
 VSOP87D algorithms. XEphem is also 'end of life' as no further updates are planned,
 however the major discrepancies are related to the projected speed of Earth's rotation.
-The discrepancies in GHA between PyEphem and Skyfield 1.31 can be summarized thus:
+The discrepancies in GHA between Ephem and Skyfield 1.31 can be summarized thus:
 
 * in 2020:&nbsp;&nbsp; 00.0 to 00.1 arcMINUTES GHA too high
 * in 2030:&nbsp;&nbsp; 04.0 to 04.8 arcMINUTES GHA too high
@@ -19,32 +19,32 @@ The discrepancies in GHA between PyEphem and Skyfield 1.31 can be summarized thu
 * in 2100:&nbsp;&nbsp; 38.0 to 40.2 arcMINUTES GHA too high
 * in 2200:&nbsp;&nbsp; 90.1 to 94.1 arcMINUTES GHA too high
 
-The GHA discrepancy applies to the sun, moon, the First Point of Aries and all planets.
+The GHA discrepancy applies to the sun, moon, the First Point of Aries and to all planets.
 
 **Description**
 
 Pyalmanac is a **Python 3** script that creates the daily pages of the Nautical Almanac. These are tables that are needed for celestial navigation with a sextant. Although you are strongly advised to purchase the official Nautical Almanac, this program will reproduce the tables with no warranty or guarantee of accuracy.
 
 This version of Pyalmanac was developed by Andrew Bauer based on the original Pyalmanac by Enno Rodegerdts. Various improvements, enhancements and bugfixes have been included. 
-Pyalmanac contains its own star database (similar to the database in PyEphem 3.7.6), however the accuracy was poor. It is updated with data from the Hipparcos Catalogue and the GHA/Dec data now matches a sample page from a Nautical Almanac typically within 0°0.1'.
+Pyalmanac contains its own star database (similar to the database in Ephem 3.7.6), however the accuracy was poor. It is updated with data from the Hipparcos Star Catalogue and the GHA/Dec star data now matches a sample page from a Nautical Almanac typically to within 0°0.1'.
 
 NOTE: two scripts are included (both can be run): 'pyalmanac.py' and 'increments.py'  
-NOTE: Pyalmanac contains its own star database - it does not use the version supplied with PyEphem, hence updating from 3.7.6 to 3.7.7 is harmless. Star names are chosen to comply with Nautical Almanacs.  
-NOTE: if required, a Python 2.7 script with identical functionality can be found at: https://github.com/aendie/Pyalmanac-Py2  
+NOTE: Pyalmanac contains its own star database - it does not use the version supplied with Ephem, hence updating from 3.7.6 to 3.7.7.1 is harmless. Star names are chosen to comply with Nautical Almanacs.  
+NOTE: if still required, a Python 2.7 script with identical functionality can be found at: https://github.com/aendie/Pyalmanac-Py2  
 
 **ACKNOWLEDGEMENTS**
 
-I, Andrew Bauer, wish to thank Enno Rodegerdts for permission to update his GitHub site. Without Enno's pioneering work on the original Pyalmanac I would never have started (or known how to start) on this journey. I also thank the experts who have helped me... especially Brandon Rhodes, author of PyEphem and Skyfield, for fixing minor issues I identified.  
+I, Andrew Bauer, wish to thank Enno Rodegerdts for permission to update his GitHub site. Without Enno's pioneering work on the original Pyalmanac I would never have started (or known how to start) on this journey. I also thank the experts who have helped me... especially Brandon Rhodes, author of Ephem/PyEphem and Skyfield, for fixing minor issues I identified.  
 
 **AVAILABLE VERSIONS**
 
 Two versions (other than Pyalmanac) are available here: https://github.com/aendie
 
-* **Pyalmanac** is the fastest with "somewhat limited" accuracy that is sufficient for nautical navigation.  
-* **SFalmanac** is the slowest and most accurate; almost entirely based on *Skyfield*. *PyEphem* is only used for planet magnitudes (because these are not in *Skyfield*).  
-* **Skyalmanac** is a hybrid version that is significantly faster than SFalmanac. *PyEphem* is used for planet magnitudes and for all planet transits, sunrise, twilight and sunset calculations as well as moonrise and moonset.  
+* **Pyalmanac** is the fastest with "somewhat limited" accuracy that is sufficient for nautical navigation up to 2020 or so.  
+* **SFalmanac** is the slowest and most accurate; almost entirely based on *Skyfield*. *Ephem* is only used for planet magnitudes (because these are not yet in *Skyfield*).  
+* **Skyalmanac** is a hybrid version that is significantly faster than SFalmanac. *Ephem* is used for planet magnitudes and for all planet transits, sunrise, twilight and sunset calculations as well as for moonrise and moonset.  
 
-PyEphem  website: https://rhodesmill.org/pyephem/  
+Ephem/PyEphem  website: https://rhodesmill.org/pyephem/  
 Skyfield website: https://rhodesmill.org/skyfield/
 
 **UPDATE: Mar 2020**
@@ -58,7 +58,7 @@ The Equation Of Time is shaded whenever EoT is negative indicating that apparent
 
 ## Requirements
 
-&nbsp;&nbsp;&nbsp;&nbsp;Most of the computation is done by the free Pyephem library.  
+&nbsp;&nbsp;&nbsp;&nbsp;Most of the computation is done by the free Ephem library.  
 &nbsp;&nbsp;&nbsp;&nbsp;Typesetting is done by MiKTeX or TeX Live so you first need to install:
 
 * Python v3.4 or higher (the latest version is recommended)
