@@ -20,11 +20,14 @@
 #     with this program; if not, write to the Free Software Foundation, Inc.,
 #     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import ephem
-import math
+# Standard library imports
 import datetime
-import config
+import math
 import sys
+# Third party imports
+import ephem
+# Local application imports
+import config
 
 ephem_sun     = ephem.Sun()
 ephem_moon    = ephem.Moon()

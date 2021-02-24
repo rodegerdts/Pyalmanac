@@ -38,13 +38,16 @@ I, Andrew Bauer, wish to thank Enno Rodegerdts for permission to update his GitH
 
 **AVAILABLE VERSIONS**
 
+**NOTE: the Python Package Index (PyPI) edition is here:** https://pypi.org/project/pyalmanac/  
+**Users are encouraged to install the PyPI edition instead.**  
+
 Two versions (other than Pyalmanac) are available here: https://github.com/aendie
 
-* **Pyalmanac** is the fastest with "somewhat limited" accuracy that is sufficient for nautical navigation up to 2020 or so.  
+* **Pyalmanac** is the fastest with "somewhat limited" accuracy that is sufficient for nautical navigation up to 2022 or so.  
 * **SFalmanac** is the slowest and most accurate; almost entirely based on *Skyfield*. *Ephem* is only used for planet magnitudes (because these are not yet in *Skyfield*).  
 * **Skyalmanac** is a hybrid version that is significantly faster than SFalmanac. *Ephem* is used for planet magnitudes and for all planet transits, sunrise, twilight and sunset calculations as well as for moonrise and moonset.  
 
-Ephem/PyEphem  website: https://rhodesmill.org/pyephem/  
+Ephem website: https://rhodesmill.org/pyephem/  
 Skyfield website: https://rhodesmill.org/skyfield/
 
 **UPDATE: Mar 2020**
@@ -56,14 +59,19 @@ the [old](https://docs.python.org/2/library/stdtypes.html#string-formatting) sty
 
 The Equation Of Time is shaded whenever EoT is negative indicating that apparent solar time is slow compared to mean solar time (mean solar time > apparent solar time).
 
+**UPDATE: Feb 2021**
+
+Minor changes are included here to this original (non-PyPI) edition to reflect some of the adaptation that was required (e.g. integrate *increments.py* into *pyalmanac.py* as Option 5) to create a PyPI (Python Package Index) edition making this original (non-PyPI) and the PyPI editions similar. Both editions create identical almanacs and the [PyPI edition](https://pypi.org/project/pyalmanac/) is the preferred choice for users.
+
 ## Requirements
 
 &nbsp;&nbsp;&nbsp;&nbsp;Most of the computation is done by the free Ephem library.  
-&nbsp;&nbsp;&nbsp;&nbsp;Typesetting is done by MiKTeX or TeX Live so you first need to install:
+&nbsp;&nbsp;&nbsp;&nbsp;Typesetting is typically done by MiKTeX or TeX Live.  
+&nbsp;&nbsp;&nbsp;&nbsp;These need to be installed:
 
 * Python v3.4 or higher (the latest version is recommended)
-* Ephem
-* TeX/LaTeX&nbsp;&nbsp;or&nbsp;&nbsp;MiKTeX&nbsp;&nbsp;or&nbsp;&nbsp;TeX Live
+* Ephem >= 3.7.6
+* MiKTeX&nbsp;&nbsp;or&nbsp;&nbsp;TeX Live
 
 ## Files required in the execution folder:
 
@@ -82,7 +90,7 @@ The Equation Of Time is shaded whenever EoT is negative indicating that apparent
 &nbsp;&nbsp;&nbsp;&nbsp;**cd C:\\Python39**  
 &nbsp;&nbsp;&nbsp;&nbsp;**python.exe -m pip install --upgrade pip**  
 &nbsp;&nbsp;&nbsp;&nbsp;... for a first install:  
-&nbsp;&nbsp;&nbsp;&nbsp;**pip3 uninstall pyephem**  
+&nbsp;&nbsp;&nbsp;&nbsp;**pip3 uninstall pyephem ephem**  
 &nbsp;&nbsp;&nbsp;&nbsp;**pip3 install ephem**  
 &nbsp;&nbsp;&nbsp;&nbsp;... if already installed, check for upgrade explicitly:  
 &nbsp;&nbsp;&nbsp;&nbsp;**pip3 install --upgrade ephem**  
@@ -90,7 +98,7 @@ The Equation Of Time is shaded whenever EoT is negative indicating that apparent
 &nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in a new folder, run Command Prompt and start with:  
 &nbsp;&nbsp;&nbsp;&nbsp;**py -3 pyalmanac.py**
 
-&nbsp;&nbsp;&nbsp;&nbsp;If using MiKTeX 21 or higher, running **py -3 increments.py** will probably fail with  
+&nbsp;&nbsp;&nbsp;&nbsp;If using MiKTeX 21 or higher, executing 'option 5' (Increments and Corrections) will probably fail with  
 &nbsp;&nbsp;&nbsp;&nbsp;**! TeX capacity exceeded, sorry [main memory size=3000000].**  
 &nbsp;&nbsp;&nbsp;&nbsp;To resolve this problem (assuming MiKTeX has been installed for all users),  
 &nbsp;&nbsp;&nbsp;&nbsp;open a Command Prompt as Administrator and enter:  
@@ -109,7 +117,7 @@ The Equation Of Time is shaded whenever EoT is negative indicating that apparent
 &nbsp;&nbsp;&nbsp;&nbsp;**sudo apt install texlive-latex-extra**
 
 &nbsp;&nbsp;&nbsp;&nbsp;Install the required astronomical library:  
-&nbsp;&nbsp;&nbsp;&nbsp;**pip3 uninstall pyephem**  
+&nbsp;&nbsp;&nbsp;&nbsp;**pip3 uninstall pyephem ephem**  
 &nbsp;&nbsp;&nbsp;&nbsp;**pip3 install ephem**
 
 &nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in a folder and start with:  
@@ -120,11 +128,11 @@ The Equation Of Time is shaded whenever EoT is negative indicating that apparent
 
 &nbsp;&nbsp;&nbsp;&nbsp;Every Mac comes with python preinstalled.  
 &nbsp;&nbsp;&nbsp;&nbsp;(Please choose this version of Pyalmanac if Python 3.* is installed.)  
-&nbsp;&nbsp;&nbsp;&nbsp;You need to install the PyEphem library to use Pyalmanac.  
+&nbsp;&nbsp;&nbsp;&nbsp;You need to install the Ephem library to use Pyalmanac.  
 &nbsp;&nbsp;&nbsp;&nbsp;Type the following commands at the commandline (terminal app):
 
 &nbsp;&nbsp;&nbsp;&nbsp;**sudo easy_install pip**  
-&nbsp;&nbsp;&nbsp;&nbsp;**pip uninstall pyephem**  
+&nbsp;&nbsp;&nbsp;&nbsp;**pip uninstall pyephem ephem**  
 &nbsp;&nbsp;&nbsp;&nbsp;**pip install ephem**  
 
 &nbsp;&nbsp;&nbsp;&nbsp;If this command fails, your Mac asks you if you would like to install the header files.  

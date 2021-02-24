@@ -17,9 +17,13 @@
 #     with this program; if not, write to the Free Software Foundation, Inc.,
 #     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import sys
+# Standard library imports
 import os
-from math import *
+import sys
+from math import pi as pi
+from math import cos as cos
+from math import tan as tan
+from math import sqrt as sqrt
 
 def degmin(deg):
     #changes decimal degrees to the format usually used in the nautical almanac. (ddd°mm.m')
@@ -329,17 +333,17 @@ where $A$ is the azimuth angle, $L$ is the latitude, $d$ is the declination and 
 	\end{multicols} \end{document}'''
 	return lx
 
-if sys.version_info[0] != 3:
-    raise Exception("This runs with Python 3")
+#if sys.version_info[0] != 3:
+#    raise Exception("This runs with Python 3")
 
-fn = "inc"
-filename = fn + ".tex"
-outfile = open(filename, mode="w", encoding="utf8")
-outfile.write(makelatex())
-outfile.close()
-command = 'pdflatex {}'.format(filename)
-os.system(command)
-print("finished")
-os.remove(fn + ".tex")
-os.remove(fn + ".log")
-os.remove(fn + ".aux")
+#fn = "inc"
+#filename = fn + ".tex"
+#outfile = open(filename, mode="w", encoding="utf8")
+#outfile.write(makelatex())
+#outfile.close()
+#command = 'pdflatex {}'.format(filename)
+#os.system(command)
+#print("finished")
+#os.remove(fn + ".tex")
+#os.remove(fn + ".log")
+#os.remove(fn + ".aux")
