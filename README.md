@@ -8,28 +8,26 @@ some restrictions regarding the accuracy of sunset/twilight/sunrise and moonrise
 are the new norm as these are based on the more accurate algorithms currently employed
 in the NASA JPL HORIZONS System (the same algorithms are implemented in Skyfield).
 
-Pyalmanac is implemented using Ephem (originally named PyEphem), which in turn uses XEphem that is based on the
-VSOP87D algorithms. XEphem is also 'end of life' as no further updates are planned,
-however the major discrepancies are related to the projected speed of Earth's rotation.
-The discrepancies in GHA between Ephem and Skyfield 1.31 (both UTC-time based) can be summarized thus:
+Pyalmanac is implemented using Ephem (originally named PyEphem), which in turn uses XEphem that uses the
+VSOP87D algorithms for the planets. XEphem is also 'end of life' as no further updates are planned.
+However the key discrepancies are related to the projected speed of Earth's rotation, or "sidereal time".
 
-* in 2020:&nbsp;&nbsp; 00.0 to 00.1 arcMINUTES GHA too high
-* in 2030:&nbsp;&nbsp; 04.0 to 04.8 arcMINUTES GHA too high
-* in 2050:&nbsp;&nbsp; 13.9 to 14.9 arcMINUTES GHA too high
-* in 2100:&nbsp;&nbsp; 38.0 to 40.2 arcMINUTES GHA too high
-* in 2200:&nbsp;&nbsp; 90.1 to 94.1 arcMINUTES GHA too high
-
-The GHA discrepancy applies to the sun, moon, the First Point of Aries and to all planets.
+Skyfield-based almanacs (SFalmanac and Skyalmanac) now use the International Earth Rotation and Reference 
+Systems Service (IERS) Earth Orientation Parameters (EOP) data which are forecast for at least the coming 
+12 months (and updated weekly). Accurate assessment of "sidereal time" will minimize GHA 
+discrepancies in general. This applies to the sun, moon, the First Point of Aries and to all planets.
 
 **Description**
 
-Pyalmanac is a **Python 3** script that creates the daily pages of the Nautical Almanac **using the UTC timescale**, which is ***not optimal for navigation purposes*** :frowning_face:. Official Nautical Almanacs employ a UT timescale (equivalent to UT1).
-These are tables that are needed for celestial navigation with a sextant. Although you are strongly advised to purchase the official Nautical Almanac, this program will reproduce the tables with no warranty or guarantee of accuracy.
+Pyalmanac is a **Python 3** script that creates the daily pages of the Nautical Almanac **using the UTC timescale**, which is ***not optimal for navigation purposes*** :frowning_face:. 
+Official Nautical Almanacs employ a UT timescale (equivalent to UT1).
+The "daily pages" are tables that are needed for celestial navigation with a sextant. 
+Although you are strongly advised to purchase the official Nautical Almanac, this program will reproduce the tables with no warranty or guarantee of accuracy.
 
 This version of Pyalmanac was developed by Andrew Bauer based on the original Pyalmanac by Enno Rodegerdts. Various improvements, enhancements and bugfixes have been included. 
-Pyalmanac contains its own star database (similar to the database in Ephem 3.7.6), however the accuracy was poor. It is updated with data from the Hipparcos Star Catalogue and the GHA/Dec star data now matches a sample page from a Nautical Almanac typically to within 0°0.1'.
+Pyalmanac contains its own star database (similar to the database in Ephem 3.7.6, however the accuracy was poor). 
+It is updated with data from the Hipparcos Star Catalogue and the GHA/Dec star data now matches a sample page from a Nautical Almanac typically to within 0°0.1'.
 
-NOTE: two scripts are included (both can be run): 'pyalmanac.py' and 'increments.py'  
 NOTE: Pyalmanac contains its own star database - it does not use the version supplied with Ephem, hence updating from 3.7.6 to 3.7.7.1 is harmless. Star names are chosen to comply with Nautical Almanacs.  
 NOTE: if still required, a Python 2.7 script with identical functionality can be found at: https://github.com/aendie/Pyalmanac-Py2  
 
@@ -66,13 +64,13 @@ Minor changes are included here to this original (non-PyPI) edition to reflect s
 
 ## Requirements
 
-&nbsp;&nbsp;&nbsp;&nbsp;Most of the computation is done by the free Ephem library.  
-&nbsp;&nbsp;&nbsp;&nbsp;Typesetting is typically done by MiKTeX or TeX Live.  
-&nbsp;&nbsp;&nbsp;&nbsp;These need to be installed:
+&emsp;Most of the computation is done by the free Ephem library.  
+&emsp;Typesetting is typically done by MiKTeX or TeX Live.  
+&emsp;These need to be installed:
 
 * Python v3.4 or higher (the latest version is recommended)
 * Ephem >= 3.7.6
-* MiKTeX&nbsp;&nbsp;or&nbsp;&nbsp;TeX Live
+* MiKTeX&ensp;or&ensp;TeX Live
 
 ## Files required in the execution folder:
 
@@ -82,66 +80,66 @@ Minor changes are included here to this original (non-PyPI) edition to reflect s
 
 ### INSTALLATION GUIDELINES on Windows 10:
 
-&nbsp;&nbsp;&nbsp;&nbsp;Install Python 3.9.1 (should be in the system environment variable PATH, e.g. )  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**C:\\Python39\Scripts;C:\\Python39;** .....  
-&nbsp;&nbsp;&nbsp;&nbsp;Install MiKTeX 21.1 from https://miktex.org/  
-&nbsp;&nbsp;&nbsp;&nbsp;When MiKTeX first runs it will require installation of additional packages.  
-&nbsp;&nbsp;&nbsp;&nbsp;Run Command Prompt as Administrator, go to your Python folder and execute, e.g.:
+&emsp;Install Python 3.9.1 (should be in the system environment variable PATH, e.g. )  
+&emsp;&ensp;**C:\\Python39\Scripts;C:\\Python39;** .....  
+&emsp;Install MiKTeX 21.1 from https://miktex.org/  
+&emsp;When MiKTeX first runs it will require installation of additional packages.  
+&emsp;Run Command Prompt as Administrator, go to your Python folder and execute, e.g.:
 
-&nbsp;&nbsp;&nbsp;&nbsp;**cd C:\\Python39**  
-&nbsp;&nbsp;&nbsp;&nbsp;**python.exe -m pip install --upgrade pip**  
-&nbsp;&nbsp;&nbsp;&nbsp;... for a first install:  
-&nbsp;&nbsp;&nbsp;&nbsp;**pip3 uninstall pyephem ephem**  
-&nbsp;&nbsp;&nbsp;&nbsp;**pip3 install ephem**  
-&nbsp;&nbsp;&nbsp;&nbsp;... if already installed, check for upgrade explicitly:  
-&nbsp;&nbsp;&nbsp;&nbsp;**pip3 install --upgrade ephem**  
+&emsp;**cd C:\\Python39**  
+&emsp;**python.exe -m pip install --upgrade pip**  
+&emsp;... for a first install:  
+&emsp;**pip3 uninstall pyephem ephem**  
+&emsp;**pip3 install ephem**  
+&emsp;... if already installed, check for upgrade explicitly:  
+&emsp;**pip3 install --upgrade ephem**  
 
-&nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in a new folder, run Command Prompt and start with:  
-&nbsp;&nbsp;&nbsp;&nbsp;**py -3 pyalmanac.py**
+&emsp;Put the Pyalmanac files in a new folder, run Command Prompt and start with:  
+&emsp;**py -3 pyalmanac.py**
 
-&nbsp;&nbsp;&nbsp;&nbsp;If using MiKTeX 21 or higher, executing 'option 5' (Increments and Corrections) will probably fail with  
-&nbsp;&nbsp;&nbsp;&nbsp;**! TeX capacity exceeded, sorry [main memory size=3000000].**  
-&nbsp;&nbsp;&nbsp;&nbsp;To resolve this problem (assuming MiKTeX has been installed for all users),  
-&nbsp;&nbsp;&nbsp;&nbsp;open a Command Prompt as Administrator and enter:  
-&nbsp;&nbsp;&nbsp;&nbsp;**initexmf --admin --edit-config-file=pdflatex**  
-&nbsp;&nbsp;&nbsp;&nbsp;This opens **pdflatex.ini** in Notepad. Add the following line:  
-&nbsp;&nbsp;&nbsp;&nbsp;**extra_mem_top = 1000000**  
-&nbsp;&nbsp;&nbsp;&nbsp;and save the file. Problem solved. For more details go [here](https://tex.stackexchange.com/questions/438902/how-to-increase-memory-size-for-xelatex-in-miktex/438911#438911)
+&emsp;If using MiKTeX 21 or higher, executing 'option 5' (Increments and Corrections) will probably fail with  
+&emsp;**! TeX capacity exceeded, sorry [main memory size=3000000].**  
+&emsp;To resolve this problem (assuming MiKTeX has been installed for all users),  
+&emsp;open a Command Prompt as Administrator and enter:  
+&emsp;**initexmf --admin --edit-config-file=pdflatex**  
+&emsp;This opens **pdflatex.ini** in Notepad. Add the following line:  
+&emsp;**extra_mem_top = 1000000**  
+&emsp;and save the file. Problem solved. For more details go [here](https://tex.stackexchange.com/questions/438902/how-to-increase-memory-size-for-xelatex-in-miktex/438911#438911)
 
 ### INSTALLATION GUIDELINES on Ubuntu 19.10 or 20.04:
 
-&nbsp;&nbsp;&nbsp;&nbsp;Ubuntu 19 and higher come with Python 3 preinstalled,  
-&nbsp;&nbsp;&nbsp;&nbsp;however pip may need to be installed:  
-&nbsp;&nbsp;&nbsp;&nbsp;**sudo apt install python3-pip**
+&emsp;Ubuntu 19 and higher come with Python 3 preinstalled,  
+&emsp;however pip may need to be installed:  
+&emsp;**sudo apt install python3-pip**
 
-&nbsp;&nbsp;&nbsp;&nbsp;Install the following TeX Live package:  
-&nbsp;&nbsp;&nbsp;&nbsp;**sudo apt install texlive-latex-extra**
+&emsp;Install the following TeX Live package:  
+&emsp;**sudo apt install texlive-latex-extra**
 
-&nbsp;&nbsp;&nbsp;&nbsp;Install the required astronomical library:  
-&nbsp;&nbsp;&nbsp;&nbsp;**pip3 uninstall pyephem ephem**  
-&nbsp;&nbsp;&nbsp;&nbsp;**pip3 install ephem**
+&emsp;Install the required astronomical library:  
+&emsp;**pip3 uninstall pyephem ephem**  
+&emsp;**pip3 install ephem**
 
-&nbsp;&nbsp;&nbsp;&nbsp;Put the Pyalmanac files in a folder and start with:  
-&nbsp;&nbsp;&nbsp;&nbsp;**python3 pyalmanac.py**  
+&emsp;Put the Pyalmanac files in a folder and start with:  
+&emsp;**python3 pyalmanac.py**  
 
 
 ### INSTALLATION GUIDELINES on MAC:
 
-&nbsp;&nbsp;&nbsp;&nbsp;Every Mac comes with python preinstalled.  
-&nbsp;&nbsp;&nbsp;&nbsp;(Please choose this version of Pyalmanac if Python 3.* is installed.)  
-&nbsp;&nbsp;&nbsp;&nbsp;You need to install the Ephem library to use Pyalmanac.  
-&nbsp;&nbsp;&nbsp;&nbsp;Type the following commands at the commandline (terminal app):
+&emsp;Every Mac comes with python preinstalled.  
+&emsp;(Please choose this version of Pyalmanac if Python 3.* is installed.)  
+&emsp;You need to install the Ephem library to use Pyalmanac.  
+&emsp;Type the following commands at the commandline (terminal app):
 
-&nbsp;&nbsp;&nbsp;&nbsp;**sudo easy_install pip**  
-&nbsp;&nbsp;&nbsp;&nbsp;**pip uninstall pyephem ephem**  
-&nbsp;&nbsp;&nbsp;&nbsp;**pip install ephem**  
+&emsp;**sudo easy_install pip**  
+&emsp;**pip uninstall pyephem ephem**  
+&emsp;**pip install ephem**  
 
-&nbsp;&nbsp;&nbsp;&nbsp;If this command fails, your Mac asks you if you would like to install the header files.  
-&nbsp;&nbsp;&nbsp;&nbsp;Do so - you do not need to install the full IDE - and try again.
+&emsp;If this command fails, your Mac asks you if you would like to install the header files.  
+&emsp;Do so - you do not need to install the full IDE - and try again.
 
-&nbsp;&nbsp;&nbsp;&nbsp;Install TeX/LaTeX from http://www.tug.org/mactex/
+&emsp;Install TeX/LaTeX from http://www.tug.org/mactex/
 
-&nbsp;&nbsp;&nbsp;&nbsp;Now you are almost ready. Put the Pyalmanac files in any directory and start with:  
-&nbsp;&nbsp;&nbsp;&nbsp;**python pyalmanac**  
-&nbsp;&nbsp;&nbsp;&nbsp;or  
-&nbsp;&nbsp;&nbsp;&nbsp;**./pyalmanac**
+&emsp;Now you are almost ready. Put the Pyalmanac files in any directory and start with:  
+&emsp;**python pyalmanac**  
+&emsp;or  
+&emsp;**./pyalmanac**
