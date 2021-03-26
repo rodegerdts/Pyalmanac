@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #   Copyright (C) 2014  Enno Rodegerdts
-#   Copyright (C) 2019  Andrew Bauer
+#   Copyright (C) 2021  Andrew Bauer
 
 #  This program is free software; you can redistribute it and/or modify
 #     it under the terms of the GNU General Public License as published by
@@ -844,8 +844,8 @@ def almanac(first_day, pagenum):
         rm1 = "10mm"
         tm = "21mm"     # data pages...
         bm = "18mm"
-        lm = "12mm"
-        rm = "8mm"
+        lm = "10mm"
+        rm = "9mm"
         if config.tbls == "m":
             tm = "10mm"
             bm = "15mm"
