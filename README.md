@@ -62,6 +62,10 @@ The Equation Of Time is shaded whenever EoT is negative indicating that apparent
 
 Minor changes are included here to this original (non-PyPI) edition to reflect some of the adaptation that was required (e.g. integrate *increments.py* into *pyalmanac.py* as Option 5) to create a PyPI (Python Package Index) edition making this original (non-PyPI) and the PyPI editions similar. Both editions create identical almanacs and the [PyPI edition](https://pypi.org/project/pyalmanac/) is the preferred choice for users.
 
+**UPDATE: Apr 2021**
+
+Internal technical enhancements and minor text changes.
+
 ## Requirements
 
 &emsp;Most of the computation is done by the free Ephem library.  

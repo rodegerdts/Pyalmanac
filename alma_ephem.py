@@ -24,8 +24,10 @@
 import datetime
 import math
 import sys
+
 # Third party imports
 import ephem
+
 # Local application imports
 import config
 
@@ -133,10 +135,14 @@ def sunmoon(date):          # used in suntab(m), sunmoontab(m)
     ephem_moon.compute(date+0.5*ephem.hour,epoch=date+0.5*ephem.hour)
     obs.date = date + 0.5 * ephem.hour
     rghap = ephem.degrees(obs.sidereal_time()-ephem_moon.g_ra).norm
+
     deg = ephem.degrees(ephem.degrees(rghap-rgha).norm-ephem.degrees('14:19:00'))
-    vm = "{:0.1f}'".format(deg*360*30/ephem.pi)
+    vmf = deg*360*30/ephem.pi
+    vm = "{:0.1f}'".format(vmf)
+
     deg = ephem.degrees(ephem_moon.g_dec-rdec)
-    dm = "{:0.1f}'".format(deg*360*30/ephem.pi)
+    dmf = deg*360*30/ephem.pi
+    dm = "{:0.1f}'".format(dmf)
     
     # degs, degm have been added for the sunmooontab function
     return ghas,decs,gham,vm,decm,dm,hp,degs,degm
@@ -935,12 +941,12 @@ def equation_of_time(date): # used in twilighttab (section 3)
     eqt00 = ephem.hours(x)
     eqt00 = str(eqt00)[-8:-3]
     if x >= 0:
-        eqt00 = r"\colorbox{{lightgray!80}}{{{}}}".format(eqt00)
+        eqt00 = r"\colorbox{{lightgray!60}}{{{}}}".format(eqt00)
 
     y = round((obs.next_transit(ephem_sun)-(date+0.5))*86400)*2*math.pi/86400
     eqt12 = ephem.hours(y)
     eqt12 = str(eqt12)[-8:-3]
     if y >= 0:
-        eqt12 = r"\colorbox{{lightgray!80}}{{{}}}".format(eqt12)
+        eqt12 = r"\colorbox{{lightgray!60}}{{{}}}".format(eqt12)
 
     return eqt00,eqt12,transs,transm,antim,age,pct

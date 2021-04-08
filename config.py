@@ -17,19 +17,22 @@
 #     with this program; if not, write to the Free Software Foundation, Inc.,
 #     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# define global variables
-# open/close a log file
+# ================ EDIT LINES IN THIS SECTION ONLY ================
 
+pgsz = 'A4'     # page size 'A4' or 'Letter' (global variable)
+search_next_rising_sun = True   # 'False' = base it only on month and hemisphere
+
+# ================ DO NOT EDIT LINES BELOW HERE ================
+
+# define global variables
+logfileopen = False
 tbls = ''		# table style (global variable)
 decf = ''		# Declination format (global variable)
-pgsz = 'A4'     # page size 'A4' or 'Letter' (global variable)
-logfileopen = False
-search_next_rising_sun = True   # 'False' = base it only on month and hemisphere
 
 # list of latitudes to include for Sunrise/Sunset/Twilight/Moonrise/Moonset...
 lat = [72,70,68,66,64,62,60,58,56,54,52,50,45,40,35,30,20,10,0,-10,-20,-30,-35,-40,-45,-50,-52,-54,-56,-58,-60]
 
-
+# open/write/close a log file
 def initLOG():
     global errors
     errors = 0
