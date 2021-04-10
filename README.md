@@ -64,7 +64,7 @@ Minor changes are included here to this original (non-PyPI) edition to reflect s
 
 **UPDATE: Apr 2021**
 
-Internal technical enhancements and minor text changes.
+A double moonrise or moonset on the same day is now highlighted for better legibility. Some internal technical enhancements and minor text changes are included.
 
 ## Requirements
 
