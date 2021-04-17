@@ -259,7 +259,7 @@ def venparallax():
 
 
 def makelatex():
-	lx = r"""\documentclass[ 10pt, twoside, a4paper]{scrreprt}
+	lx = r"""\documentclass[ 10pt, a4paper]{scrreprt}
 	\usepackage[automark]{scrlayer-scrpage}
 	\pagestyle{scrheadings}
 	\clearscrheadfoot

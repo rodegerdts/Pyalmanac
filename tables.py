@@ -279,7 +279,8 @@ def starstab(date):
 
     # returns 3 tables with SHA & Mer.pass for Venus, Mars, Jupiter and Saturn
     for i in range(3):
-        datestr = r'''{} {} {}'''.format(ephem.date(date+i).datetime().strftime("%b"), ephem.date(date+i).datetime().strftime("%d"), ephem.date(date+i).datetime().strftime("%a"))
+        dt = ephem.date(date+i).datetime()
+        datestr = r'''{} {} {}'''.format(dt.strftime("%b"), dt.strftime("%d"), dt.strftime("%a"))
         m = m + '''\hline
 '''
         if config.tbls == "m":
@@ -888,6 +889,7 @@ def almanac(first_day, pagenum):
 
     # page size specific parameters
     if config.pgsz == "A4":
+        # pay attention to the limited page width
         paper = "a4paper"
         vsep1 = "2.0cm"
         vsep2 = "1.5cm"
@@ -911,6 +913,7 @@ def almanac(first_day, pagenum):
             oddim = "14mm"
             oddom = "11mm"
     else:
+        # pay attention to the limited page height
         paper = "letterpaper"
         vsep1 = "1.5cm"
         vsep2 = "1.0cm"
@@ -1015,7 +1018,7 @@ def almanac(first_day, pagenum):
     \item[Disclaimer:] These are computer generated tables - use them at your own risk.
     The accuracy has been checked as well as possible, but cannot be guaranteed.
     This means I cannot be held liable if you get lost on the oceans because of errors in this publication.
-    Besides, this publication only contains the daily pages: an official version of the Nautical Almanac is indispensable.
+    Besides, this publication only contains the 'daily pages' of the Nautical Almanac: an official version of the Nautical Almanac is indispensable.
     \end{description}
 \end{titlepage}
 \restoregeometry    % so it does not affect the rest of the pages'''

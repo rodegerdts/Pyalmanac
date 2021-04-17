@@ -23,11 +23,29 @@ import os
 import sys
 import time
 import datetime
+
 # Local application imports
 import tables
-import suntables 
+import suntables
+import eventtables
 import config
 import increments
+
+
+def makePDF(fn, msg = ""):
+    command = 'pdflatex {}'.format(fn + ".tex")
+    os.system(command)
+    print("finished" + msg)
+    return
+
+def tidy_up(fn):
+    os.remove(fn + ".tex")
+    if os.path.isfile(fn + ".log"):
+        os.remove(fn + ".log")
+    if os.path.isfile(fn + ".aux"):
+        os.remove(fn + ".aux")
+    return
+
 
 ##Main##
 if sys.version_info[0] < 3:
@@ -51,17 +69,19 @@ if config.pgsz not in set(['A4', 'Letter']):
     sys.exit(0)
 
 s = input("""\nWhat do you want to create?:\n
-    1   Full nautical almanac   (for a year)
-    2   Just tables for the sun (for a year)
-    3   Nautical almanac   - 6 days from today
-    4   Tables for the sun - 30 days from today
-    5   "Increments and Corrections" tables (static data)
+    1   Nautical Almanac   (for a year)
+    2   Sun tables only    (for a year)
+    3   Event Time tables  (for a year)
+    4   Nautical almanac   -  6 days from today
+    5   Sun tables only    - 30 days from today
+    6   Event Time tables  -  6 days from today
+    7   "Increments and Corrections" tables (static data)
 """)
 
-if s in set(['1', '2', '3', '4', '5']):
-    if int(s) < 3:
-        print("Please enter the year you want to create the nautical almanac")
-        years = input("  for as yyyy ... or the FIRST and LAST year as yyyy-yyyy\n")
+if s in set(['1', '2', '3', '4', '5', '6', '7']):
+    if int(s) < 4:
+        print("Please enter the desired year")
+        years = input("  as yyyy ... or the FIRST and LAST year as yyyy-yyyy\n")
         if len(years)== 4:
             yearfr = years
             yearto = years
@@ -95,7 +115,7 @@ if s in set(['1', '2', '3', '4', '5']):
             print("Error! Last year is not numeric")
             sys.exit(0)
 
-    if s != '5':
+    if s != '3' and int(s) <= 5:
         tsin = input("""What table style is required?:\n
         t   Traditional
         m   Modern
@@ -112,7 +132,7 @@ if s in set(['1', '2', '3', '4', '5']):
         else:
             DecFmt = '[old]'
 
-    if s == '1':
+    if s == '1':        # Nautical Almanac (for a year)
         print("Please wait - this can take a while.")
         for yearint in range(int(yearfr),int(yearto)+1):
             start = time.time()
@@ -120,92 +140,92 @@ if s in set(['1', '2', '3', '4', '5']):
             msg = "\nCreating the nautical almanac for the year {}".format(year)
             print(msg)
             first_day = datetime.date(yearint, 1, 1)
-            filename = "almanac{}{}.tex".format(ff,year+DecFmt)
-            outfile = open(filename, mode="w", encoding="utf8")
+            fn = "almanac{}{}".format(ff,year+DecFmt)
+            outfile = open(fn + ".tex", mode="w", encoding="utf8")
             outfile.write(tables.almanac(first_day,122))
             outfile.close()
             stop = time.time()
             msg = "execution time = {:0.2f} seconds".format(stop-start) # msg = "execution time = %0.2f seconds" %(stop-start)
             print(msg)
             print()
-            command = 'pdflatex {}'.format(filename)
-            os.system(command)
-            print("finished creating nautical almanac for {}".format(year))
-            os.remove(filename)
-            if os.path.isfile("almanac{}{}.log".format(ff,year+DecFmt)):
-                os.remove("almanac{}{}.log".format(ff,year+DecFmt))
-            if os.path.isfile("almanac{}{}.aux".format(ff,year+DecFmt)):
-                os.remove("almanac{}{}.aux".format(ff,year+DecFmt))
+            makePDF(fn, " creating nautical almanac for {}".format(year))
+            tidy_up(fn)
 
-    elif s == '2':
+    elif s == '2':      # Sun Tables (for a year)
         for yearint in range(int(yearfr),int(yearto)+1):
             year = "{:4d}".format(yearint)  # year = "%4d" %yearint
             msg = "\nCreating the sun tables only for the year {}".format(year)
             print(msg)
             first_day = datetime.date(yearint, 1, 1)
-            filename = "sunalmanac{}{}.tex".format(ff,year+DecFmt)
-            outfile = open(filename, mode="w", encoding="utf8")
+            fn = "sunalmanac{}{}".format(ff,year+DecFmt)
+            outfile = open(fn + ".tex", mode="w", encoding="utf8")
             outfile.write(suntables.almanac(first_day,25))
             outfile.close()
-            command = 'pdflatex {}'.format(filename)
-            os.system(command)
-            print("finished creating sun tables for {}".format(year))
-            os.remove(filename)
-            if os.path.isfile("sunalmanac{}{}.log".format(ff,year+DecFmt)):
-                os.remove("sunalmanac{}{}.log".format(ff,year+DecFmt))
-            if os.path.isfile("sunalmanac{}{}.aux".format(ff,year+DecFmt)):
-                os.remove("sunalmanac{}{}.aux".format(ff,year+DecFmt))
+            makePDF(fn, " creating sun tables for {}".format(year))
+            tidy_up(fn)
 
-    elif s == '3':
+    elif s == '3':      # Event Time tables  (for a year)
+        print("Please wait - this can take a while.")
+        for yearint in range(int(yearfr),int(yearto)+1):
+            start = time.time()
+            year = "{:4d}".format(yearint)  # year = "%4d" %yearint
+            msg = "\nCreating the event time tables for the year {}".format(year)
+            print(msg)
+            first_day = datetime.date(yearint, 1, 1)
+            fn = "event-times{}".format(year)
+            outfile = open(fn + ".tex", mode="w", encoding="utf8")
+            outfile.write(eventtables.maketables(first_day,183))
+            outfile.close()
+            stop = time.time()
+            msg = "execution time = {:0.2f} seconds".format(stop-start) # msg = "execution time = %0.2f seconds" %(stop-start)
+            print(msg)
+            print()
+            makePDF(fn, " creating event time tables for {}".format(year))
+            tidy_up(fn)
+
+    elif s == '4':      # Nautical almanac   -  6 days from today
 ##        config.initLOG()		# initialize log file
         msg = "\nCreating nautical almanac tables - from {}".format(sdmy)
         print(msg)
-        filename = "almanac{}{}.tex".format(ff,symd+DecFmt)
-        outfile = open(filename, mode="w", encoding="utf8")
+        fn = "almanac{}{}".format(ff,symd+DecFmt)
+        outfile = open(fn + ".tex", mode="w", encoding="utf8")
         outfile.write(tables.almanac(first_day,2))
         outfile.close()
 ##        msg = 'Count of incorrect values: {}'.format(config.errors)
 ##        config.writeLOG('\n' + msg + '\n')
 ##        config.closeLOG()
-        command = 'pdflatex {}'.format(filename)
-        os.system(command)
-        print("finished")
-        os.remove(filename)
-        if os.path.isfile("almanac{}{}.log".format(ff,symd+DecFmt)):
-            os.remove("almanac{}{}.log".format(ff,symd+DecFmt))
-        if os.path.isfile("almanac{}{}.aux".format(ff,symd+DecFmt)):
-            os.remove("almanac{}{}.aux".format(ff,symd+DecFmt))
+        makePDF(fn)
+        tidy_up(fn)
 
-    elif s == '4':
+    elif s == '5':      # Sun tables only    - 30 days from today
         msg = "\nCreating the sun tables only - from {}".format(sdmy)
         print(msg)
-        filename = "sunalmanac{}{}.tex".format(ff,symd+DecFmt)
-        outfile = open(filename, mode="w", encoding="utf8")
+        fn = "sunalmanac{}{}".format(ff,symd+DecFmt)
+        outfile = open(fn + ".tex", mode="w", encoding="utf8")
         outfile.write(suntables.almanac(first_day,2))
         outfile.close()
-        command = 'pdflatex {}'.format(filename)
-        os.system(command)
-        print("finished")
-        os.remove(filename)
-        if os.path.isfile("sunalmanac{}{}.log".format(ff,symd+DecFmt)):
-            os.remove("sunalmanac{}{}.log".format(ff,symd+DecFmt))
-        if os.path.isfile("sunalmanac{}{}.aux".format(ff,symd+DecFmt)):
-            os.remove("sunalmanac{}{}.aux".format(ff,symd+DecFmt))
+        makePDF(fn)
+        tidy_up(fn)
 
-    elif s == '5':
+    elif s == '6':      # Event Time tables  -  6 days from today
+        msg = "\nCreating event time tables - from {}".format(sdmy)
+        print(msg)
+        fn = "event-times{}".format(symd)
+        outfile = open(fn + ".tex", mode="w", encoding="utf8")
+        outfile.write(eventtables.maketables(first_day,3))
+        outfile.close()
+        makePDF(fn)
+        tidy_up(fn)
+
+    elif s == '7':
         msg = "\nCreating the Increments and Corrections tables"
         print(msg)
         fn = "inc"
-        filename = fn + ".tex"
-        outfile = open(filename, mode="w", encoding="utf8")
+        outfile = open(fn + ".tex", mode="w", encoding="utf8")
         outfile.write(increments.makelatex())
         outfile.close()
-        command = 'pdflatex {}'.format(filename)
-        os.system(command)
-        print("finished")
-        os.remove(fn + ".tex")
-        os.remove(fn + ".log")
-        os.remove(fn + ".aux")
+        makePDF(fn)
+        tidy_up(fn)
 
 else:
-    print("Error! Choose 1, 2, 3, 4 or 5")
+    print("Error! Choose 1, 2, 3, 4, 5, 6 or 7")

@@ -335,6 +335,7 @@ def almanac(first_day, pagenum):
 
     # page size specific parameters
     if config.pgsz == "A4":
+        # pay attention to the limited page width
         paper = "a4paper"
         tm = "21mm"
         bm = "18mm"
@@ -351,6 +352,7 @@ def almanac(first_day, pagenum):
             lm = "14mm"
             rm = "14mm"
     else:
+        # pay attention to the limited page height
         paper = "letterpaper"
         tm = "12.2mm"
         bm = "13mm"
