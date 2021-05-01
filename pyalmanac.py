@@ -154,7 +154,7 @@ if s in set(['1', '2', '3', '4', '5', '6', '7']):
     elif s == '2':      # Sun Tables (for a year)
         for yearint in range(int(yearfr),int(yearto)+1):
             year = "{:4d}".format(yearint)  # year = "%4d" %yearint
-            msg = "\nCreating the sun tables only for the year {}\n".format(year)
+            msg = "\nCreating the sun tables for the year {}\n".format(year)
             print(msg)
             first_day = datetime.date(yearint, 1, 1)
             fn = "sunalmanac{}{}".format(ff,year+DecFmt)
@@ -198,7 +198,7 @@ if s in set(['1', '2', '3', '4', '5', '6', '7']):
         tidy_up(fn)
 
     elif s == '5':      # Sun tables only    - 30 days from today
-        msg = "\nCreating the sun tables only - from {}\n".format(sdmy)
+        msg = "\nCreating the sun tables - from {}\n".format(sdmy)
         print(msg)
         fn = "sunalmanac{}{}".format(ff,symd+DecFmt)
         outfile = open(fn + ".tex", mode="w", encoding="utf8")
