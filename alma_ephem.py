@@ -175,7 +175,6 @@ def sunmoon(date):          # used in suntab(m), sunmoontab(m)
     # degs, degm have been added for the sunmooontab function
     return ghas,decs,gham,vm,decm,dm,hp,degs,degm
 
-##NEW##
 def sun_moon_SD(date):      # used in suntab(m), sunmoontab(m)
     obs = ephem.Observer()
     obs.date = date
@@ -459,55 +458,18 @@ def twilight(date, lat, hemisph, round2seconds = False):   # used in twilighttab
     obs.lat = latitude
 
     if round2seconds:
-        d = ephem.date(date - 0.5 * ephem.second)   # search from 0.5 seconds before midnight
+        d = ephem.date(date) - 0.5 * ephem.second   # search from 0.5 seconds before midnight
     else:
-        d = ephem.date(date - 30 * ephem.second)    # search from 30 seconds before midnight
+        d = ephem.date(date) - 30 * ephem.second    # search from 30 seconds before midnight
 
     obs.date = d
     obs.pressure = 0
     s = ephem.Sun(obs)
     s.compute(d)
     r = s.radius
+    abhd = False                                # above/below horizon display NOT enabled
 
-    obs.horizon = ephem.degrees('-12')+r	# Nautical twilight ...
-    try:
-        out[0] = date2time(obs.next_rising(s), round2seconds)	# begin
-    except:
-        out[0] = '--:--'
-    obs.date = d
-    try:
-        out[6] = date2time(obs.next_setting(s), round2seconds)	# end
-    except:
-        out[6] = '--:--'
-    if out[0] == '--:--' and out[6] == '--:--':	# if neither begin nor end...
-        if config.search_next_rising_sun:
-            yn = getsunstate(date, lat, 2)      # ... get the sun state
-        else:
-            yn = midnightsun(mth, hemisph)
-        out[0] = yn
-        out[6] = yn
-#-----------------------------------------------------------
-    obs.horizon = ephem.degrees('-6')+r		# Civil twilight...
-    obs.date = d
-    try:
-        out[1] = date2time(obs.next_rising(s), round2seconds)	# begin
-    except:
-        out[1] = '--:--'
-    obs.date = d
-    try:
-        out[5] = date2time(obs.next_setting(s), round2seconds)	# end
-    except:
-        out[5] = '--:--'
-    if out[1] == '--:--' and out[5] == '--:--':	# if neither begin nor end...
-        if config.search_next_rising_sun:
-            yn = getsunstate(date, lat, 1)      # ... get the sun state
-        else:
-            yn = midnightsun(mth, hemisph)
-        out[1] = yn
-        out[5] = yn
-#-----------------------------------------------------------
     obs.horizon = '-0:34'   # 34' (atmospheric refraction)
-    obs.date = d
     try:
         out[2] = date2time(obs.next_rising(s), round2seconds)	# sunrise
     except:
@@ -518,6 +480,7 @@ def twilight(date, lat, hemisph, round2seconds = False):   # used in twilighttab
     except:
         out[4] = '--:--'
     if out[2] == '--:--' and out[4] == '--:--':	# if neither sunrise nor sunset...
+        abhd = True                             # enable above/below horizon display
         if config.search_next_rising_sun:
             yn = getsunstate(date, lat, 0)      # ... get the sun state
         else:
@@ -525,20 +488,58 @@ def twilight(date, lat, hemisph, round2seconds = False):   # used in twilighttab
         out[2] = yn
         out[4] = yn
 #-----------------------------------------------------------
+    obs.horizon = ephem.degrees('-6')+r		    # Civil twilight...
+    obs.date = d
+    try:
+        out[1] = date2time(obs.next_rising(s), round2seconds)	# begin
+    except:
+        out[1] = '--:--'
+    obs.date = d
+    try:
+        out[5] = date2time(obs.next_setting(s), round2seconds)	# end
+    except:
+        out[5] = '--:--'
+    if abhd and out[1] == '--:--' and out[5] == '--:--':	# if neither begin nor end...
+        if config.search_next_rising_sun:
+            yn = getsunstate(date, lat, 1)      # ... get the sun state
+        else:
+            yn = midnightsun(mth, hemisph)
+        out[1] = yn
+        out[5] = yn
+#-----------------------------------------------------------
+    obs.horizon = ephem.degrees('-12')+r	    # Nautical twilight ...
+    obs.date = d
+    try:
+        out[0] = date2time(obs.next_rising(s), round2seconds)	# begin
+    except:
+        out[0] = '--:--'
+    obs.date = d
+    try:
+        out[6] = date2time(obs.next_setting(s), round2seconds)	# end
+    except:
+        out[6] = '--:--'
+    if abhd and out[0] == '--:--' and out[6] == '--:--':	# if neither begin nor end...
+        if config.search_next_rising_sun:
+            yn = getsunstate(date, lat, 2)      # ... get the sun state
+        else:
+            yn = midnightsun(mth, hemisph)
+        out[0] = yn
+        out[6] = yn
+#-----------------------------------------------------------
     obs.date = d
     out[3] = date2time(obs.next_transit(s), round2seconds)
     
     return out
 
-##NEW##
 def getsunstate(d, lat, h):
     # populate the sun state (visible or not) for the specified date & latitude
     # note: the first parameter 'd' is an ephem date at midnight
     # note: getsunstate is called when there is neither a sunrise nor a sunset on 'd'
+
     i = config.lat.index(lat)
     latitude = ephem.degrees('{}:00:00.0'.format(lat))
     obs = ephem.Observer()
-    #d = ephem.date(date - 30 * ephem.second)
+    #d = ephem.date(date) - 30 * ephem.second
     obs.pressure = 0
     s = ephem.Sun(obs)
     err = False
@@ -603,14 +604,24 @@ def getsunstate(d, lat, h):
         #print("{}".format(i), nextrising, nextsetting, sunvisible[i][h])
 
     # return the current sunstate
-    out = '--:--'
-    if sunup == True:
-        out = r'\begin{tikzpicture}\draw (0,0) rectangle (12pt,4pt);\end{tikzpicture}'
-    else:
-        out = r'\rule{12Pt}{4Pt}'
-    return out
+    return formatsun('--:--', sunup, True)
 
 ##NEW##
+def formatsun(t, sunup, ab_enabled):
+    # return a formatted string of the current sunrise/sunset/twilight time or state
+    # t = time (hh:mm) or '--:--'
+    # ab_enabled =  True to show time of event or sun event state above/below horizon
+    # ab_enabled =  False to show "event does not happen" as '--:--'
+    # sunup = True  if sun continuously above horizon
+    # sunup = False if sun continuously below horizon
+    
+    if not ab_enabled:      # if above/below horizon display enabled
+        return t
+    elif sunup:
+        return r'''\begin{tikzpicture}\draw (0,0) rectangle (12pt,4pt);\end{tikzpicture}'''
+    else:
+        return r'''\rule{12Pt}{4Pt}'''
+
 def midnightsun(mth, hemisph):
     # simple way to fudge whether the sun is up or down when there's no
     # sunrise or sunset on a day depending on the month and hemisphere only.
@@ -621,11 +632,7 @@ def midnightsun(mth, hemisph):
         sunup = True
     if hemisph == 'S':
         sunup = not(sunup)
-    if sunup == True:
-        out = r'''\begin{tikzpicture}\draw (0,0) rectangle (12pt,4pt);\end{tikzpicture}'''
-    else:
-        out = r'''\rule{12Pt}{4Pt}'''
-    return out
+    return formatsun('--:--', sunup, True)
 
 #-------------------------
 #   MOONRISE/-SET table
@@ -633,14 +640,16 @@ def midnightsun(mth, hemisph):
 
 # create a list of 'moon above/below horizon' states per Latitude...
 #    None = unknown; True = above horizon (visible); False = below horizon (not visible)
-moonvisible = [None] * 31       # moonvisible[0] up to moonvisible[30]
+#    moonvisible[0] is not linked to a latitude but a manual override
+moonvisible = [None] * 32       # moonvisible[0] up to moonvisible[31]
 
-def moonrise_set(date, lat):    # used in twilighttab (section 2)
+def moonrise_set(date, lat):    # used by tables.py in twilighttab (section 2)
+    # - - - TIMES ARE ROUNDED TO MINUTES - - -
     # returns moonrise and moonset for the given date and latitude plus next 2 days:
     #    rise day 1, rise day 2, rise day 3, set day 1, set day 2, set day 3
     # Additionally it also tracks the current state of the moon (above or below horizon)
 
-    i = config.lat.index(lat)
+    i = 1 + config.lat.index(lat)   # index 0 is reserved to enable an explicit setting
     out  = ['--:--','--:--','--:--','--:--','--:--','--:--']	# first event
     out2 = ['--:--','--:--','--:--','--:--','--:--','--:--']	# second event on same day (rare)
 
@@ -649,7 +658,7 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
     obs.lat = latitude
     obs.pressure = 0
     obs.horizon = '-0:34'       # 34' (atmospheric refraction)
-    d = ephem.date(date - 30 * ephem.second)    # search from 30 seconds before midnight
+    d = ephem.date(date) - 30 * ephem.second    # search from 30 seconds before midnight
     obs.date = d
     m = ephem.Moon(obs)
     m.compute(d)
@@ -716,9 +725,16 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
             getmoonstate(d, lat)			# ...get moon state if unknown
         out[0] = moonstate(i)
         out[3] = moonstate(i)
+
+    if out[0] == '--:--' and out[3] != '--:--':	# if moonset but no moonrise...
+        out[0] = moonset_no_rise(d, date, i, lat)
+
+    if out[0] != '--:--' and out[3] == '--:--':	# if moonrise but no moonset...
+        out[3] = moonrise_no_set(d, date, i, lat)
+
 #-----------------------------------------------------------
     # Moonrise/Moonset on 2nd. day ...
-    d = ephem.date(date + 1 - 30 * ephem.second)
+    d = ephem.date(date + 1) - 30 * ephem.second
     obs.date = d
     m.compute(d)
     try:
@@ -782,9 +798,16 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
             getmoonstate(d, lat)			# ...get moon state if unknown
         out[1] = moonstate(i)
         out[4] = moonstate(i)
+
+    if out[1] == '--:--' and out[4] != '--:--':	# if moonset but no moonrise...
+        out[1] = moonset_no_rise(d, date+1, i, lat)
+
+    if out[1] != '--:--' and out[4] == '--:--':	# if moonrise but no moonset...
+        out[4] = moonrise_no_set(d, date+1, i, lat)
+
 #-----------------------------------------------------------
     # Moonrise/Moonset on 3rd. day ...
-    d = ephem.date(date + 2 - 30 * ephem.second)
+    d = ephem.date(date + 2) - 30 * ephem.second
     obs.date = d
     m.compute(d)
     try:
@@ -849,14 +872,265 @@ def moonrise_set(date, lat):    # used in twilighttab (section 2)
         out[2] = moonstate(i)
         out[5] = moonstate(i)
 
+    if out[2] == '--:--' and out[5] != '--:--':	# if moonset but no moonrise...
+        out[2] = moonset_no_rise(d, date+2, i, lat)
+
+    if out[2] != '--:--' and out[5] == '--:--':	# if moonrise but no moonset...
+        out[5] = moonrise_no_set(d, date+2, i, lat)
+
     return out, out2
 
-def moonrise_set2(date, lat):    # used by eventtables.py
+def moonstate(ndx):
+    # return the current moonstate (if known)
+    out = '--:--'
+    if moonvisible[ndx] == True:
+        #out = 'UP'
+        #out = r'\framebox(12,4){}'
+        #out = r'{\setlength{\fboxrule}{0.8pt}\setlength{\fboxsep}{0pt}\fbox{\makebox(12,4){}}}'
+        #out = r'{\setlength{\fboxrule}{0.8pt}\fbox{\parbox[c][0pt]{0pt}{ }}}'
+        #out = r'\includegraphics[scale=1.0]{./moonup.jpg}'
+        out = r'\begin{tikzpicture}\draw (0,0) rectangle (12pt,4pt);\end{tikzpicture}'
+    if moonvisible[ndx] == False:
+        #out = 'DOWN'
+        out = r'\rule{12Pt}{4Pt}'
+    return out
+
+def getmoonstate(d, lat):
+    # populate the moon state (visible or not) for the specified date & latitude
+    # note: the first parameter 'd' is already an ephem date 30 seconds before midnight
+    # note: getmoonstate is called when there is neither a moonrise nor a moonset on 'd'
+
+    i = 1 + config.lat.index(lat)   # index 0 is reserved to enable an explicit setting
+    latitude = ephem.degrees('{}:00:00.0'.format(lat))
+    obs = ephem.Observer()
+    #d = ephem.date(date) - 30 * ephem.second
+    obs.pressure = 0
+    obs.horizon = '-0:34'
+    m = ephem.Moon(obs)
+    err = False
+    obs.date = d
+    obs.lat = latitude
+    m.compute(d)
+    nextrising = d + 100.0	# in case moonset but no next moonrise
+    nextsetting = d + 100.0	# in case moonrise but no next moonset
+
+    try:
+        nextrising  = obs.next_rising(m)
+    except ephem.NeverUpError:
+        err = True
+        #print("nr NeverUp")
+        moonvisible[i] = False
+    except ephem.AlwaysUpError:
+        err = True
+        #print("nr AlwaysUp")
+        moonvisible[i] = True
+    except Exception:
+        flag_msg("Oops! moon nextR {}: {} occured, line: {}".format(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+        #sys.exc_clear()		# only in Python 2
+
+    obs.date = d
+    if not(err):	# note - 'nextrising' above *should* fail
+        try:
+            nextsetting = obs.next_setting(m)
+        except ephem.NeverUpError:
+            err = True
+            #print("ns NeverUp")
+            moonvisible[i] = False
+        except ephem.AlwaysUpError:
+            err = True
+            #print("ns AlwaysUp")
+            moonvisible[i] = True
+        except Exception:
+            flag_msg("Oops! moon nextS {}: {} occured, line: {}".format(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            #sys.exc_clear()		# only in Python 2
+
+    if not(err):	# note - "err == True" *is* expected...
+        # however if we found both, which occured first?
+        moonvisible[i] = False
+        if nextrising > nextsetting:
+            moonvisible[i] = True
+        #print("{}".format(i), nextrising, nextsetting, moonvisible[i])
+    return
+
+##NEW##
+def moonset_no_rise(d, date, i, lat):
+    # if moonset but no moonrise...
+    msg = ""
+    n = seek_moonrise(d, lat)
+    if n == 1:
+        out = moonstate(i)       # moonrise "below horizon"
+        msg = "below horizon (start)"
+    if n == -1:
+        #print("UP")
+        moonvisible[0] = True
+        out = moonstate(0)       # moonrise "above horizon"
+        msg = "above horizon (end)"
+        #print(out[0])
+    #if msg != "":
+        #print("no moonrise on {} at lat {} => {}".format(ephem.date(date).datetime().strftime("%Y-%m-%d"), lat, msg))
+    if n == 0:
+        out = r'''\raisebox{0.24ex}{\boldmath$\cdot\cdot$~\boldmath$\cdot\cdot$}'''
+    return out
+
+##NEW##
+def moonrise_no_set(d, date, i, lat):
+    # if moonrise but no moonset...
+    msg = ""
+    n = seek_moonset(d, lat)
+    if n == 1:
+        out = moonstate(i)       # moonset "above horizon"
+        msg = "above horizon (start)"
+    if n == -1:
+        moonvisible[0] = False
+        out = moonstate(0)       # moonset "below horizon"
+        msg = "below horizon (end)"
+    #if msg != "":
+        #print("no moonset on  {} at lat {} => {}".format(ephem.date(date).datetime().strftime("%Y-%m-%d"), lat, msg))
+    if n == 0:
+        out = r'''\raisebox{0.24ex}{\boldmath$\cdot\cdot$~\boldmath$\cdot\cdot$}'''
+    return out
+
+##NEW##
+def seek_moonset(d, lat):
+    # for the specified date & latitude ...
+    # return -1 if there is NO MOONSET yesterday
+    # return +1 if there is NO MOONSET tomorrow
+    # return  0 if there was a moonset yesterday and will be a moonset tomorrow
+    # note: this is called when there is only a moonrise on the specified date+latitude
+
+    m_set_t = 0     # normal case: assume moonsets yesterday & tomorrow
+
+    i = 1 + config.lat.index(lat)   # index 0 is reserved to enable an explicit setting
+    latitude = ephem.degrees('{}:00:00.0'.format(lat))
+    obs = ephem.Observer()
+    #d = ephem.date(date) - 30 * ephem.second
+    obs.pressure = 0    # turn off PyEphem’s native mechanism for computing atmospheric refraction near the horizon
+    obs.horizon = '-0:34'
+    m = ephem.Moon(obs)
+    err = False
+    obs.date = d
+    obs.lat = latitude
+    m.compute(d)
+    nextsetting = d + 10.0	# in case moonrise but no next moonset
+
+    try:
+        nextsetting = obs.next_setting(m)
+    except ephem.NeverUpError:
+        err = True
+        #print("ns NeverUp")
+        flag_msg("Oops! moon nextS {}: {} occured, line: {}".format(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+    except ephem.AlwaysUpError:
+        err = True
+        m_set_t = +1
+        #print("ns AlwaysUp")
+    except Exception:
+        flag_msg("Oops! moon nextS {}: {} occured, line: {}".format(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+        #sys.exc_clear()		# only in Python 2
+
+    if not(err):	# note - "err == True" *is* expected...
+        # moonset detected - is it after tomorrow?
+        if nextsetting > d + 2.0:
+            m_set_t = +1
+
+    obs.date = d
+    if m_set_t == 0:
+        try:
+            prevsetting = obs.previous_setting(m)
+        except ephem.NeverUpError:
+            err = True
+            m_set_t = -1
+            #print("ps NeverUp")
+        except ephem.AlwaysUpError:
+            err = True
+            #print("ps AlwaysUp")
+            flag_msg("Oops! moon prevS {}: {} occured, line: {}".format(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+        except Exception:
+            flag_msg("Oops! moon prevS {}: {} occured, line: {}".format(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            #sys.exc_clear()		# only in Python 2
+
+        if not(err):	# note - "err == True" *is* expected...
+            # moonset detected - is it before yesterday?
+            if prevsetting < d - 1.0:
+                m_set_t = -1
+        #print("m_set_t = {}".format(m_set_t))
+    return m_set_t
+
+##NEW##
+def seek_moonrise(d, lat):
+    # return -1 if there is NO MOONRISE yesterday
+    # return +1 if there is NO MOONRISE tomorrow
+    # return  0 if there was a moonrise yesterday and will be a moonrise tomorrow
+    # note: this is called when there is only a moonset on the specified date+latitude
+
+    m_rise_t = 0    # normal case: assume moonrise yesteray & tomorrow
+
+    i = 1 + config.lat.index(lat)   # index 0 is reserved to enable an explicit setting
+    latitude = ephem.degrees('{}:00:00.0'.format(lat))
+    obs = ephem.Observer()
+    #d = ephem.date(date) - 30 * ephem.second
+    obs.pressure = 0
+    obs.horizon = '-0:34'
+    m = ephem.Moon(obs)
+    err = False
+    obs.date = d
+    obs.lat = latitude
+    m.compute(d)
+    nextrising = d + 10.0	# in case moonset but no next moonrise
+
+    try:
+        nextrising  = obs.next_rising(m)
+    except ephem.NeverUpError:
+        err = True
+        m_rise_t = +1
+        #print("nr NeverUp")
+    except ephem.AlwaysUpError:
+        err = True
+        #print("nr AlwaysUp")
+        flag_msg("Oops! moon nextR {}: {} occured, line: {}".format(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+    except Exception:
+        flag_msg("Oops! moon nextR {}: {} occured, line: {}".format(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+        #sys.exc_clear()		# only in Python 2
+
+    if not(err):	# note - "err == True" *is* expected...
+        # moonrise detected - is it after tomorrow?
+        if nextrising > d + 2.0:
+            m_rise_t = +1
+
+    obs.date = d
+    if m_rise_t == 0:
+        try:
+            prevrising = obs.previous_rising(m)
+        except ephem.NeverUpError:
+            err = True
+            #print("pr NeverUp")
+            flag_msg("Oops! moon prevR {}: {} occured, line: {}".format(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+        except ephem.AlwaysUpError:
+            err = True
+            m_rise_t = -1
+            #print("pr AlwaysUp")
+        except Exception:
+            flag_msg("Oops! moon prevR {}: {} occured, line: {}".format(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
+            #sys.exc_clear()		# only in Python 2
+
+        if not(err):	# note - "err == True" *is* expected...
+            # moonrise detected - is it before yesterday?
+            if prevrising < d - 1.0:
+                m_rise_t = -1
+
+        #print("m_rise_t = {}".format(m_rise_t))
+    return m_rise_t
+
+#-------------------------
+#   EVENT TIME tables
+#-------------------------
+
+def moonrise_set2(date, lat):    # used in twilighttab of eventtables.py
+    # - - - TIMES ARE ROUNDED TO SECONDS - - -
     # returns moonrise and moonset for the given date and latitude:
     #    rise time, set time
     # Additionally it also tracks the current state of the moon (above or below horizon)
 
-    i = config.lat.index(lat)
+    i = 1 + config.lat.index(lat)   # index 0 is reserved to enable an explicit setting
     out  = ['--:--','--:--']	# first event
     out2 = ['--:--','--:--']	# second event on same day (rare)
 
@@ -865,7 +1139,7 @@ def moonrise_set2(date, lat):    # used by eventtables.py
     obs.lat = latitude
     obs.pressure = 0
     obs.horizon = '-0:34'       # 34' (atmospheric refraction)
-    d = ephem.date(date - 0.5 * ephem.second)   # search from 0.5 seconds before midnight
+    d = ephem.date(date) - 0.5 * ephem.second   # search from 0.5 seconds before midnight
     obs.date = d
     m = ephem.Moon(obs)
     m.compute(d)
@@ -933,80 +1207,13 @@ def moonrise_set2(date, lat):    # used by eventtables.py
         out[0] = moonstate(i)
         out[1] = moonstate(i)
 
+    if out[0] == '--:--' and out[1] != '--:--':	# if moonset but no moonrise...
+        out[0] = moonset_no_rise(d, date, i, lat)
+
+    if out[0] != '--:--' and out[1] == '--:--':	# if moonrise but no moonset...
+        out[1] = moonrise_no_set(d, date, i, lat)
+
     return out, out2
-
-
-def getmoonstate(d, lat):
-    # populate the moon state (visible or not) for the specified date & latitude
-    # note: the first parameter 'd' is already an ephem date 30 seconds before midnight
-    # note: getmoonstate is called when there is neither a moonrise nor a moonset on 'd'
-
-    i = config.lat.index(lat)
-    latitude = ephem.degrees('{}:00:00.0'.format(lat))
-    obs = ephem.Observer()
-    #d = ephem.date(date - 30 * ephem.second)
-    obs.pressure = 0
-    obs.horizon = '-0:34'
-    m = ephem.Moon(obs)
-    err = False
-    obs.date = d
-    obs.lat = latitude
-    m.compute(d)
-    nextrising = d + 100.0	# in case moonset but no next moonrise
-    nextsetting = d + 100.0	# in case moonrise but no next moonset
-
-    try:
-        nextrising  = obs.next_rising(m)
-    except ephem.NeverUpError:
-        err = True
-        #print("nr NeverUp")
-        moonvisible[i] = False
-    except ephem.AlwaysUpError:
-        err = True
-        #print("nr AlwaysUp")
-        moonvisible[i] = True
-    except Exception:
-        flag_msg("Oops! moon nextR {}: {} occured, line: {}".format(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
-        #sys.exc_clear()		# only in Python 2
-
-    obs.date = d
-    if not(err):	# note - 'nextrising' above *should* fail
-        try:
-            nextsetting = obs.next_setting(m)
-        except ephem.NeverUpError:
-            err = True
-            #print("ns NeverUp")
-            moonvisible[i] = False
-        except ephem.AlwaysUpError:
-            err = True
-            #print("ns AlwaysUp")
-            moonvisible[i] = True
-        except Exception:
-            flag_msg("Oops! moon nextS {}: {} occured, line: {}".format(i,sys.exc_info()[1],sys.exc_info()[2].tb_lineno))
-            #sys.exc_clear()		# only in Python 2
-
-    if not(err):	# note - "err == True" *is* expected...
-        # however if we found both, which occured first?
-        moonvisible[i] = False
-        if nextrising > nextsetting:
-            moonvisible[i] = True
-        #print("{}".format(i), nextrising, nextsetting, moonvisible[i])
-    return
-
-def moonstate(ndx):
-    # return the current moonstate (if known)
-    out = '--:--'
-    if moonvisible[ndx] == True:
-        #out = 'UP'
-        #out = r'\framebox(12,4){}'
-        #out = r'{\setlength{\fboxrule}{0.8pt}\setlength{\fboxsep}{0pt}\fbox{\makebox(12,4){}}}'
-        #out = r'{\setlength{\fboxrule}{0.8pt}\fbox{\parbox[c][0pt]{0pt}{ }}}'
-        #out = r'\includegraphics[scale=1.0]{./moonup.jpg}'
-        out = r'\begin{tikzpicture}\draw (0,0) rectangle (12pt,4pt);\end{tikzpicture}'
-    if moonvisible[ndx] == False:
-        #out = 'DOWN'
-        out = r'\rule{12Pt}{4Pt}'
-    return out
 
 #------------------------------
 #   Equation of Time section
@@ -1024,12 +1231,12 @@ def equation_of_time(date, round2seconds = False): # used in twilighttab (sectio
         # !! transit times are rounded to the nearest second,
         # !! so the search needs to start and end 0.5 sec earlier
         # !! e.g. after 23h 59m 59.5s rounds up to 00:00:00 next day
-        d = ephem.date(date - 0.5 * ephem.second)
+        d = ephem.date(date) - 0.5 * ephem.second
     else:
         # !! transit times are rounded to the nearest minute,
         # !! so the search needs to start and end 30 sec earlier
         # !! e.g. after 23h 59m 30s rounds up to 00:00 next day
-        d = ephem.date(date - 30 * ephem.second)
+        d = ephem.date(date) - 30 * ephem.second
 
     obs = ephem.Observer()
     obs.date = d

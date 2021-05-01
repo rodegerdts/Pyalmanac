@@ -137,7 +137,7 @@ if s in set(['1', '2', '3', '4', '5', '6', '7']):
         for yearint in range(int(yearfr),int(yearto)+1):
             start = time.time()
             year = "{:4d}".format(yearint)  # year = "%4d" %yearint
-            msg = "\nCreating the nautical almanac for the year {}".format(year)
+            msg = "\nCreating the nautical almanac for the year {}\n".format(year)
             print(msg)
             first_day = datetime.date(yearint, 1, 1)
             fn = "almanac{}{}".format(ff,year+DecFmt)
@@ -154,7 +154,7 @@ if s in set(['1', '2', '3', '4', '5', '6', '7']):
     elif s == '2':      # Sun Tables (for a year)
         for yearint in range(int(yearfr),int(yearto)+1):
             year = "{:4d}".format(yearint)  # year = "%4d" %yearint
-            msg = "\nCreating the sun tables only for the year {}".format(year)
+            msg = "\nCreating the sun tables only for the year {}\n".format(year)
             print(msg)
             first_day = datetime.date(yearint, 1, 1)
             fn = "sunalmanac{}{}".format(ff,year+DecFmt)
@@ -169,7 +169,7 @@ if s in set(['1', '2', '3', '4', '5', '6', '7']):
         for yearint in range(int(yearfr),int(yearto)+1):
             start = time.time()
             year = "{:4d}".format(yearint)  # year = "%4d" %yearint
-            msg = "\nCreating the event time tables for the year {}".format(year)
+            msg = "\nCreating the event time tables for the year {}\n".format(year)
             print(msg)
             first_day = datetime.date(yearint, 1, 1)
             fn = "event-times{}".format(year)
@@ -185,7 +185,7 @@ if s in set(['1', '2', '3', '4', '5', '6', '7']):
 
     elif s == '4':      # Nautical almanac   -  6 days from today
 ##        config.initLOG()		# initialize log file
-        msg = "\nCreating nautical almanac tables - from {}".format(sdmy)
+        msg = "\nCreating nautical almanac tables - from {}\n".format(sdmy)
         print(msg)
         fn = "almanac{}{}".format(ff,symd+DecFmt)
         outfile = open(fn + ".tex", mode="w", encoding="utf8")
@@ -198,7 +198,7 @@ if s in set(['1', '2', '3', '4', '5', '6', '7']):
         tidy_up(fn)
 
     elif s == '5':      # Sun tables only    - 30 days from today
-        msg = "\nCreating the sun tables only - from {}".format(sdmy)
+        msg = "\nCreating the sun tables only - from {}\n".format(sdmy)
         print(msg)
         fn = "sunalmanac{}{}".format(ff,symd+DecFmt)
         outfile = open(fn + ".tex", mode="w", encoding="utf8")
@@ -208,7 +208,7 @@ if s in set(['1', '2', '3', '4', '5', '6', '7']):
         tidy_up(fn)
 
     elif s == '6':      # Event Time tables  -  6 days from today
-        msg = "\nCreating event time tables - from {}".format(sdmy)
+        msg = "\nCreating event time tables - from {}\n".format(sdmy)
         print(msg)
         fn = "event-times{}".format(symd)
         outfile = open(fn + ".tex", mode="w", encoding="utf8")
@@ -218,7 +218,7 @@ if s in set(['1', '2', '3', '4', '5', '6', '7']):
         tidy_up(fn)
 
     elif s == '7':
-        msg = "\nCreating the Increments and Corrections tables"
+        msg = "\nCreating the Increments and Corrections tables\n"
         print(msg)
         fn = "inc"
         outfile = open(fn + ".tex", mode="w", encoding="utf8")

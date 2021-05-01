@@ -67,6 +67,14 @@ Minor changes are included here to this original (non-PyPI) edition to reflect s
 A double moonrise or moonset on the same day is now highlighted for better legibility. Event Time tables can now be generated - these are the tables containing data in hours:minutes:seconds, e.g. sunrise, sunset, moonrise, moonset and Meridian Passage.
 Accuracy to to the second of time is not required for navigational purposes, but may be used to compare accuracy with other algorithms. Some internal technical enhancements and minor changes to text are also included.
 
+**UPDATE: May 2021**
+
+The indication of objects (Sun or Moon) continuously above or below the horizon has been corrected.
+
+Regarding Moon Data: ".. .." has been added to indicate that the moonrise/moonset event occurs the following day (at the specified latitude). If there is no moonrise/moonset for two or more consecutive days, black boxes indicate "moon below horizon"; white boxes indicate "moon above horizon". This brings it inline with Nautical Almanacs. (Previously they were only displayed when there was no moonrise *and* no moonset on a single day.)
+
+Correction to Sun Data: "Sun continually above/below horizon" now shown if it applies to both Sunrise and Sunset, or *additionally* to both Civil Twilight Start & End; or *additionally* to both Astronomical Twilight Start & End, i.e. as two, four or six events per day and latitute. This brings it inline with Nautical Almanacs.
+
 ## Requirements
 
 &emsp;Most of the computation is done by the free Ephem library.  

@@ -21,8 +21,6 @@
 #       will be removed from Python at some later time. See:
 # https://docs.python.org/3/whatsnew/3.0.html#pep-3101-a-new-approach-to-string-formatting
 
-# Standard library imports
-
 # Third party imports
 import ephem
 
@@ -90,7 +88,7 @@ def twilighttab(date):
                 tab = tab + r'''\rule{0pt}{2.6ex}
 '''
         lasthemisph = hemisph
-        twi = twilight(date, i, hemisph, True)
+        twi = twilight(date, i, hemisph, True)      # True = round to seconds
         moon, moon2 = moonrise_set2(date,i)
         if not(double_events_found(moon,moon2)):
             line = r'''\textbf{{{}}}'''.format(hs) + r''' {}$^\circ$'''.format(abs(i))
@@ -151,7 +149,7 @@ def meridiantab(date):
 \textbf{{{}}} & \textbf{{SHA}} & \textbf{{Mer.pass}}\\
 \hline\multicolumn{{3}}{{|r|}}{{}}\\[-2.0ex]
 '''.format(datestr)
-    p = planetstransit(date, True)
+    p = planetstransit(date, True)      # True = round to seconds
     m = m + r'''Venus & {} & {} \\
 '''.format(p[0],p[1])
     m = m + r'''Mars & {} & {} \\
@@ -186,7 +184,7 @@ def equationtab(date):
 
     for k in range(2):
         d = ephem.date(date+k)
-        eq = equation_of_time(d, True)
+        eq = equation_of_time(d, True)      # True = round to seconds
         tab = tab + r'''{} & {} & {} & {} & {} & {} & {}({}\%) \\
 '''.format(d.datetime().strftime("%d"),eq[0],eq[1],eq[2],eq[3],eq[4],eq[5],eq[6])
 
