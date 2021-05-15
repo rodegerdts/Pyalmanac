@@ -29,7 +29,7 @@ Pyalmanac contains its own star database (similar to the database in Ephem 3.7.6
 It is updated with data from the Hipparcos Star Catalogue and the GHA/Dec star data now matches a sample page from a Nautical Almanac typically to within 0°0.1'.
 
 NOTE: Pyalmanac contains its own star database - it does not use the version supplied with Ephem, hence updating from 3.7.6 to 3.7.7.1 is harmless. Star names are chosen to comply with Nautical Almanacs.  
-NOTE: if still required, a Python 2.7 script with identical functionality can be found at: https://github.com/aendie/Pyalmanac-Py2  
+NOTE: if still required, a Python 2.7 script with similar functionality can be found at: https://github.com/aendie/Pyalmanac-Py2  
 
 **ACKNOWLEDGEMENTS**
 
@@ -74,6 +74,9 @@ The indication of objects (Sun or Moon) continuously above or below the horizon 
 Regarding Moon Data: ".. .." has been added to indicate that the moonrise/moonset event occurs the following day (at the specified latitude). If there is no moonrise/moonset for two or more consecutive days, black boxes indicate "moon below horizon"; white boxes indicate "moon above horizon". This brings it in line with Nautical Almanacs. (Previously they were only displayed when there was no moonrise *and* no moonset on a single day.)
 
 Correction to Sun Data: "Sun continually above/below horizon" now shown if it applies to both Sunrise and Sunset, or *additionally* to both Civil Twilight Start & End; or *additionally* to both Astronomical Twilight Start & End, i.e. as two, four or six events per day and latitude. This brings it in line with Nautical Almanacs.
+
+&emsp;:smiley:&ensp;Pyalmanac is now available on DockerHub [here](https://hub.docker.com/repository/docker/aendie/pyalmanac).&ensp;:smiley:
+The DockerHub image contains a Linux-based OS, TeX Live, the application code, and third party Python imports (including the astronomical library). It can be executed "in a container" on Windows 10 Pro, macOS or a Linux-based OS.
 
 ## Requirements
 

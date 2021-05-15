@@ -192,7 +192,8 @@ def parallaxtab():
 	tab += line
 	
 	while Hdeg < 5 :
-		line = " ´ "
+		#line = " \u0027 "        # DOCKER ONLY
+		line = " ' "        # DOCKER ONLY
 		dd = Hdeg
 		while dd < 90:
 			line += r"& \multicolumn{{1}}{{l}}{{\textbf{{{}$^\circ$}}}}".format(dd)
@@ -240,7 +241,7 @@ def venparallax():
 	\multicolumn{7}{c}{\textbf{Parallax of Venus and Mars}}\\
 	'''
 	tab += r"""\hline 
-	$H_{a}$ HP & \textbf{.1'} & \textbf{.2'} & \textbf{.3} & \textbf{.4'} & \textbf{.5'} & \textbf{.6'} \\
+	$H_{a}$ HP & \textbf{.1'} & \textbf{.2'} & \textbf{.3'} & \textbf{.4'} & \textbf{.5'} & \textbf{.6'} \\
 	\hline
 	"""
 	while Hdeg<90:
@@ -264,9 +265,10 @@ def makelatex():
 	\pagestyle{scrheadings}
 	\clearpairofpagestyles
 	\chead{\large \textbf{Increments and Corrections}}
-    \usepackage[utf8]{inputenc}
+    %\usepackage[utf8]{inputenc}
     \usepackage[english]{babel}
     \usepackage{fontenc}
+    %\usepackage{upquote}
     \usepackage{array, multicol, blindtext}
     \usepackage[landscape,headsep=0mm, headheight=5mm, top=15mm, bottom=15mm, left=8mm, right=8mm]{geometry}
 	\newcommand{\HRule}{\rule{\linewidth}{0.9mm}}

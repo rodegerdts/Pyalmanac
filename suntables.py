@@ -398,14 +398,19 @@ def almanac(first_day, pagenum):
 \begin{document}
 % for the title page and page 2 only...
 \newgeometry{nomarginpar, top=5mm, bottom=13mm, left=20mm, right=14mm}
-\begin{titlepage}'''
-
-    alm = alm + r'''
+\begin{titlepage}
     \vspace*{2cm}
     \begin{center}
-    \textsc{\Large Generated using Ephem}\\[1.5cm]
-    \includegraphics[width=0.4\textwidth]{./Ra}\\[1cm]
-    \textsc{\huge The Nautical Almanac for the Sun}\\[0.7cm]'''
+    \textsc{\Large Generated using Ephem}\\[1.5cm]'''
+
+    if config.dockerized:   # DOCKER ONLY
+        fn = "../Ra"
+    else:
+        fn = "./Ra"
+
+    alm = alm + r'''
+    \includegraphics[width=0.4\textwidth]{{{}}}\\[1cm]
+    \textsc{{\huge The Nautical Almanac for the Sun}}\\[0.7cm]'''.format(fn)
 
     if pagenum == 25:
         alm = alm + r'''

@@ -979,9 +979,16 @@ def almanac(first_day, pagenum):
     alm = alm + r'''
     \begin{titlepage}
     \begin{center}
-    \textsc{\Large Generated using Ephem}\\[0.7cm]
+    \textsc{\Large Generated using Ephem}\\[0.7cm]'''
+
+    if config.dockerized:   # DOCKER ONLY
+        fn = "../A4chartNorth_P.pdf"
+    else:
+        fn = "./A4chartNorth_P.pdf"
+
+    alm = alm + r'''
     % TRIM values: left bottom right top
-    \includegraphics[clip, trim=5mm 8cm 5mm 21mm, width=0.8\textwidth]{./A4chartNorth_P.pdf}\\'''
+    \includegraphics[clip, trim=5mm 8cm 5mm 21mm, width=0.8\textwidth]{{{}}}\\'''.format(fn)
 
     alm = alm + r'''[{}]
     \textsc{{\huge The Nautical Almanac}}\\[{}]'''.format(vsep1,vsep2)

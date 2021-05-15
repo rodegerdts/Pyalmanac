@@ -20,10 +20,21 @@
 # ================ EDIT LINES IN THIS SECTION ONLY ================
 
 pgsz = 'A4'     # page size 'A4' or 'Letter' (global variable)
-search_next_rising_sun = True   # 'False' = base it only on month and hemisphere
+search_next_rising_sun = False   # 'False' = base it only on month and hemisphere
 
 # ================ DO NOT EDIT LINES BELOW HERE ================
+# Docker-related stuff...
+dockerized = False   # 'True' to build this app to run in a Docker-Linux container
+# NOTE: config.py has been "Dockerized" by use of environment variables in .env
 
+# Docker Container subfolder for creating PDF files (and optionally a LOG file)
+# This folder must be mapped to a Named Volume as part of the 'docker run' command:
+#   e.g.    -v "%cd%\pdf":/app/tmp      in a Windows host system
+#   e.g.    -v $(pwd)/pdf:/app/tmp      in a macOS/Linux host system
+docker_pdf = "tmp"
+docker_prefix  = docker_pdf + "/" if dockerized else ""  # docker image is based on Linux
+docker_postfix = "/" + docker_pdf if dockerized else ""  # docker image is based on Linux
+# ==============================================================
 # define global variables
 logfileopen = False
 tbls = ''		# table style (global variable)
@@ -37,7 +48,7 @@ def initLOG():
     global errors
     errors = 0
     global logfile
-    logfile = open('debug.log', mode="w", encoding="utf8")
+    logfile = open(docker_prefix + 'debug.log', mode="w", encoding="utf8")
     global logfileopen
     logfileopen = True
 

@@ -224,7 +224,7 @@ def doublepage(date, page1):
 
 
 def pages(date, p):
-    # make 'p' doublepages beginning with date
+    # make almanac starting from 'date'
     out = ''
     page1 = True
     for i in range(p):
@@ -242,6 +242,7 @@ def maketables(first_day, pagenum):
 
     # page size specific parameters
     if config.pgsz == "A4":
+        # pay attention to the limited page width
         paper = "a4paper"
         vsep1 = "2.0cm"
         vsep2 = "1.5cm"
@@ -254,6 +255,7 @@ def maketables(first_day, pagenum):
         lm = "16mm"
         rm = "16mm"
     else:
+        # pay attention to the limited page height
         paper = "letterpaper"
         vsep1 = "1.5cm"
         vsep2 = "1.0cm"
@@ -299,9 +301,16 @@ def maketables(first_day, pagenum):
     alm = alm + r'''
     \begin{titlepage}
     \begin{center}
-    \textsc{\Large Generated using Ephem}\\[0.7cm]
+    \textsc{\Large Generated using Ephem}\\[0.7cm]'''
+
+    if config.dockerized:   # DOCKER ONLY
+        fn = "../A4chartNorth_P.pdf"
+    else:
+        fn = "./A4chartNorth_P.pdf"
+
+    alm = alm + r'''
     % TRIM values: left bottom right top
-    \includegraphics[clip, trim=5mm 8cm 5mm 21mm, width=0.8\textwidth]{./A4chartNorth_P.pdf}\\'''
+    \includegraphics[clip, trim=5mm 8cm 5mm 21mm, width=0.8\textwidth]{{{}}}\\'''.format(fn)
 
     alm = alm + r'''[{}]
     \textsc{{\huge Event Time Tables}}\\[{}]'''.format(vsep1,vsep2)
