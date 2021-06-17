@@ -250,7 +250,7 @@ def planetstabm(date):
 
 
 def starstab(date):
-    # returns a table with ephemerieds for the navigational stars
+    # returns a table with ephemerides for the navigational stars
     # OLD: \begin{tabular*}{0.25\textwidth}[t]{@{\extracolsep{\fill}}|rrr|}
 
     if config.tbls == "m":

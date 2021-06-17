@@ -133,7 +133,7 @@ def twilighttab(date):
 
 
 def meridiantab(date):
-    # returns a table with ephemerieds for the navigational stars
+    # returns a table with ephemerides for the navigational stars
     # LaTeX SPACING: \enskip \quad \qquad
     out = r'''\quad
 \begin{tabular*}{0.25\textwidth}[t]{@{\extracolsep{\fill}}|rrr|}
