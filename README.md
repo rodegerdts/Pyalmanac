@@ -79,6 +79,21 @@ Correction to Sun Data: "Sun continually above/below horizon" now shown if it ap
 
 The DockerHub image contains a Linux-based OS, TeX Live, the application code, and third party Python imports (including the astronomical library). It can be executed "in a container" on Windows 10 Pro, macOS or a Linux-based OS.
 
+**UPDATE: Jul 2021**
+
+The PDF filenames have been revised:
+
+* modna_\<starting date or year\>.pdf: for Nautical Almanacs in modern style
+* modst_\<starting date or year\>.pdf: for Sun Tables in modern style
+* tradna_\<starting date or year\>.pdf: for Nautical Almanacs in traditional style
+* tradst_\<starting date or year\>.pdf: for Sun Tables in traditional style
+
+One command line argument may be appended to the run command:
+
+* -v to invoke verbose mode (send pdfTeX execution steps to the console)
+* -log to preserve the log file
+* -tex to preserve the tex file
+
 ## Requirements
 
 &emsp;Most of the computation is done by the free Ephem library.  
