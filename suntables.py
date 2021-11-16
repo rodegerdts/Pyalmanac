@@ -24,6 +24,7 @@
 # https://docs.python.org/3/whatsnew/3.0.html#pep-3101-a-new-approach-to-string-formatting
 
 # Standard library imports
+from datetime import datetime, timedelta
 import math
 
 # Third party imports
@@ -33,175 +34,17 @@ import ephem
 from alma_ephem import *
 import config
 
-def suntab(date):
-    # generates LaTeX table for sun only (traditional)
-    tab = r'''\noindent
-\begin{tabular*}{0.2\textwidth}[t]{@{\extracolsep{\fill}}|c|rr|}
-'''
-    n = 0
-    while n < 3:
-        da = date + n
-        tab = tab + r'''\hline
-\multicolumn{{1}}{{|c|}}{{\rule{{0pt}}{{2.6ex}}\textbf{{{}}}}} & \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c|}}{{\textbf{{Dec}}}}\\
-\hline\rule{{0pt}}{{2.6ex}}\noindent
-'''.format(ephem.date(da).datetime().strftime("%d"))
-        h = 0
+#----------------------
+#   internal methods
+#----------------------
 
-        if config.decf != '+':	# USNO format for Declination
-            # first populate an array of 24 hours with all data
-            hourlydata = [[] for i in range(24)]
-            while h < 24:
-                hourlydata[h] = sunmoon(da)
-                da = da + ephem.hour
-                h += 1
-            # now print the data per hour
-            da = date + n
-            h = 0
+def fmtdate(d):
+    if config.pgsz == 'Letter': return d.strftime("%m/%d/%Y")
+    return d.strftime("%d.%m.%Y")
 
-            while h < 24:
-                eph = hourlydata[h]
-                if h > 0:
-                    preveph = hourlydata[h-1]
-                else:
-                    preveph = hourlydata[0]		# hour -1 = hour 0
-                if h < 23:
-                    nexteph = hourlydata[h+1]
-                else:
-                    nexteph = hourlydata[23]	# hour 24 = hour 23
-
-                # format declination checking for hemisphere change
-                printNS, printDEG = declCompare(preveph[7],eph[7],nexteph[7],h)
-                sdec = NSdecl(eph[1],h,printNS,printDEG,False)
-
-                line = "{} & {} & {}".format(h,eph[0],sdec)
-                lineterminator = r'''\\
-'''
-                if h < 23 and (h+1)%6 == 0:
-                    lineterminator = r'''\\[2Pt]
-'''
-                tab = tab + line + lineterminator
-                h += 1
-                da = da + ephem.hour
-
-        else:			# Positive/Negative Declinations
-            while h < 24:
-                eph = sunmoon(da)
-                line = "{} & {} & {}".format(h,eph[0],eph[1])
-                lineterminator = r'''\\
-'''
-                if h < 23 and (h+1)%6 == 0:
-                    lineterminator = r'''\\[2Pt]
-'''
-                tab = tab + line + lineterminator
-                h += 1
-                da = da + ephem.hour
-
-        vd = sun_moon_SD(date + n)
-        tab = tab + r'''\hline
-\rule{{0pt}}{{2.4ex}} & \multicolumn{{1}}{{c}}{{SD.={}}} & \multicolumn{{1}}{{c|}}{{d={}}}\\
-\hline
-'''.format(vd[1],vd[0])
-        if n < 2:
-            # add space between tables...
-            tab = tab + r'''\multicolumn{1}{c}{}\\[-0.5ex]'''
-        n += 1
-
-    tab = tab + r'''\end{tabular*}'''
-    return tab
-
-def suntabm(date):
-    # generates LaTeX table for sun only (modern)
-    if config.decf != '+':	# USNO format for Declination
-        colsep = "4pt"
-    else:
-        colsep = "3.8pt"
-    
-    tab = r'''\noindent
-\renewcommand{{\arraystretch}}{{1.1}}
-\setlength{{\tabcolsep}}{{{}}}
-\begin{{tabular}}[t]{{crr}}'''.format(colsep)
-
-    n = 0
-    while n < 3:
-        da = date + n
-        tab = tab + r'''
-\multicolumn{{1}}{{c}}{{\footnotesize{{\textbf{{{}}}}}}} & \multicolumn{{1}}{{c}}{{\footnotesize{{\textbf{{GHA}}}}}} & \multicolumn{{1}}{{c}}{{\footnotesize{{\textbf{{Dec}}}}}}\\
-\cmidrule{{1-3}}
-'''.format(ephem.date(da).datetime().strftime("%d"))
-        h = 0
-
-        if config.decf != '+':	# USNO format for Declination
-            # first populate an array of 24 hours with all data
-            hourlydata = [[] for i in range(24)]
-            while h < 24:
-                hourlydata[h] = sunmoon(da)
-                da = da + ephem.hour
-                h += 1
-            # now print the data per hour
-            da = date + n
-            h = 0
-
-            while h < 24:
-                band = int(h/6)
-                group = band % 2
-                eph = hourlydata[h]
-                if h > 0:
-                    preveph = hourlydata[h-1]
-                else:
-                    preveph = hourlydata[0]		# hour -1 = hour 0
-                if h < 23:
-                    nexteph = hourlydata[h+1]
-                else:
-                    nexteph = hourlydata[23]	# hour 24 = hour 23
-
-                # format declination checking for hemisphere change
-                printNS, printDEG = declCompare(preveph[7],eph[7],nexteph[7],h)
-                sdec = NSdecl(eph[1],h,printNS,printDEG,True)
-
-                line = r'''\color{{blue}}{{{}}} & '''.format(h)
-                line = line + "{} & {}".format(eph[0],sdec)
-                if group == 1:
-                    tab = tab + r'''\rowcolor{LightCyan}'''
-                lineterminator = r'''\\
-'''
-                if config.pgsz == "A4" and h < 23 and (h+1)%6 == 0:
-                    lineterminator = r'''\\[2Pt]
-'''
-                tab = tab + line + lineterminator
-                h += 1
-                da = da + ephem.hour
-
-        else:			# Positive/Negative Declinations
-            while h < 24:
-                band = int(h/6)
-                group = band % 2
-                eph = sunmoon(da)
-                line = r'''\color{{blue}}{{{}}} & '''.format(h)
-                line = line + "{} & {}".format(eph[0],eph[1])
-                if group == 1:
-                    tab = tab + r'''\rowcolor{LightCyan}'''
-                lineterminator = r'''\\
-'''
-                if config.pgsz == "A4" and h < 23 and (h+1)%6 == 0:
-                    lineterminator = r'''\\[2Pt]
-'''
-                tab = tab + line + lineterminator
-                h += 1
-                da = da + ephem.hour
-
-        vd = sun_moon_SD(date + n)
-        tab = tab + r'''\cmidrule{{2-3}}
-& \multicolumn{{1}}{{c}}{{\footnotesize{{SD.={}}}}} & \multicolumn{{1}}{{c}}{{\footnotesize{{d={}}}}}\\
-\cmidrule{{2-3}}'''.format(vd[1],vd[0])
-        if n < 2:
-            # add space between tables...
-            tab = tab + r'''
-\multicolumn{3}{c}{}\\[-1.5ex]'''
-        n += 1
-    tab = tab + r'''
-\end{tabular}'''
-    return tab
-
+def fmtdates(d1,d2):
+    if config.pgsz == 'Letter': return d1.strftime("%m/%d/%Y") + " - " + d2.strftime("%m/%d/%Y")
+    return d1.strftime("%d.%m.%Y") + " - " + d2.strftime("%d.%m.%Y")
 
 def declCompare(prev_rad, curr_rad, next_rad, hr):
     # for Declinations only...
@@ -277,8 +120,198 @@ def NSdecl(deg, hr, printNS, printDEG, modernFMT):
     #print("sdeg: ", sdeg)
     return sdeg
 
+# >>>>>>>>>>>>>>>>>>>>>>>>
+def suntab(date, n):
+    # generates LaTeX table for sun only (traditional)
 
-def page(date):
+    first_day = r'''{}/{}/{}'''.format(date.year,date.month,date.day)
+    dfl = ephem.Date(first_day)    # convert date to float
+
+    tab = r'''\noindent
+\begin{tabular*}{0.2\textwidth}[t]{@{\extracolsep{\fill}}|c|rr|}
+'''
+    while n > 0:
+        dhr = dfl       # variable to increment per hour
+        # print date based on dfl (as Ephem routines use dfl)
+        tab = tab + r'''\hline
+\multicolumn{{1}}{{|c|}}{{\rule{{0pt}}{{2.6ex}}\textbf{{{}}}}} & \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c|}}{{\textbf{{Dec}}}}\\
+\hline\rule{{0pt}}{{2.6ex}}\noindent
+'''.format(ephem.date(dfl).datetime().strftime("%d"))
+        h = 0
+
+        if config.decf != '+':	# USNO format for Declination
+            # first populate an array of 24 hours with all data
+            hourlydata = [[] for i in range(24)]
+            while h < 24:
+                hourlydata[h] = sunmoon(dhr)
+                dhr += ephem.hour
+                h += 1
+            # now print the data per hour
+            h = 0
+
+            while h < 24:
+                eph = hourlydata[h]
+                if h > 0:
+                    preveph = hourlydata[h-1]
+                else:
+                    preveph = hourlydata[0]		# hour -1 = hour 0
+                if h < 23:
+                    nexteph = hourlydata[h+1]
+                else:
+                    nexteph = hourlydata[23]	# hour 24 = hour 23
+
+                # format declination checking for hemisphere change
+                printNS, printDEG = declCompare(preveph[7],eph[7],nexteph[7],h)
+                sdec = NSdecl(eph[1],h,printNS,printDEG,False)
+
+                line = "{} & {} & {}".format(h,eph[0],sdec)
+                lineterminator = r'''\\
+'''
+                if h < 23 and (h+1)%6 == 0:
+                    lineterminator = r'''\\[2Pt]
+'''
+                tab += line + lineterminator
+                h += 1
+
+        else:			# Positive/Negative Declinations
+            while h < 24:
+                eph = sunmoon(dhr)
+                line = "{} & {} & {}".format(h,eph[0],eph[1])
+                lineterminator = r'''\\
+'''
+                if h < 23 and (h+1)%6 == 0:
+                    lineterminator = r'''\\[2Pt]
+'''
+                tab += line + lineterminator
+                h += 1
+                dhr += ephem.hour
+
+        vd = sun_moon_SD(dfl)
+        tab = tab + r'''\hline
+\rule{{0pt}}{{2.4ex}} & \multicolumn{{1}}{{c}}{{SD={}$'$}} & \multicolumn{{1}}{{c|}}{{\textit{{d}}\,=\,{}$'$}}\\
+\hline
+'''.format(vd[1],vd[0])
+        if n < 2:
+            # add space between tables...
+            tab = tab + r'''\multicolumn{1}{c}{}\\[-0.5ex]'''
+        n -= 1
+        dfl += 1
+
+    tab = tab + r'''
+\end{tabular*}'''
+    return tab
+
+# >>>>>>>>>>>>>>>>>>>>>>>>
+def suntabm(date, n):
+    # generates LaTeX table for sun only (modern)
+
+    first_day = r'''{}/{}/{}'''.format(date.year,date.month,date.day)
+    dfl = ephem.Date(first_day)    # convert date to float
+
+    if config.decf != '+':	# USNO format for Declination
+        colsep = "4pt"
+    else:
+        colsep = "3.8pt"
+    
+    tab = r'''\noindent
+\renewcommand{{\arraystretch}}{{1.1}}
+\setlength{{\tabcolsep}}{{{}}}
+\begin{{tabular}}[t]{{crr}}'''.format(colsep)
+
+    while n > 0:
+        dhr = dfl       # variable to increment per hour
+        # print date based on dfl (as Ephem routines use dfl)
+        tab = tab + r'''
+\multicolumn{{1}}{{c}}{{\footnotesize{{\textbf{{{}}}}}}} & \multicolumn{{1}}{{c}}{{\footnotesize{{\textbf{{GHA}}}}}} & \multicolumn{{1}}{{c}}{{\footnotesize{{\textbf{{Dec}}}}}}\\
+\cmidrule{{1-3}}
+'''.format(ephem.date(dfl).datetime().strftime("%d"))
+        h = 0
+
+        if config.decf != '+':	# USNO format for Declination
+            # first populate an array of 24 hours with all data
+            hourlydata = [[] for i in range(24)]
+            while h < 24:
+                hourlydata[h] = sunmoon(dhr)
+                dhr += ephem.hour
+                h += 1
+            # now print the data per hour
+            h = 0
+
+            while h < 24:
+                band = int(h/6)
+                group = band % 2
+                eph = hourlydata[h]
+                if h > 0:
+                    preveph = hourlydata[h-1]
+                else:
+                    preveph = hourlydata[0]		# hour -1 = hour 0
+                if h < 23:
+                    nexteph = hourlydata[h+1]
+                else:
+                    nexteph = hourlydata[23]	# hour 24 = hour 23
+
+                # format declination checking for hemisphere change
+                printNS, printDEG = declCompare(preveph[7],eph[7],nexteph[7],h)
+                sdec = NSdecl(eph[1],h,printNS,printDEG,True)
+
+                line = r'''\color{{blue}}{{{}}} & '''.format(h)
+                line = line + "{} & {}".format(eph[0],sdec)
+                if group == 1:
+                    tab = tab + r'''\rowcolor{LightCyan}'''
+                lineterminator = r'''\\
+'''
+                if config.pgsz == "A4" and h < 23 and (h+1)%6 == 0:
+                    lineterminator = r'''\\[2Pt]
+'''
+                tab += line + lineterminator
+                h += 1
+
+        else:			# Positive/Negative Declinations
+            while h < 24:
+                band = int(h/6)
+                group = band % 2
+                eph = sunmoon(dhr)
+                line = r'''\color{{blue}}{{{}}} & '''.format(h)
+                line = line + "{} & {}".format(eph[0],eph[1])
+                if group == 1:
+                    tab = tab + r'''\rowcolor{LightCyan}'''
+                lineterminator = r'''\\
+'''
+                if config.pgsz == "A4" and h < 23 and (h+1)%6 == 0:
+                    lineterminator = r'''\\[2Pt]
+'''
+                tab += line + lineterminator
+                h += 1
+                dhr += ephem.hour
+
+        vd = sun_moon_SD(dfl)
+        tab = tab + r'''\cmidrule{{2-3}}
+& \multicolumn{{1}}{{c}}{{\scriptsize{{SD\,=\,{}$'$}}}} & \multicolumn{{1}}{{c}}{{\footnotesize{{\textit{{d}}\,=\,{}$'$}}}}\\
+\cmidrule{{2-3}}'''.format(vd[1],vd[0])
+        if n > 1:
+            # add space between tables...
+            tab = tab + r'''
+\multicolumn{3}{c}{}\\[-1.5ex]'''
+        n -= 1
+        dfl += 1
+
+    tab = tab + r'''
+\end{tabular}'''
+    return tab
+
+#----------------------
+#   page preparation
+#----------------------
+
+def page(date, dpp=15):
+
+    if dpp > 1:
+        str2 = r'''\textbf{{{} to {}}}
+'''.format(date.strftime("%Y %B %d"),(date+timedelta(days=dpp-1)).strftime("%b. %d"))
+    else:
+        str2 = r'''\textbf{{{}}}
+'''.format(date.strftime("%Y %B %d"))
+
     # creates a page(15 days) of the Sun almanac
     page = r'''
 % ------------------ N E W   P A G E ------------------
@@ -286,30 +319,24 @@ def page(date):
 \sffamily
 \noindent
 \begin{{flushright}}
-\textbf{{{} to {}}}\par
+\textbf{{{}}}\par
 \end{{flushright}}
 \begin{{scriptsize}}
-'''.format(ephem.date(date).datetime().strftime("%Y %B %d"),ephem.date(date+14).datetime().strftime("%b. %d"))
+'''.format(str2)
+
     if config.tbls == "m":
-        page = page + suntabm(date)
-        page = page + r'''\quad
+        while dpp > 0:
+            page += suntabm(date,min(3,dpp))
+            date += timedelta(days=3)
+            dpp -= 3
+            if dpp > 0: page = page + r'''\quad
 '''
-        page = page + suntabm(date+3)
-        page = page + r'''\quad
-'''
-        page = page + suntabm(date+6)
-        page = page + r'''\quad
-'''
-        page = page + suntabm(date+9)
-        page = page + r'''\quad
-'''
-        page = page + suntabm(date+12)
     else:
-        page = page + suntab(date)
-        page = page + suntab(date+3)
-        page = page + suntab(date+6)
-        page = page + suntab(date+9)
-        page = page + suntab(date+12)
+        while dpp > 0:
+            page += suntab(date,min(3,dpp))
+            date += timedelta(days=3)
+            dpp -= 3
+
     # to avoid "Overfull \hbox" messages, leave a paragraph end before the end of a size change. (This may only apply to tabular* table style) See lines below...
     page = page + r'''
 
@@ -317,21 +344,54 @@ def page(date):
     return page
 
 
-def pages(date, p):
-    # make 'p' pages beginning with date
+def pages(first_day, dtp):
+    # dtp = 0 if for entire year; = -1 if for entire month; else days to print
+
     out = ''
-    for i in range(p):
-        out = out + page(date)
-        date += 15
+
+    if dtp == 0:       # if entire year
+        year = first_day.year
+        yr = year
+        dpp = 15      # 15 days per page maximum
+        day1 = first_day
+        while year == yr:
+            day15 = day1 + timedelta(days=14)
+            if day15.year != yr:
+                dpp -= day15.day
+                if dpp <= 0: return out
+            out += page(day1, dpp)
+            day1 += timedelta(days=15)
+            year = day1.year
+    elif dtp == -1:    # if entire month
+        mth = first_day.month
+        m = mth
+        dpp = 15      # 15 days per page maximum
+        day1 = first_day
+        while mth == m:
+            day15 = day1 + timedelta(days=14)
+            if day15.month != m:
+                dpp -= day15.day
+                if dpp <= 0: return out
+            out += page(day1, dpp)
+            day1 += timedelta(days=15)
+            mth = day1.month
+    else:               # print 'dtp' days beginning with first_day
+        day1 = first_day
+        dpp = 15      # 15 days per page maximum
+        while dtp > 0:
+            if dtp <= 15: dpp = dtp
+            out += page(day1, dpp)
+            dtp -= 15
+            day1 += timedelta(days=15)
+
     return out
 
+#--------------------------
+#   external entry point
+#--------------------------
 
-def almanac(first_day, pagenum):
-
+def sunalmanac(first_day, dtp):
     # make almanac starting from first_day
-    year = first_day.year
-    mth = first_day.month
-    day = first_day.day
 
     # page size specific parameters
     if config.pgsz == "A4":
@@ -339,8 +399,8 @@ def almanac(first_day, pagenum):
         paper = "a4paper"
         tm = "21mm"
         bm = "18mm"
-        lm = "13mm"
-        rm = "13mm"
+        lm = "12mm"     # 13mm
+        rm = "12mm"     # 13mm
         if config.tbls == "m" and config.decf != '+':	# USNO format for Declination
             tm = "8mm"
             bm = "13mm"
@@ -349,15 +409,15 @@ def almanac(first_day, pagenum):
         if config.tbls == "m" and config.decf == '+':	# Positive/Negative Declinations
             tm = "8mm"
             bm = "13mm"
-            lm = "14mm"
-            rm = "14mm"
+            lm = "12mm"
+            rm = "12mm"
     else:
         # pay attention to the limited page height
         paper = "letterpaper"
         tm = "12.2mm"
         bm = "13mm"
-        lm = "16mm"
-        rm = "16mm"
+        lm = "15mm"     # 16mm
+        rm = "15mm"     # 16mm
         if config.tbls == "m" and config.decf != '+':	# USNO format for Declination
             tm = "5mm"
             bm = "8mm"
@@ -366,8 +426,8 @@ def almanac(first_day, pagenum):
         if config.tbls == "m" and config.decf == '+':	# Positive/Negative Declinations
             tm = "5mm"
             bm = "8mm"
-            lm = "17mm"
-            rm = "17mm"
+            lm = "15mm"
+            rm = "15mm"
 
     # default is 'oneside'...
     alm = r'''\documentclass[10pt, {}]{{report}}'''.format(paper)
@@ -375,7 +435,8 @@ def almanac(first_day, pagenum):
     alm = alm + r'''
 %\usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
-\usepackage{fontenc}'''
+\usepackage{fontenc}
+\usepackage{enumitem} % used to customize the {description} environment'''
 
     if config.tbls == "m":
         alm = alm + r'''
@@ -412,16 +473,26 @@ def almanac(first_day, pagenum):
     \includegraphics[width=0.4\textwidth]{{{}}}\\[1cm]
     \textsc{{\huge The Nautical Almanac for the Sun}}\\[0.7cm]'''.format(fn)
 
-    if pagenum == 25:
+    if dtp == 0:
         alm = alm + r'''
     \HRule \\[0.6cm]
     {{ \Huge \bfseries {}}}\\[0.4cm]
-    \HRule \\[1.5cm]'''.format(year)
+    \HRule \\[1.5cm]'''.format(first_day.year)
+    elif dtp == -1:
+        alm = alm + r'''
+    \HRule \\[0.6cm]
+    {{ \Huge \bfseries {}}}\\[0.4cm]
+    \HRule \\[1.5cm]'''.format(first_day.strftime("%B %Y"))
+    elif dtp > 1:
+        alm = alm + r'''
+    \HRule \\[0.6cm]
+    {{ \Huge \bfseries {}}}\\[0.4cm]
+    \HRule \\[1.5cm]'''.format(fmtdates(first_day,first_day+timedelta(days=dtp-1)))
     else:
         alm = alm + r'''
     \HRule \\[0.6cm]
-    {{ \Huge \bfseries from {}.{}.{}}}\\[0.4cm]
-    \HRule \\[1.5cm]'''.format(day,mth,year)
+    {{ \Huge \bfseries {}}}\\[0.4cm]
+    \HRule \\[1.5cm]'''.format(fmtdate(first_day))
 
     if config.tbls == "m":
         alm = alm + r'''
@@ -445,10 +516,10 @@ def almanac(first_day, pagenum):
     {\large \today}
     \HRule \\[0.6cm]
     \end{center}
-    \begin{description}\footnotesize
+    \begin{description}[leftmargin=5.5em,style=nextline]\footnotesize
     \item[Disclaimer:] These are computer generated tables - use them at your own risk.
     The accuracy has been checked as well as possible, but cannot be guaranteed.
-    This means I cannot be held liable if you get lost on the oceans because of errors in this publication.
+    The author claims no liability for any consequences arising from use of these tables.
     Besides, this publication only contains sun tables: an official version of the Nautical Almanac is indispensable.
     \end{description}
 \end{titlepage}
@@ -486,9 +557,9 @@ def almanac(first_day, pagenum):
     \end{itemize}
 \restoregeometry    % so it does not affect the rest of the pages'''
 
-    first_day = r'''{}/{}/{}'''.format(year,mth,day)
-    date = ephem.Date(first_day)    # date to float
-    alm = alm + pages(date,pagenum)
+#    first_day = r'''{}/{}/{}'''.format(year,mth,day)
+#    date = ephem.Date(first_day)    # date to float
+    alm = alm + pages(first_day,dtp)
     alm = alm + '''
 \end{document}'''
     return alm

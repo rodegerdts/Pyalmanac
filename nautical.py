@@ -43,6 +43,7 @@
 #       column width specifiers - thus table widths vary slightly from page to page.
 
 # Standard library imports
+from datetime import datetime, timedelta
 import math
 
 # Third party imports
@@ -52,7 +53,120 @@ import ephem
 from alma_ephem import *
 import config
 
-def planetstab(date):
+#----------------------
+#   internal methods
+#----------------------
+
+def fmtdate(d):
+    if config.pgsz == 'Letter': return d.strftime("%m/%d/%Y")
+    return d.strftime("%d.%m.%Y")
+
+def fmtdates(d1,d2):
+    if config.pgsz == 'Letter': return d1.strftime("%m/%d/%Y") + " - " + d2.strftime("%m/%d/%Y")
+    return d1.strftime("%d.%m.%Y") + " - " + d2.strftime("%d.%m.%Y")
+
+def declCompare(prev_rad, curr_rad, next_rad, hr):
+    # for Declinations only...
+    # decide if to print N/S; decide if to print degrees
+    # note: the first three arguments are PyEphem angles in radians
+    prNS = False
+    prDEG = False
+    psign = math.copysign(1.0,prev_rad)
+    csign = math.copysign(1.0,curr_rad)
+    nsign = math.copysign(1.0,next_rad)
+    pdeg = abs(math.degrees(prev_rad))
+    cdeg = abs(math.degrees(curr_rad))
+    ndeg = abs(math.degrees(next_rad))
+    pdegi = int(pdeg)
+    cdegi = int(cdeg)
+    ndegi = int(ndeg)
+    pmin = round((pdeg-pdegi)*60, 1)	# minutes (float), rounded to 1 decimal place
+    cmin = round((cdeg-cdegi)*60, 1)	# minutes (float), rounded to 1 decimal place
+    nmin = round((ndeg-ndegi)*60, 1)	# minutes (float), rounded to 1 decimal place
+    pmini = int(pmin)
+    cmini = int(cmin)
+    nmini = int(nmin)
+    if pmini == 60:
+        pmin -= 60
+        pdegi += 1
+    if cmini == 60:
+        cmin -= 60
+        cdegi += 1
+    if nmini == 60:
+        nmin -= 60
+        ndegi += 1
+    # now we have the values in degrees+minutes as printed
+
+    if hr%6 == 0:
+        prNS = True			# print N/S for hour = 0, 6, 12, 18
+    else:
+        if psign != csign:
+            prNS = True		# print N/S if previous sign different
+    if hr < 23:
+        if csign != nsign:
+            prNS = True		# print N/S if next sign different
+    if prNS == False:
+        if pdegi != cdegi:
+            prDEG = True	# print degrees if changed since previous value
+        if cdegi != ndegi:
+            prDEG = True	# print degrees if next value is changed
+    else:
+        prDEG= True			# print degrees is N/S to be printed
+    return prNS, prDEG
+
+def NSdecl(deg, hr, printNS, printDEG, modernFMT):
+    # reformat degrees latitude to Ndd°mm.m or Sdd°mm.m
+    if deg[0:1] == '-':
+        hemisph = 'S'
+        deg = deg[1:]
+    else:
+        hemisph = 'N'
+    if not(printDEG):
+        deg = deg[10:]	# skip the degrees (always dd°mm.m) - note: the degree symbol '$^\circ$' is eight bytes long
+        if (hr+3)%6 == 0:
+            deg = r'''\raisebox{0.24ex}{\boldmath$\cdot$~\boldmath$\cdot$~~}''' + deg
+    if modernFMT:
+        if printNS or hr%6 == 0:
+            sdeg = r'''\textcolor{{blue}}{{{}}}'''.format(hemisph) + deg
+        else:
+            sdeg = deg
+    else:
+        if printNS or hr%6 == 0:
+            sdeg = r'''\textbf{{{}}}'''.format(hemisph) + deg
+        else:
+            sdeg = deg
+    #print("sdeg: ", sdeg)
+    return sdeg
+
+def NSdeg(deg, modern=False, hr=0, forceNS=False):
+    # reformat degrees latitude to Ndd°mm.m or Sdd°mm.m
+    if deg[0:1] == '-':
+        hemisph = 'S'
+        deg = deg[1:]
+    else:
+        hemisph = 'N'
+    if modern:
+        if forceNS or hr%6 == 0:
+            sdeg = r'''\textcolor{{blue}}{{{}}}'''.format(hemisph) + deg
+        else:
+            sdeg = deg
+    else:
+        if forceNS or hr%6 == 0:
+            sdeg = r'''\textbf{{{}}}'''.format(hemisph) + deg
+        else:
+            sdeg = deg
+    return sdeg, hemisph
+
+def double_events_found(m1, m2):
+    # check for two moonrise/moonset events on the same day & latitude
+    dbl = False
+    for i in range(len(m1)):
+        if m2[i] != '--:--':
+            dbl = True
+    return dbl
+
+# >>>>>>>>>>>>>>>>>>>>>>>>
+def planetstab(dfloat):
     # generates a LaTeX table for the navigational plantets (traditional style)
     # OLD: \begin{tabular*}{0.74\textwidth}[t]{@{\extracolsep{\fill}}|c|r|rr|rr|rr|rr|}
     # OLD: \begin{tabular}[t]{|C{15pt}|r|rr|rr|rr|rr|}
@@ -65,7 +179,7 @@ def planetstab(date):
     # note: 74% table width above removes "Overfull \hbox (1.65279pt too wide)"
     n = 0
     while n < 3:
-        da = date + n
+        da = dfloat + n
         tab = tab + r'''\hline
 \rule{{0pt}}{{2.4ex}}\textbf{{{}}} & \multicolumn{{1}}{{c|}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c|}}{{\textbf{{Dec}}}} & \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c|}}{{\textbf{{Dec}}}} & \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c|}}{{\textbf{{Dec}}}} & \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c|}}{{\textbf{{Dec}}}}\\
 \hline\rule{{0pt}}{{2.6ex}}\noindent
@@ -80,7 +194,7 @@ def planetstab(date):
                 da = da + ephem.hour
                 h += 1
             # now print the data per hour
-            da = date + n
+            da = dfloat + n
             h = 0
             while h < 24:
                 eph = hourlydata[h]
@@ -129,20 +243,25 @@ def planetstab(date):
                 h += 1
                 da = da + ephem.hour
 
-        vd = vdm_planets(date + n)
+        vd = vdm_planets(dfloat + n)
         tab = tab + r'''\hline
-\multicolumn{{2}}{{|c|}}{{\rule{{0pt}}{{2.4ex}}Mer.pass.:{}}} & \multicolumn{{2}}{{c|}}{{v{} d{} m{}}} & \multicolumn{{2}}{{c|}}{{v{} d{} m{}}} & \multicolumn{{2}}{{c|}}{{v{} d{} m{}}} & \multicolumn{{2}}{{c|}}{{v{} d{} m{}}}\\
+\multicolumn{{2}}{{|c|}}{{\rule{{0pt}}{{2.4ex}}Mer.pass. {}}} & 
+\multicolumn{{2}}{{c|}}{{\(\nu\) {}$'$ \emph{{d}} {}$'$ m {}\hphantom{{0}}}} & 
+\multicolumn{{2}}{{c|}}{{\(\nu\) {}$'$ \emph{{d}} {}$'$ m {}}} & 
+\multicolumn{{2}}{{c|}}{{\(\nu\) {}$'$ \emph{{d}} {}$'$ m {}\hphantom{{0}}}} & 
+\multicolumn{{2}}{{c|}}{{\(\nu\) {}$'$ \emph{{d}} {}$'$ m {}}}\\
 \hline
 \multicolumn{{10}}{{c}}{{}}\\
-'''.format(ariestransit(date + n),vd[0],vd[1],vd[2],vd[3],vd[4],vd[5],vd[6],vd[7],vd[8],vd[9],vd[10],vd[11])
+'''.format(ariestransit(dfloat + n),vd[0],vd[1],vd[2],vd[3],vd[4],vd[5],vd[6],vd[7],vd[8],vd[9],vd[10],vd[11])
+        # the phantom character '0' compensates the format with two decimal places in SFalmanac
         n += 1
 
     tab = tab + r'''\end{tabular}
 '''
     return tab
 
-
-def planetstabm(date):
+# >>>>>>>>>>>>>>>>>>>>>>>>
+def planetstabm(dfloat):
     # generates a LaTeX table for the navigational plantets (modern style)
 
     tab = r'''\vspace{6Pt}\noindent
@@ -158,7 +277,7 @@ def planetstabm(date):
 \cmidrule{2-2} \cmidrule{4-5} \cmidrule{7-8} \cmidrule{10-11} \cmidrule{13-14}'''
     n = 0
     while n < 3:
-        da = date + n
+        da = dfloat + n
         tab = tab + r'''
 \multicolumn{{1}}{{c}}{{\textbf{{{}}}}} & \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} && 
 \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c}}{{\textbf{{Dec}}}} &&  \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c}}{{\textbf{{Dec}}}} &&  \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c}}{{\textbf{{Dec}}}} &&  \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c}}{{\textbf{{Dec}}}}\\
@@ -173,7 +292,7 @@ def planetstabm(date):
                 da = da+ephem.hour
                 h += 1
             # now print the data per hour
-            da = date + n
+            da = dfloat + n
             h = 0
             while h < 24:
                 band = int(h/6)
@@ -226,16 +345,16 @@ def planetstabm(date):
                 h += 1
                 da = da + ephem.hour
 
-        vd = vdm_planets(date + n)
+        vd = vdm_planets(dfloat + n)
         tab = tab + r'''\cmidrule{{1-2}} \cmidrule{{4-5}} \cmidrule{{7-8}} \cmidrule{{10-11}} \cmidrule{{13-14}}
-\multicolumn{{2}}{{c}}{{\footnotesize{{Mer.pass.:{}}}}} && 
-\multicolumn{{2}}{{c}}{{\footnotesize{{v{} d{} m{}}}}} && 
-\multicolumn{{2}}{{c}}{{\footnotesize{{v{} d{} m{}}}}} && 
-\multicolumn{{2}}{{c}}{{\footnotesize{{v{} d{} m{}}}}} && 
-\multicolumn{{2}}{{c}}{{\footnotesize{{v{} d{} m{}}}}}\\
+\multicolumn{{2}}{{c}}{{\footnotesize{{Mer.pass. {}}}}} && 
+\multicolumn{{2}}{{c}}{{\footnotesize{{\(\nu\){}$'$ \emph{{d}}{}$'$ m{}\hphantom{{0}}}}}} && 
+\multicolumn{{2}}{{c}}{{\footnotesize{{\(\nu\){}$'$ \emph{{d}}{}$'$ m{}}}}} && 
+\multicolumn{{2}}{{c}}{{\footnotesize{{\(\nu\){}$'$ \emph{{d}}{}$'$ m{}\hphantom{{0}}}}}} && 
+\multicolumn{{2}}{{c}}{{\footnotesize{{\(\nu\){}$'$ \emph{{d}}{}$'$ m{}}}}}\\
 \cmidrule{{1-2}} \cmidrule{{4-5}} \cmidrule{{7-8}} \cmidrule{{10-11}} \cmidrule{{13-14}}
-'''.format(ariestransit(date + n),vd[0],vd[1],vd[2],vd[3],vd[4],vd[5],vd[6],vd[7],vd[8],vd[9],vd[10],vd[11])
-        
+'''.format(ariestransit(dfloat + n),vd[0],vd[1],vd[2],vd[3],vd[4],vd[5],vd[6],vd[7],vd[8],vd[9],vd[10],vd[11])
+        # the phantom character '0' compensates the format with two decimal places in SFalmanac
         if n < 2:
             vsep = ""
             if config.pgsz == "Letter":
@@ -248,8 +367,8 @@ def planetstabm(date):
 '''
     return tab
 
-
-def starstab(date):
+# >>>>>>>>>>>>>>>>>>>>>>>>
+def starstab(dfloat):
     # returns a table with ephemerides for the navigational stars
     # OLD: \begin{tabular*}{0.25\textwidth}[t]{@{\extracolsep{\fill}}|rrr|}
 
@@ -270,7 +389,7 @@ def starstab(date):
 \rule{0pt}{2.4ex} & \multicolumn{1}{c}{\textbf{SHA}} & \multicolumn{1}{c|}{\textbf{Dec}}\\
 \hline\rule{0pt}{2.6ex}\noindent
 '''
-    stars = stellar(date+1)
+    stars = stellar(dfloat+1)
     for i in range(len(stars)):
         out = out + r'''{} & {} & {} \\
 '''.format(stars[i][0],stars[i][1],stars[i][2])
@@ -279,7 +398,7 @@ def starstab(date):
 
     # returns 3 tables with SHA & Mer.pass for Venus, Mars, Jupiter and Saturn
     for i in range(3):
-        dt = ephem.date(date+i).datetime()
+        dt = ephem.date(dfloat+i).datetime()
         datestr = r'''{} {} {}'''.format(dt.strftime("%b"), dt.strftime("%d"), dt.strftime("%a"))
         m = m + '''\hline
 '''
@@ -293,7 +412,7 @@ def starstab(date):
             m = m + r'''& & \multicolumn{{1}}{{r|}}{{}}\\[-2.0ex]
 \textbf{{{}}} & \textbf{{SHA}} & \textbf{{Mer.pass}}\\
 '''.format(datestr)
-        datex = ephem.date(date + i)
+        datex = ephem.date(dfloat + i)
         p = planetstransit(datex)
         m = m + r'''Venus & {} & {} \\
 '''.format(p[0],p[1])
@@ -324,8 +443,8 @@ def starstab(date):
     out = out + r'''\end{tabular}'''
     return out
 
-
-def sunmoontab(date):
+# >>>>>>>>>>>>>>>>>>>>>>>>
+def sunmoontab(dfloat):
     # generates LaTeX table for sun and moon (traditional style)
     # OLD: \begin{tabular*}{0.54\textwidth}[t]{@{\extracolsep{\fill}}|c|rr|rrrrr|}
     # OLD note: 54% table width above removes "Overfull \hbox (1.65279pt too wide)"
@@ -343,9 +462,9 @@ def sunmoontab(date):
 '''
     n = 0
     while n < 3:
-        da = date + n
+        da = dfloat + n
         tab = tab + r'''\hline
-\multicolumn{{1}}{{|c|}}{{\rule{{0pt}}{{2.6ex}}\textbf{{{}}}}} &\multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c|}}{{\textbf{{Dec}}}}  & \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c}}{{\textbf{{\(\nu\)}}}} & \multicolumn{{1}}{{c}}{{\textbf{{Dec}}}} & \multicolumn{{1}}{{c}}{{\textbf{{d}}}} & \multicolumn{{1}}{{c|}}{{\textbf{{HP}}}}\\
+\multicolumn{{1}}{{|c|}}{{\rule{{0pt}}{{2.6ex}}\textbf{{{}}}}} &\multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c|}}{{\textbf{{Dec}}}}  & \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c}}{{\textbf{{\(\nu\)}}}} & \multicolumn{{1}}{{c}}{{\textbf{{Dec}}}} & \multicolumn{{1}}{{c}}{{\textit{{d}}}} & \multicolumn{{1}}{{c|}}{{\textbf{{HP}}}}\\
 \hline\rule{{0pt}}{{2.6ex}}\noindent
 '''.format(ephem.date(da).datetime().strftime("%a"))
         h = 0
@@ -358,7 +477,7 @@ def sunmoontab(date):
                 da = da + ephem.hour
                 h += 1
             # now print the data per hour
-            da = date + n
+            da = dfloat + n
             h = 0
             mlastNS = ''
             while h < 24:
@@ -404,9 +523,9 @@ def sunmoontab(date):
                 h += 1
                 da = da + ephem.hour
 
-        vd = sun_moon_SD(date + n)
+        vd = sun_moon_SD(dfloat + n)
         tab = tab + r'''\hline
-\rule{{0pt}}{{2.4ex}} & \multicolumn{{1}}{{c}}{{SD.={}}} & \multicolumn{{1}}{{c|}}{{d={}}} & \multicolumn{{5}}{{c|}}{{S.D.={}}}\\
+\rule{{0pt}}{{2.4ex}} & \multicolumn{{1}}{{c}}{{SD = {}$'$}} & \multicolumn{{1}}{{c|}}{{\textit{{d}} = {}$'$}} & \multicolumn{{5}}{{c|}}{{SD = {}$'$}}\\
 \hline
 '''.format(vd[1],vd[0],vd[2])
         if n < 2:
@@ -417,8 +536,8 @@ def sunmoontab(date):
 '''
     return tab
 
-
-def sunmoontabm(date):
+# >>>>>>>>>>>>>>>>>>>>>>>>
+def sunmoontabm(dfloat):
     # generates LaTeX table for sun and moon (modern style)
 
     tab = r'''\noindent
@@ -433,9 +552,9 @@ def sunmoontabm(date):
     # note: \quad\quad above shifts all tables to the right (still within margins)
     n = 0
     while n < 3:
-        da = date + n
+        da = dfloat + n
         tab = tab + r'''
-\multicolumn{{1}}{{c}}{{\textbf{{{}}}}} & \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c}}{{\textbf{{Dec}}}} & & \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c}}{{\textbf{{\(\nu\)}}}} & \multicolumn{{1}}{{c}}{{\textbf{{Dec}}}} & \multicolumn{{1}}{{c}}{{\textbf{{d}}}} & \multicolumn{{1}}{{c}}{{\textbf{{HP}}}}\\
+\multicolumn{{1}}{{c}}{{\textbf{{{}}}}} & \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c}}{{\textbf{{Dec}}}} & & \multicolumn{{1}}{{c}}{{\textbf{{GHA}}}} & \multicolumn{{1}}{{c}}{{\textbf{{\(\nu\)}}}} & \multicolumn{{1}}{{c}}{{\textbf{{Dec}}}} & \multicolumn{{1}}{{c}}{{\textit{{d}}}} & \multicolumn{{1}}{{c}}{{\textbf{{HP}}}}\\
 '''.format(ephem.date(da).datetime().strftime("%a"))
         h = 0
 
@@ -447,7 +566,7 @@ def sunmoontabm(date):
                 da = da + ephem.hour
                 h += 1
             # now print the data per hour
-            da = date + n
+            da = dfloat + n
             h = 0
             mlastNS = ''
             while h < 24:
@@ -498,10 +617,10 @@ def sunmoontabm(date):
                 h += 1
                 da = da + ephem.hour
 
-        vd = sun_moon_SD(date + n)
+        vd = sun_moon_SD(dfloat + n)
         tab = tab + r'''\cmidrule{{2-3}} \cmidrule{{5-9}}
-\multicolumn{{1}}{{c}}{{}} & \multicolumn{{1}}{{c}}{{\footnotesize{{SD.={}}}}} & 
-\multicolumn{{1}}{{c}}{{\footnotesize{{d={}}}}} && \multicolumn{{5}}{{c}}{{\footnotesize{{S.D.={}}}}}\\
+\multicolumn{{1}}{{c}}{{}} & \multicolumn{{1}}{{c}}{{\footnotesize{{SD = {}$'$}}}} & 
+\multicolumn{{1}}{{c}}{{\footnotesize{{\textit{{d}} = {}$'$}}}} && \multicolumn{{5}}{{c}}{{\footnotesize{{SD = {}$'$}}}}\\
 \cmidrule{{2-3}} \cmidrule{{5-9}}
 '''.format(vd[1],vd[0],vd[2])
         if n < 2:
@@ -515,103 +634,8 @@ def sunmoontabm(date):
 '''
     return tab
 
-
-def declCompare(prev_rad, curr_rad, next_rad, hr):
-    # for Declinations only...
-    # decide if to print N/S; decide if to print degrees
-    # note: the first three arguments are PyEphem angles in radians
-    prNS = False
-    prDEG = False
-    psign = math.copysign(1.0,prev_rad)
-    csign = math.copysign(1.0,curr_rad)
-    nsign = math.copysign(1.0,next_rad)
-    pdeg = abs(math.degrees(prev_rad))
-    cdeg = abs(math.degrees(curr_rad))
-    ndeg = abs(math.degrees(next_rad))
-    pdegi = int(pdeg)
-    cdegi = int(cdeg)
-    ndegi = int(ndeg)
-    pmin = round((pdeg-pdegi)*60, 1)	# minutes (float), rounded to 1 decimal place
-    cmin = round((cdeg-cdegi)*60, 1)	# minutes (float), rounded to 1 decimal place
-    nmin = round((ndeg-ndegi)*60, 1)	# minutes (float), rounded to 1 decimal place
-    pmini = int(pmin)
-    cmini = int(cmin)
-    nmini = int(nmin)
-    if pmini == 60:
-        pmin -= 60
-        pdegi += 1
-    if cmini == 60:
-        cmin -= 60
-        cdegi += 1
-    if nmini == 60:
-        nmin -= 60
-        ndegi += 1
-    # now we have the values in degrees+minutes as printed
-
-    if hr%6 == 0:
-        prNS = True			# print N/S for hour = 0, 6, 12, 18
-    else:
-        if psign != csign:
-            prNS = True		# print N/S if previous sign different
-    if hr < 23:
-        if csign != nsign:
-            prNS = True		# print N/S if next sign different
-    if prNS == False:
-        if pdegi != cdegi:
-            prDEG = True	# print degrees if changed since previous value
-        if cdegi != ndegi:
-            prDEG = True	# print degrees if next value is changed
-    else:
-        prDEG= True			# print degrees is N/S to be printed
-    return prNS, prDEG
-
-
-def NSdecl(deg, hr, printNS, printDEG, modernFMT):
-    # reformat degrees latitude to Ndd°mm.m or Sdd°mm.m
-    if deg[0:1] == '-':
-        hemisph = 'S'
-        deg = deg[1:]
-    else:
-        hemisph = 'N'
-    if not(printDEG):
-        deg = deg[10:]	# skip the degrees (always dd°mm.m) - note: the degree symbol '$^\circ$' is eight bytes long
-        if (hr+3)%6 == 0:
-            deg = r'''\raisebox{0.24ex}{\boldmath$\cdot$~\boldmath$\cdot$~~}''' + deg
-    if modernFMT:
-        if printNS or hr%6 == 0:
-            sdeg = r'''\textcolor{{blue}}{{{}}}'''.format(hemisph) + deg
-        else:
-            sdeg = deg
-    else:
-        if printNS or hr%6 == 0:
-            sdeg = r'''\textbf{{{}}}'''.format(hemisph) + deg
-        else:
-            sdeg = deg
-    #print("sdeg: ", sdeg)
-    return sdeg
-
-
-def NSdeg(deg, modern=False, hr=0, forceNS=False):
-    # reformat degrees latitude to Ndd°mm.m or Sdd°mm.m
-    if deg[0:1] == '-':
-        hemisph = 'S'
-        deg = deg[1:]
-    else:
-        hemisph = 'N'
-    if modern:
-        if forceNS or hr%6 == 0:
-            sdeg = r'''\textcolor{{blue}}{{{}}}'''.format(hemisph) + deg
-        else:
-            sdeg = deg
-    else:
-        if forceNS or hr%6 == 0:
-            sdeg = r'''\textbf{{{}}}'''.format(hemisph) + deg
-        else:
-            sdeg = deg
-    return sdeg, hemisph
-
-
-def twilighttab(date):
+# >>>>>>>>>>>>>>>>>>>>>>>>
+def twilighttab(dfloat):
     # returns the twilight and moonrise tables, finally EoT data
 
 # Twilight tables ...........................................
@@ -676,7 +700,7 @@ def twilighttab(date):
 '''
         lasthemisph = hemisph
         # day+1 to calculate for the second day (three days are printed on one page)
-        twi = twilight(date+1, i, hemisph)
+        twi = twilight(dfloat+1, i, hemisph)
         line = r'''\textbf{{{}}}'''.format(hs) + " " + r'''{}$^\circ$'''.format(abs(i))
         line = line + r''' & {} & {} & {} & {} & {} & {} \\
 '''.format(twi[0],twi[1],twi[2],twi[4],twi[5],twi[6])
@@ -701,7 +725,7 @@ def twilighttab(date):
 \multicolumn{3}{c|}{\textbf{Moonset}}\\
 '''
 
-    weekday = [ephem.date(date).datetime().strftime("%a"),ephem.date(date+1).datetime().strftime("%a"),ephem.date(date+2).datetime().strftime("%a")]
+    weekday = [ephem.date(dfloat).datetime().strftime("%a"),ephem.date(dfloat+1).datetime().strftime("%a"),ephem.date(dfloat+2).datetime().strftime("%a")]
     tab = tab + r'''\multicolumn{{1}}{{|c|}}{{}} & 
 \multicolumn{{1}}{{c}}{{{}}} & 
 \multicolumn{{1}}{{c}}{{{}}} & 
@@ -729,7 +753,7 @@ def twilighttab(date):
                 tab = tab + r'''\rule{0pt}{2.6ex}
 '''
         lasthemisph = hemisph
-        moon, moon2 = moonrise_set(date,i)
+        moon, moon2 = moonrise_set(dfloat,i)
         if not(double_events_found(moon,moon2)):
             tab = tab + r'''\textbf{{{}}}'''.format(hs) + " " + r'''{}$^\circ$'''.format(abs(i))
             tab = tab + r''' & {} & {} & {} & {} & {} & {} \\
@@ -788,7 +812,7 @@ def twilighttab(date):
 '''
 
     for k in range(3):
-        d = ephem.date(date+k)
+        d = ephem.date(dfloat+k)
         eq = equation_of_time(d)
         if k == 2:
             tab = tab + r'''{} & {} & {} & {} & {} & {} & {}({}\%) \\[0.3ex]
@@ -800,18 +824,15 @@ def twilighttab(date):
 \end{tabular}'''
     return tab
 
+#----------------------
+#   page preparation
+#----------------------
 
-def double_events_found(m1, m2):
-    # check for two moonrise/moonset events on the same day & latitude
-    dbl = False
-    for i in range(len(m1)):
-        if m2[i] != '--:--':
-            dbl = True
-    return dbl
-
-
-def doublepage(date, page1):
+def doublepage(first_day, page1):
     # creates a doublepage (3 days) of the nautical almanac
+
+    first_day = r'''{}/{}/{}'''.format(first_day.year,first_day.month,first_day.day)
+    dfloat = ephem.Date(first_day)      # convert date to float
     page = ''
     if not(page1):
         page = r'''
@@ -825,10 +846,11 @@ def doublepage(date, page1):
         leftindent = "\quad"
         rightindent = "\hphantom{\quad}"
 
+    # print date based on dfloat (as Ephem routines use dfloat)
     page = page + r'''
 \sffamily
 \noindent
-{}\textbf{{{}, {}, {}   ({}.,  {}.,  {}.)}}'''.format(leftindent,ephem.date(date).datetime().strftime("%B %d"),ephem.date(date+1).datetime().strftime("%d"),ephem.date(date+2).datetime().strftime("%d"),ephem.date(date).datetime().strftime("%a"),ephem.date(date+1).datetime().strftime("%a"),ephem.date(date+2).datetime().strftime("%a"))
+{}\textbf{{{}, {}, {}   ({}.,  {}.,  {}.)}}'''.format(leftindent,ephem.date(dfloat).datetime().strftime("%B %d"),ephem.date(dfloat+1).datetime().strftime("%d"),ephem.date(dfloat+2).datetime().strftime("%d"),ephem.date(dfloat).datetime().strftime("%a"),ephem.date(dfloat+1).datetime().strftime("%a"),ephem.date(dfloat+2).datetime().strftime("%a"))
 
     if config.tbls == "m":
         page = page + r'\\[1.0ex]'  # \par leaves about 1.2ex
@@ -840,11 +862,12 @@ def doublepage(date, page1):
 '''
 
     if config.tbls == "m":
-        page = page + planetstabm(date)
+        page = page + planetstabm(dfloat)
     else:
-        page = page + planetstab(date) + r'''\enskip
+        page = page + planetstab(dfloat) + r'''\enskip
 '''
-    page = page + starstab(date)
+    page = page + starstab(dfloat)
+    # print date based on dfloat (as Ephem routines use dfloat)
     str1 = r'''
 \end{{scriptsize}}
 % ------------------ N E W   P A G E ------------------
@@ -854,14 +877,14 @@ def doublepage(date, page1):
 \textbf{{{} to {}}}{}%
 \end{{flushright}}\par
 \begin{{scriptsize}}
-'''.format(tm, bm, oddim, oddom, ephem.date(date).datetime().strftime("%Y %B %d"), ephem.date(date+2).datetime().strftime("%b. %d"), rightindent)
+'''.format(tm, bm, oddim, oddom, ephem.date(dfloat).datetime().strftime("%Y %B %d"), ephem.date(dfloat+2).datetime().strftime("%b. %d"), rightindent)
     page = page + str1
     if config.tbls == "m":
-        page = page + sunmoontabm(date)
+        page = page + sunmoontabm(dfloat)
     else:
-        page = page + sunmoontab(date) + r'''\enskip
+        page = page + sunmoontab(dfloat) + r'''\enskip
 '''
-    page = page + twilighttab(date)
+    page = page + twilighttab(dfloat)
     # to avoid "Overfull \hbox" messages, leave a paragraph end before the end of a size change. (This may only apply to tabular* table style) See lines below...
     page = page + r'''
 
@@ -869,23 +892,50 @@ def doublepage(date, page1):
     return page
 
 
-def pages(date, p):
-    # make 'p' doublepages beginning with date
+def pages(first_day, dtp):
+    # dtp = 0 if for entire year; = -1 if for entire month; else days to print
+
     out = ''
     page1 = True
-    for i in range(p):
-        out = out + doublepage(date,page1)
-        page1 = False
-        date += 3
+    dpp = 3         # 3 days per page
+    day1 = first_day
+
+    if dtp == 0:        # if entire year
+        year = first_day.year
+        yr = year
+        while year == yr:
+            day3 = day1 + timedelta(days=2)
+            out += doublepage(day1, page1)
+            page1 = False
+            day1 += timedelta(days=3)
+            year = day1.year
+    elif dtp == -1:     # if entire month
+        mth = first_day.month
+        m = mth
+        while mth == m:
+            day3 = day1 + timedelta(days=2)
+            out += doublepage(day1, page1)
+            page1 = False
+            day1 += timedelta(days=3)
+            mth = day1.month
+    else:           # print 'dtp' days beginning with first_day
+        i = dtp   # don't decrement dtp
+        while i > 0:
+            out += doublepage(day1, page1)
+            page1 = False
+            i -= 3
+            day1 += timedelta(days=3)
+
     return out
 
+#--------------------------
+#   external entry point
+#--------------------------
 
-def almanac(first_day, pagenum):
+def almanac(first_day, dtp):
     # make almanac starting from first_day
-    global tm, bm, oddim, oddom
-    year = first_day.year
-    mth = first_day.month
-    day = first_day.day
+    # dtp = 0 if for entire year; = -1 if for entire month; else days to print
+    global tm, bm, oddim, oddom     # required by doublepage
 
     # page size specific parameters
     if config.pgsz == "A4":
@@ -942,7 +992,8 @@ def almanac(first_day, pagenum):
     alm = alm + r'''
 %\usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
-\usepackage{fontenc}'''
+\usepackage{fontenc}
+\usepackage{enumitem} % used to customize the {description} environment'''
 
     # to troubleshoot add "showframe, verbose," below:
     alm = alm + r'''
@@ -993,16 +1044,26 @@ def almanac(first_day, pagenum):
     alm = alm + r'''[{}]
     \textsc{{\huge The Nautical Almanac}}\\[{}]'''.format(vsep1,vsep2)
 
-    if pagenum == 122:
+    if dtp == 0:
         alm = alm + r'''
     \HRule \\[0.5cm]
     {{ \Huge \bfseries {}}}\\[0.2cm]
-    \HRule \\'''.format(year)
+    \HRule \\'''.format(first_day.year)
+    elif dtp == -1:
+        alm = alm + r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(first_day.strftime("%B %Y"))
+    elif dtp > 1:
+        alm = alm + r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(fmtdates(first_day,first_day+timedelta(days=dtp-1)))
     else:
         alm = alm + r'''
     \HRule \\[0.5cm]
-    {{ \Huge \bfseries from {}.{}.{}}}\\[0.2cm]
-    \HRule \\'''.format(day,mth,year)
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(fmtdate(first_day))
 
     if config.tbls == "m":
         alm = alm + r'''
@@ -1021,18 +1082,18 @@ def almanac(first_day, pagenum):
     {\large \today}
     \HRule \\[0.2cm]
     \end{center}
-    \begin{description}\footnotesize
+    \begin{description}[leftmargin=5.5em,style=nextline]\footnotesize
     \item[Disclaimer:] These are computer generated tables - use them at your own risk.
     The accuracy has been checked as well as possible, but cannot be guaranteed.
-    This means I cannot be held liable if you get lost on the oceans because of errors in this publication.
+    The author claims no liability for any consequences arising from use of these tables.
     Besides, this publication only contains the 'daily pages' of the Nautical Almanac: an official version of the Nautical Almanac is indispensable.
     \end{description}
 \end{titlepage}
 \restoregeometry    % so it does not affect the rest of the pages'''
 
-    first_day = r'''{}/{}/{}'''.format(year,mth,day)
-    date = ephem.Date(first_day)    # date to float
-    alm = alm + pages(date,pagenum)
+#    first_day = r'''{}/{}/{}'''.format(year,mth,day)
+#    date = ephem.Date(first_day)    # date to float
+    alm = alm + pages(first_day,dtp)
     alm = alm + '''
 \end{document}'''
     return alm

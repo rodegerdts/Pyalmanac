@@ -193,7 +193,7 @@ def parallaxtab():
 	
 	while Hdeg < 5 :
 		#line = " \u0027 "        # DOCKER ONLY
-		line = " ' "        # DOCKER ONLY
+		line = " $'$ "
 		dd = Hdeg
 		while dd < 90:
 			line += r"& \multicolumn{{1}}{{l}}{{\textbf{{{}$^\circ$}}}}".format(dd)
@@ -241,7 +241,7 @@ def venparallax():
 	\multicolumn{7}{c}{\textbf{Parallax of Venus and Mars}}\\
 	'''
 	tab += r"""\hline 
-	$H_{a}$ HP & \textbf{.1'} & \textbf{.2'} & \textbf{.3'} & \textbf{.4'} & \textbf{.5'} & \textbf{.6'} \\
+	$H_{a}$ HP & \textbf{.1$'$} & \textbf{.2$'$} & \textbf{.3$'$} & \textbf{.4$'$} & \textbf{.5$'$} & \textbf{.6$'$} \\
 	\hline
 	"""
 	while Hdeg<90:
@@ -258,7 +258,7 @@ def venparallax():
 	"""
 	return tab
 
-
+# >>>>>>>>>>>>>>>>>>>>>>>>
 def makelatex():
 	lx = r"""\documentclass[ 10pt, a4paper]{scrreprt}
 	\usepackage[automark]{scrlayer-scrpage}

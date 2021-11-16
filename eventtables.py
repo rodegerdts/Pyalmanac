@@ -22,12 +22,25 @@
 # https://docs.python.org/3/whatsnew/3.0.html#pep-3101-a-new-approach-to-string-formatting
 
 # Third party imports
+from datetime import datetime, timedelta
 import ephem
 
 # Local application imports
 from alma_ephem import *
 import config
 
+
+#----------------------
+#   internal methods
+#----------------------
+
+def fmtdate(d):
+    if config.pgsz == 'Letter': return d.strftime("%m/%d/%Y")
+    return d.strftime("%d.%m.%Y")
+
+def fmtdates(d1,d2):
+    if config.pgsz == 'Letter': return d1.strftime("%m/%d/%Y") + " - " + d2.strftime("%m/%d/%Y")
+    return d1.strftime("%d.%m.%Y") + " - " + d2.strftime("%d.%m.%Y")
 
 def double_events_found(m1, m2):
     # check for two moonrise/moonset events on the same day & latitude
@@ -37,9 +50,12 @@ def double_events_found(m1, m2):
             dbl = True
     return dbl
 
-
+# >>>>>>>>>>>>>>>>>>>>>>>>
 def twilighttab(date):
     # returns the twilight and moonrise tables
+
+    first_day = r'''{}/{}/{}'''.format(date.year,date.month,date.day)
+    dfl = ephem.Date(first_day)    # convert date to float
 
 # Twilight tables ...........................................
     #lat = [72,70,68,66,64,62,60,58,56,54,52,50,45,40,35,30,20,10,0, -10,-20,-30,-35,-40,-45,-50,-52,-54,-56,-58,-60]
@@ -49,7 +65,7 @@ def twilighttab(date):
 %%%\multicolumn{9}{c}{\normalsize{}}\\
 '''
 
-    ondate = ephem.date(date).datetime().strftime("%d %B %Y")
+    ondate = ephem.date(dfl).datetime().strftime("%d %B %Y")
     tab = tab + r'''\hline
 \multicolumn{{9}}{{|c|}}{{\rule{{0pt}}{{2.4ex}}{{\textbf{{{}}}}}}}\\
 '''.format(ondate)
@@ -88,8 +104,8 @@ def twilighttab(date):
                 tab = tab + r'''\rule{0pt}{2.6ex}
 '''
         lasthemisph = hemisph
-        twi = twilight(date, i, hemisph, True)      # True = round to seconds
-        moon, moon2 = moonrise_set2(date,i)
+        twi = twilight(dfl, i, hemisph, True)      # True = round to seconds
+        moon, moon2 = moonrise_set2(dfl,i)
         if not(double_events_found(moon,moon2)):
             line = r'''\textbf{{{}}}'''.format(hs) + r''' {}$^\circ$'''.format(abs(i))
             line = line + r''' & {} & {} & {} & {} & {} & {} & {} & {} \\
@@ -131,9 +147,13 @@ def twilighttab(date):
 '''
     return tab
 
-
+# >>>>>>>>>>>>>>>>>>>>>>>>
 def meridiantab(date):
     # returns a table with ephemerides for the navigational stars
+
+    first_day = r'''{}/{}/{}'''.format(date.year,date.month,date.day)
+    dfl = ephem.Date(first_day)    # convert date to float
+
     # LaTeX SPACING: \enskip \quad \qquad
     out = r'''\quad
 \begin{tabular*}{0.25\textwidth}[t]{@{\extracolsep{\fill}}|rrr|}
@@ -141,7 +161,7 @@ def meridiantab(date):
 '''
     m = ""
     # returns a table with SHA & Mer.pass for Venus, Mars, Jupiter and Saturn
-    dt = ephem.date(date).datetime()
+    dt = ephem.date(dfl).datetime()
     datestr = r'''{} {}'''.format(dt.strftime("%b"), dt.strftime("%d"))
 #        datestr = r'''{} {} {}'''.format(dt.strftime("%b"), dt.strftime("%d"), dt.strftime("%a"))
     m = m + r'''\hline
@@ -149,7 +169,8 @@ def meridiantab(date):
 \textbf{{{}}} & \textbf{{SHA}} & \textbf{{Mer.pass}}\\
 \hline\multicolumn{{3}}{{|r|}}{{}}\\[-2.0ex]
 '''.format(datestr)
-    p = planetstransit(date, True)      # True = round to seconds
+
+    p = planetstransit(dfl, True)      # True = round to seconds
     m = m + r'''Venus & {} & {} \\
 '''.format(p[0],p[1])
     m = m + r'''Mars & {} & {} \\
@@ -167,9 +188,12 @@ def meridiantab(date):
 '''
     return out
 
-
-def equationtab(date):
+# >>>>>>>>>>>>>>>>>>>>>>>>
+def equationtab(date, dpp):
     # returns the Equation of Time section for 'date' and 'date+1'
+
+    first_day = r'''{}/{}/{}'''.format(date.year,date.month,date.day)
+    dfl = ephem.Date(first_day)    # convert date to float
 
     tab = r'''\begin{tabular}[t]{|r|ccc|ccc|}
 %\multicolumn{7}{c}{\normalsize{}}\\
@@ -182,9 +206,11 @@ def equationtab(date):
 \cline{1-7}\rule{0pt}{3.0ex}\noindent
 '''
 
-    for k in range(2):
-        d = ephem.date(date+k)
+    nn = 0
+    while nn < dpp:
+        d = ephem.date(dfl+nn)
         eq = equation_of_time(d, True)      # True = round to seconds
+        nn += 1
         tab = tab + r'''{} & {} & {} & {} & {} & {} & {}({}\%) \\
 '''.format(d.datetime().strftime("%d"),eq[0],eq[1],eq[2],eq[3],eq[4],eq[5],eq[6])
 
@@ -192,53 +218,92 @@ def equationtab(date):
 \end{tabular}'''
     return tab
 
+#----------------------
+#   page preparation
+#----------------------
 
-def doublepage(date, page1):
-    # creates a doublepage (2 days) of tables
-    page = ''
+def page(date, dpp=2):
+    # creates a page (2 days) of tables
 
-    leftindent = ""
-    rightindent = ""
-    str1 = r'''
+    if dpp > 1:
+        str2 = r'''\textbf{{{} to {}}}
+'''.format(date.strftime("%Y %B %d"),(date+timedelta(days=dpp-1)).strftime("%b. %d"))
+    else:
+        str2 = r'''\textbf{{{}}}
+'''.format(date.strftime("%Y %B %d"))
+
+    page = r'''
 % ------------------ N E W   P A G E ------------------
 \newpage
 \sffamily
 \noindent
 \begin{{flushright}}
-\textbf{{{} to {}}}{}%
+\textbf{{{}}}%
 \end{{flushright}}\par
 \begin{{scriptsize}}
-'''.format(ephem.date(date).datetime().strftime("%Y %B %d"),ephem.date(date+1).datetime().strftime("%b. %d"),rightindent)
-    page = page + str1
+'''.format(str2)
 
-    page = page + twilighttab(date)
-    page = page + meridiantab(date)
-    page = page + twilighttab(date+1)
-    page = page + meridiantab(date+1)
-    page = page + equationtab(date)
+    date2 = date + timedelta(days=1)
+    page += twilighttab(date)
+    page += meridiantab(date)
+    if dpp == 2:
+        page += twilighttab(date2)
+        page += meridiantab(date2)
+    page += equationtab(date,dpp)
+
+    # to avoid "Overfull \hbox" messages, leave a paragraph end before the end of a size change. (This may only apply to tabular* table style) See lines below...
     page = page + r'''
 
 \end{scriptsize}'''
-    # to avoid "Overfull \hbox" messages, leave a paragraph end before the end of a size change. (See lines above)
     return page
 
+def pages(first_day, dtp):
+    # dtp = 0 if for entire year; = -1 if for entire month; else days to print
 
-def pages(date, p):
     # make almanac starting from 'date'
     out = ''
-    page1 = True
-    for i in range(p):
-        out = out + doublepage(date,page1)
-        page1 = False
-        date += 2
+    dpp = 2         # 2 days per page maximum
+    day1 = first_day
+
+    if dtp == 0:        # if entire year
+        year = first_day.year
+        yr = year
+        while year == yr:
+            day2 = day1 + timedelta(days=1)
+            if day2.year != yr:
+                dpp -= day2.day
+                if dpp <= 0: return out
+            out += page(day1, dpp)
+            day1 += timedelta(days=2)
+            year = day1.year
+    elif dtp == -1:     # if entire month
+        mth = first_day.month
+        m = mth
+        while mth == m:
+            day2 = day1 + timedelta(days=1)
+            if day2.month != m:
+                dpp -= day2.day
+                if dpp <= 0: return out
+            out += page(day1, dpp)
+            day1 += timedelta(days=2)
+            mth = day1.month
+    else:           # print 'dtp' days beginning with first_day
+        i = dtp   # don't decrement dtp
+        while i > 0:
+            if i < 2: dpp = i
+            out += page(day1, dpp)
+            i -= 2
+            day1 += timedelta(days=2)
+
     return out
 
+#--------------------------
+#   external entry point
+#--------------------------
 
-def maketables(first_day, pagenum):
+def maketables(first_day, dtp):
     # make tables starting from first_day
-    year = first_day.year
-    mth = first_day.month
-    day = first_day.day
+    # dtp = 0 if for entire year; = -1 if for entire month; else days to print
 
     # page size specific parameters
     if config.pgsz == "A4":
@@ -273,7 +338,8 @@ def maketables(first_day, pagenum):
     alm = alm + r'''
 %\usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
-\usepackage{fontenc}'''
+\usepackage{fontenc}
+\usepackage{enumitem} % used to customize the {description} environment'''
 
     # to troubleshoot add "showframe, verbose," below:
     alm = alm + r'''
@@ -315,16 +381,26 @@ def maketables(first_day, pagenum):
     alm = alm + r'''[{}]
     \textsc{{\huge Event Time Tables}}\\[{}]'''.format(vsep1,vsep2)
 
-    if pagenum == 183:
+    if dtp == 0:
         alm = alm + r'''
     \HRule \\[0.5cm]
     {{ \Huge \bfseries {}}}\\[0.2cm]
-    \HRule \\'''.format(year)
+    \HRule \\'''.format(first_day.year)
+    elif dtp == -1:
+        alm = alm + r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(first_day.strftime("%B %Y"))
+    elif dtp > 1:
+        alm = alm + r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(fmtdates(first_day,first_day+timedelta(days=dtp-1)))
     else:
         alm = alm + r'''
     \HRule \\[0.5cm]
-    {{ \Huge \bfseries from {}.{}.{}}}\\[0.2cm]
-    \HRule \\'''.format(day,mth,year)
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(fmtdate(first_day))
 
     alm = alm + r'''
     \begin{center}\begin{tabular}[t]{rl}
@@ -335,15 +411,16 @@ def maketables(first_day, pagenum):
     {\large \today}
     \HRule \\[0.2cm]
     \end{center}
-    \begin{description}\footnotesize
-    \item[Disclaimer:] These are computer generated tables. They focus on times of rising and setting events and are rounded to the second... primarily intended for comparison with other astronomical algorithms (not for navigation). Meridian Passage times of the sun, moon and four planets are included.
+    \begin{description}[leftmargin=5.5em,style=nextline]\footnotesize
+    \item[Disclaimer:] These are computer generated tables. They focus on times of rising and setting events and are rounded to the second (not primarily intended for navigation). Meridian Passage times of the sun, moon and four planets are included.
+    The author claims no liability for any consequences arising from use of these tables.
     \end{description}
 \end{titlepage}
 \restoregeometry    % so it does not affect the rest of the pages'''
 
-    first_day = r'''{}/{}/{}'''.format(year,mth,day)
-    date = ephem.Date(first_day)    # date to float
-    alm = alm + pages(date,pagenum)
+#    first_day = r'''{}/{}/{}'''.format(year,mth,day)
+#    date = ephem.Date(first_day)    # date to float
+    alm = alm + pages(first_day,dtp)
     alm = alm + '''
 \end{document}'''
     return alm

@@ -156,12 +156,12 @@ def sunmoon(date):          # used in suntab(m), sunmoontab(m)
     hp = "{:0.1f}'".format(deg*360*30/math.pi)
     
     #calculate v and d by advancing the time with one hour.
-    ephem_moon.compute(date-0.5*ephem.hour,epoch=date-0.5*ephem.hour)
-    obs.date = date - 0.5 * ephem.hour
+    ephem_moon.compute(date,epoch=date)
+    obs.date = date
     rgha = ephem.degrees(obs.sidereal_time()-ephem_moon.g_ra).norm
     rdec = ephem_moon.g_dec
-    ephem_moon.compute(date+0.5*ephem.hour,epoch=date+0.5*ephem.hour)
-    obs.date = date + 0.5 * ephem.hour
+    ephem_moon.compute(date+ephem.hour,epoch=date+ephem.hour)
+    obs.date = date + ephem.hour
     rghap = ephem.degrees(obs.sidereal_time()-ephem_moon.g_ra).norm
 
     deg = ephem.degrees(ephem.degrees(rghap-rgha).norm-ephem.degrees('14:19:00'))
@@ -367,7 +367,7 @@ def stellar(date):          # used in starstab
     out = []
     for line in db.strip().split('\n'):
         st = ephem.readdb(line)
-        st.compute(date+0.5)    # calculate at noon
+        st.compute(date)    # calculate at midnight
         out.append([st.name,nadeg(2*math.pi - ephem.degrees(st.g_ra).norm),nadeg(st.g_dec)])
     return out
 
@@ -1262,7 +1262,7 @@ def equation_of_time(date, round2seconds = False): # used in twilighttab (sectio
     obs = ephem.Observer()
     obs.date = date
     
-    ephem_moon.compute(date+0.5)
+    ephem_moon.compute(date)
     pct = int(round(ephem_moon.phase))   # percent of moon surface illuminated
     age = int(round((date+0.5)-ephem.previous_new_moon(date+0.5)))
     phase = ephem_moon.elong.norm+0.0    # moon phase as float (0:new to π:full to 2π:new)
