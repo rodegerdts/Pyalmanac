@@ -188,17 +188,18 @@ def suntab(date, n):
 
         vd = sun_moon_SD(dfl)
         tab = tab + r'''\hline
-\rule{{0pt}}{{2.4ex}} & \multicolumn{{1}}{{c}}{{SD={}$'$}} & \multicolumn{{1}}{{c|}}{{\textit{{d}}\,=\,{}$'$}}\\
+\rule{{0pt}}{{2.4ex}} & 
+\multicolumn{{1}}{{c}}{{SD={}$'$}} & 
+\multicolumn{{1}}{{c|}}{{\textit{{d}}\,=\,{}$'$}}\\
 \hline
 '''.format(vd[1],vd[0])
-        if n < 2:
+        if n > 1:
             # add space between tables...
             tab = tab + r'''\multicolumn{1}{c}{}\\[-0.5ex]'''
         n -= 1
         dfl += 1
 
-    tab = tab + r'''
-\end{tabular*}'''
+    tab = tab + r'''\end{tabular*}'''
     return tab
 
 # >>>>>>>>>>>>>>>>>>>>>>>>
@@ -285,8 +286,8 @@ def suntabm(date, n):
                 dhr += ephem.hour
 
         vd = sun_moon_SD(dfl)
-        tab = tab + r'''\cmidrule{{2-3}}
-& \multicolumn{{1}}{{c}}{{\scriptsize{{SD\,=\,{}$'$}}}} & \multicolumn{{1}}{{c}}{{\footnotesize{{\textit{{d}}\,=\,{}$'$}}}}\\
+        tab = tab + r'''\cmidrule{{2-3}} & 
+\multicolumn{{1}}{{c}}{{\scriptsize{{SD\,=\,{}$'$}}}} & \multicolumn{{1}}{{c}}{{\footnotesize{{\textit{{d}}\,=\,{}$'$}}}}\\
 \cmidrule{{2-3}}'''.format(vd[1],vd[0])
         if n > 1:
             # add space between tables...

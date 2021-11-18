@@ -226,11 +226,9 @@ def page(date, dpp=2):
     # creates a page (2 days) of tables
 
     if dpp > 1:
-        str2 = r'''\textbf{{{} to {}}}
-'''.format(date.strftime("%Y %B %d"),(date+timedelta(days=dpp-1)).strftime("%b. %d"))
+        str2 = r'''\textbf{{{} to {}}}'''.format(date.strftime("%Y %B %d"),(date+timedelta(days=dpp-1)).strftime("%b. %d"))
     else:
-        str2 = r'''\textbf{{{}}}
-'''.format(date.strftime("%Y %B %d"))
+        str2 = r'''\textbf{{{}}}'''.format(date.strftime("%Y %B %d"))
 
     page = r'''
 % ------------------ N E W   P A G E ------------------
@@ -307,7 +305,6 @@ def maketables(first_day, dtp):
 
     # page size specific parameters
     if config.pgsz == "A4":
-        # pay attention to the limited page width
         paper = "a4paper"
         vsep1 = "2.0cm"
         vsep2 = "1.5cm"
@@ -320,7 +317,6 @@ def maketables(first_day, dtp):
         lm = "16mm"
         rm = "16mm"
     else:
-        # pay attention to the limited page height
         paper = "letterpaper"
         vsep1 = "1.5cm"
         vsep2 = "1.0cm"
