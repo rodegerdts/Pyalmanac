@@ -236,7 +236,7 @@ def page(date, dpp=2):
 \sffamily
 \noindent
 \begin{{flushright}}
-\textbf{{{}}}%
+{}%
 \end{{flushright}}\par
 \begin{{scriptsize}}
 '''.format(str2)

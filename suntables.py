@@ -307,11 +307,9 @@ def suntabm(date, n):
 def page(date, dpp=15):
 
     if dpp > 1:
-        str2 = r'''\textbf{{{} to {}}}
-'''.format(date.strftime("%Y %B %d"),(date+timedelta(days=dpp-1)).strftime("%b. %d"))
+        str2 = r'''\textbf{{{} to {}}}'''.format(date.strftime("%Y %B %d"),(date+timedelta(days=dpp-1)).strftime("%b. %d"))
     else:
-        str2 = r'''\textbf{{{}}}
-'''.format(date.strftime("%Y %B %d"))
+        str2 = r'''\textbf{{{}}}'''.format(date.strftime("%Y %B %d"))
 
     # creates a page(15 days) of the Sun almanac
     page = r'''
@@ -320,7 +318,7 @@ def page(date, dpp=15):
 \sffamily
 \noindent
 \begin{{flushright}}
-\textbf{{{}}}\par
+{}\par
 \end{{flushright}}
 \begin{{scriptsize}}
 '''.format(str2)
