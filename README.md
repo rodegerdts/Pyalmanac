@@ -2,8 +2,8 @@
 
 **Description**
 
-Pyalmanac is a Python 3 script that essentially creates the daily pages of the Nautical Almanac **using the UTC timescale**.
-Official Nautical Almanacs employ a UT timescale (equivalent to UT1). UTC is the basis for the worldwide system of civil time.
+Pyalmanac is a Python 3 script that creates the daily pages of the Nautical Almanac using the UTC timescale,
+which is the basis for the worldwide system of civil time. Official Nautical Almanacs employ a UT timescale (equivalent to UT1).
 
 The 'daily pages' are tables that are needed for celestial navigation with a sextant.
 Although you are strongly advised to purchase the official Nautical Almanac, this program will reproduce the tables with no warranty or guarantee of accuracy.
@@ -13,18 +13,17 @@ Pyalmanac was developed based on the original *Pyalmanac* by Enno Rodegerdts. Va
 **Current state of Pyalmanac**
 
 Pyalmanac is a somewhat dated program.
-Pyalmanac is implemented using the [Ephem](https://rhodesmill.org/pyephem/) astronomical library (originally named PyEphem), which was once in a 'deprecated' state. It was then raised into 'maintenance mode'. Ephem relies on XEphem, which was 'end of life' as no further updates to XEphem were planned.
+Pyalmanac is implemented using the [Ephem](https://rhodesmill.org/pyephem/) astronomical library (originally named PyEphem), which is in 'maintenance mode', however recent improvements have made it acceptable for navigational purposes again.
+Ephem relies on XEphem, which was 'end of life' as no further updates to XEphem were planned.
 Elwood Charles Downey, the author of XEphem, generously gave permission for their use in (Py)Ephem.
 
-Pyalmanac contains its own star database, now updated with data from the Hipparcos Star Catalogue. The GHA/Dec star data now matches a sample page from a Nautical Almanac typically to within 0°0.1'.
+Pyalmanac contains its own star database, now updated with data from the Hipparcos Star Catalogue. 
+The GHA/Dec star data now matches a sample page from a Nautical Almanac typically to within 0°0.1'.
 As of now, (Py)Ephem will continue to receive critical bugfixes and be ported to each new version of Python.
 Pyalmanac still has the advantage of speed over other implementations.
 
-One limitation of Ephem is related to the projected speed of Earth's rotation, or "sidereal time".
-Skyfield-based almanacs (SFalmanac and Skyalmanac) now use the International Earth Rotation and Reference 
-Systems Service (IERS) Earth Orientation Parameters (EOP) data which are forecast for at least the coming 
-12 months (and updated weekly). 
-Accurate assessment of "sidereal time" will minimize GHA discrepancies in general. (This applies to to all celestial objects.)
+One minor limitation of Ephem is related to the projected speed of Earth's rotation, or "sidereal time", which is more accurate in Skyfield-based almanacs.
+Accurate assessment of "sidereal time" minimizes GHA discrepancies in general. (This applies to all celestial objects.)
 
 Given the choice, [SFalmanac](https://pypi.org/project/sfalmanac/) is an up-to-date program with almost identical functionality to Pyalmanac, and it uses [Skyfield](https://rhodesmill.org/skyfield/), a modern astronomical library based on the highly accurate algorithms employed in the [NASA JPL HORIZONS System](https://ssd.jpl.nasa.gov/horizons/).
 
@@ -117,7 +116,7 @@ The PDF filenames have been revised (again):
 &emsp;Here are the requirements/recommendations:
 
 * Python v3.4 or higher (the latest version is recommended)
-* Ephem >= 3.7.6
+* Ephem >= 3.7.6 (Ephem >= 4.2 is recommended due to the latest bugfixes)
 * MiKTeX&ensp;or&ensp;TeX Live
 
 ## Files required in the execution folder:
