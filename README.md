@@ -116,7 +116,7 @@ The PDF filenames have been revised (again):
 &emsp;Here are the requirements/recommendations:
 
 * Python v3.4 or higher (the latest version is recommended)
-* Ephem >= 3.7.6 (Ephem >= 4.2 is recommended due to the latest bugfixes)
+* Ephem >= 3.7.6 (4.1 is good; 4.1.1, 4.1.2 or 4.1.3 are faulty)
 * MiKTeX&ensp;or&ensp;TeX Live
 
 ## Files required in the execution folder:
