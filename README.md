@@ -16,6 +16,7 @@ Pyalmanac is a somewhat dated program.
 Pyalmanac is implemented using the [Ephem](https://rhodesmill.org/pyephem/) astronomical library (originally named PyEphem), which is in 'maintenance mode', however recent improvements have made it acceptable for navigational purposes again.
 Ephem relies on XEphem, which was 'end of life' as no further updates to XEphem were planned.
 Elwood Charles Downey, the author of XEphem, generously gave permission for their use in (Py)Ephem.
+**Please note the Software Requirements below for Ephem as the latest versions still contain a software error!**
 
 Pyalmanac contains its own star database, now updated with data from the Hipparcos Star Catalogue. 
 The GHA/Dec star data now matches a sample page from a Nautical Almanac typically to within 0°0.1'.
@@ -111,7 +112,7 @@ The PDF filenames have been revised (again):
 
 ## Requirements
 
-&emsp;Most of the computation is done by the free Ephem library.  
+&emsp;Astronomical computation is done by the free Ephem library.  
 &emsp;Typesetting is typically done by MiKTeX or TeX Live.  
 &emsp;Here are the requirements/recommendations:
 
@@ -127,13 +128,13 @@ The PDF filenames have been revised (again):
 
 ### INSTALLATION GUIDELINES on Windows 10:
 
-&emsp;Install Python 3.9.1 (should be in the system environment variable PATH, e.g. )  
-&emsp;&ensp;**C:\\Python39\Scripts;C:\\Python39;** .....  
+&emsp;Install Python 3.10.6 (should be in the system environment variable PATH, e.g. )  
+&emsp;&ensp;**C:\\Python310\Scripts;C:\\Python310;** .....  
 &emsp;Install MiKTeX 21.1 from https://miktex.org/  
 &emsp;When MiKTeX first runs it will require installation of additional packages.  
 &emsp;Run Command Prompt as Administrator, go to your Python folder and execute, e.g.:
 
-&emsp;**cd C:\\Python39**  
+&emsp;**cd C:\\Python310**  
 &emsp;**python.exe -m pip install --upgrade pip**  
 &emsp;... for a first install:  
 &emsp;**pip3 uninstall pyephem ephem**  

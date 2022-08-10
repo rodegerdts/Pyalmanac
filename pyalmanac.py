@@ -65,7 +65,7 @@ def makePDF(args, fn, msg = ""):
 def check_mth(mm):
     if not 1 <= int(mm) <= 12:
         print("ERROR: Enter month between 01 and 12")
-        sys.exit()
+        sys.exit(0)
 
 def check_date(year, month, day):
     yy = int(year)
@@ -75,7 +75,7 @@ def check_date(year, month, day):
         day_count_for_month[2] = 29
     if not (1 <= mm <= 12 and 1 <= int(day) <= day_count_for_month[mm]):
         print("ERROR: Enter a valid date")
-        sys.exit()
+        sys.exit(0)
 
 def check_years(yearfr, yearto):
     global yrmin, yrmax
@@ -220,7 +220,7 @@ if s in set(['1', '2', '3', '4', '5', '6', '7']):
 
             if sErr:
                 print("ERROR: Enter numeric digits in the correct format")
-                sys.exit()
+                sys.exit(0)
 
             if len(ss) == 2:
                 entireMth = True
@@ -267,11 +267,11 @@ if s in set(['1', '2', '3', '4', '5', '6', '7']):
                 if len(nn) > 0:
                     if not nn.isnumeric():
                         print("ERROR: Not a number")
-                        sys.exit()
+                        sys.exit(0)
                     daystoprocess = int(nn)
                     if daystoprocess > 300:
                         print("ERROR: 'Days to process' not <= 300")
-                        sys.exit()
+                        sys.exit(0)
 
     if s != '3' and int(s) <= 5:
         tsin = input("""  What table style is required?:\n
