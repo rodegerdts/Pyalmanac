@@ -20,15 +20,16 @@
 #     with this program; if not, write to the Free Software Foundation, Inc.,
 #     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# Standard library imports
-import datetime
-import math
+###### Standard library imports ######
+# don't confuse the 'date' method with the 'Date' variable!
+from datetime import date
+from math import degrees, pi, tan
 import sys
 
-# Third party imports
+###### Third party imports ######
 import ephem
 
-# Local application imports
+###### Local application imports ######
 import config
 
 ephem_sun     = ephem.Sun()
@@ -43,9 +44,9 @@ ephem_saturn  = ephem.Saturn()
 #   internal methods
 #----------------------
 
-def hhmm(date):
+def hhmm(Date):
     # turn an ephem.date (float) into a time string formatted hh:mm
-    tup = date.tuple()
+    tup = Date.tuple()
     hr = tup[-3]
     # round >=30 seconds to next minute
     min = tup[-2] + int(round((tup[-1]/60)+0.00001))
@@ -62,9 +63,9 @@ def hhmm(date):
     #       flipped into the next day, however this is not required here.
     return time
 
-def hhmmss(date):       # used by eventtables.py
+def hhmmss(Date):       # used by eventtables.py
     # turn an ephem.date (float) into a time string formatted hh:mm:ss
-    tup = date.tuple()
+    tup = Date.tuple()
     hr = tup[-3]
     mi = tup[-2]
     sec = int(round(tup[-1]))
@@ -84,11 +85,11 @@ def hhmmss(date):       # used by eventtables.py
     #       flipped into the next day, however this is not required here.
     return time
 
-def date2time(date, withseconds = False):
+def date2time(Date, withseconds = False):
     if withseconds:
-        return hhmmss(date)
+        return hhmmss(Date)
     else:
-        return hhmm(date)
+        return hhmm(Date)
 
 def nadeg(rad, fixedwidth=1):
     # changes ephem.angle (rad) to the format usually used in the nautical almanac (ddd°mm.m) and returns a string object.
@@ -96,7 +97,7 @@ def nadeg(rad, fixedwidth=1):
     theminus = ""
     if rad < 0:
     	theminus = '-'
-    df = abs(math.degrees(rad))	# convert radians to degrees (float)
+    df = abs(degrees(rad))	# convert radians to degrees (float)
     di = int(df)			# degrees (integer)
     # note: round() uses "Rounding Half To Even" strategy
     mf = round((df-di)*60, 1)	# minutes (float), rounded to 1 decimal place
@@ -128,24 +129,24 @@ def flag_msg(msg):
 #   Sun and Moon calculations
 #-------------------------------
 
-def sunmoon(date):          # used in suntab(m), sunmoontab(m)
+def sunmoon(Date):          # used in suntab(m), sunmoontab(m)
     # returns ephemrerids for sun and moon.
     
     #Sun        gha dec
     #Moon       gha v dec d hp
 
     obs = ephem.Observer()
-    obs.date = date
+    obs.date = Date
     
     #Sun
-    ephem_sun.compute(date,epoch=date)
+    ephem_sun.compute(Date,epoch=Date)
     deg = ephem.degrees(obs.sidereal_time()-ephem_sun.g_ra).norm
     ghas = nadeg(deg)
     degs = ephem_sun.g_dec
     decs = nadeg(degs,2)
     
     #Moon
-    ephem_moon.compute(date,epoch=date)
+    ephem_moon.compute(Date,epoch=Date)
     deg = ephem.degrees(obs.sidereal_time()-ephem_moon.g_ra).norm
     gham = nadeg(deg)
     degm = ephem_moon.g_dec
@@ -153,46 +154,46 @@ def sunmoon(date):          # used in suntab(m), sunmoontab(m)
     
     #calculate the moon's horizontal paralax
     deg = ephem.degrees(ephem_moon.radius/0.272805950305)
-    hp = "{:0.1f}'".format(deg*360*30/math.pi)
+    hp = "{:0.1f}'".format(deg*360*30/pi)
     
     #calculate v and d by advancing the time with one hour.
-    ephem_moon.compute(date,epoch=date)
-    obs.date = date
+    ephem_moon.compute(Date,epoch=Date)
+    obs.date = Date
     rgha = ephem.degrees(obs.sidereal_time()-ephem_moon.g_ra).norm
     rdec = ephem_moon.g_dec
-    ephem_moon.compute(date+ephem.hour,epoch=date+ephem.hour)
-    obs.date = date + ephem.hour
+    ephem_moon.compute(Date+ephem.hour,epoch=Date+ephem.hour)
+    obs.date = Date + ephem.hour
     rghap = ephem.degrees(obs.sidereal_time()-ephem_moon.g_ra).norm
 
     deg = ephem.degrees(ephem.degrees(rghap-rgha).norm-ephem.degrees('14:19:00'))
-    vmf = deg*360*30/math.pi
+    vmf = deg*360*30/pi
     vm = "{:0.1f}'".format(vmf)
 
     deg = ephem.degrees(ephem_moon.g_dec-rdec)
-    dmf = deg*360*30/math.pi
+    dmf = deg*360*30/pi
     dm = "{:0.1f}'".format(dmf)
     
     # degs, degm have been added for the sunmooontab function
     return ghas,decs,gham,vm,decm,dm,hp,degs,degm
 
-def sun_moon_SD(date):      # used in suntab(m), sunmoontab(m)
+def sun_moon_SD(Date):      # used in suntab(m), sunmoontab(m)
     obs = ephem.Observer()
-    obs.date = date
+    obs.date = Date
     
     #Sun
     # compute semi-diameter of sun and sun's declination change per hour (in minutes)
-    ephem_sun.compute(date)
+    ephem_sun.compute(Date)
     dec = ephem_sun.g_dec
-    ephem_sun.compute(date+ephem.hour)
-    obs.date = date+ephem.hour
+    ephem_sun.compute(Date+ephem.hour)
+    obs.date = Date+ephem.hour
     deg = ephem.degrees(ephem_sun.g_dec-dec)
-    ds = "{:0.1f}".format(deg*360*30/math.pi)
-    sds = "{:0.1f}".format(ephem_sun.radius*360*30/math.pi)
+    ds = "{:0.1f}".format(deg*360*30/pi)
+    sds = "{:0.1f}".format(ephem_sun.radius*360*30/pi)
     
     #Moon
     # compute semi-diameter of moon (in minutes)
-    ephem_moon.compute(date)
-    sdm = "{:0.1f}".format(ephem_moon.radius*360*30/math.pi)
+    ephem_moon.compute(Date)
+    sdm = "{:0.1f}".format(ephem_moon.radius*360*30/pi)
     
     return ds,sds,sdm
 
@@ -200,7 +201,7 @@ def sun_moon_SD(date):      # used in suntab(m), sunmoontab(m)
 #   Venus, Mars, Jupiter & Saturn calculations
 #------------------------------------------------
 
-def planetsGHA(date):       # used in planetstab(m)
+def planetsGHA(Date):       # used in planetstab(m)
     # this function returns a tuple of strings with ephemerids in the format used by the nautical almanac.
     
     # following are objects and their values:
@@ -211,35 +212,35 @@ def planetsGHA(date):       # used in planetstab(m)
     #Saturn     gha dec
 
     obs = ephem.Observer()
-    obs.date = date
+    obs.date = Date
     
     #Aries, First Point of
     deg = ephem.degrees(obs.sidereal_time()).norm
     ghaa = nadeg(deg)
     
     #Venus
-    ephem_venus.compute(date,epoch=date)
+    ephem_venus.compute(Date,epoch=Date)
     deg = ephem.degrees(obs.sidereal_time()-ephem_venus.g_ra).norm
     ghav = nadeg(deg)
     degv = ephem_venus.g_dec
     decv = nadeg(degv,2)
     
     #Mars
-    ephem_mars.compute(date,epoch=date)
+    ephem_mars.compute(Date,epoch=Date)
     deg = ephem.degrees(obs.sidereal_time()-ephem_mars.g_ra).norm
     ghamars = nadeg(deg)
     degmars = ephem_mars.g_dec
     decmars = nadeg(degmars,2)
     
     #Jupiter
-    ephem_jupiter.compute(date,epoch=date)
+    ephem_jupiter.compute(Date,epoch=Date)
     deg = ephem.degrees(obs.sidereal_time()-ephem_jupiter.g_ra).norm
     ghaj = nadeg(deg)
     degj = ephem_jupiter.g_dec
     decj = nadeg(degj,2)
     
     #Saturn
-    ephem_saturn.compute(date,epoch=date)
+    ephem_saturn.compute(Date,epoch=Date)
     deg = ephem.degrees(obs.sidereal_time()-ephem_saturn.g_ra).norm
     ghasat = nadeg(deg)
     degsat = ephem_saturn.g_dec
@@ -248,66 +249,66 @@ def planetsGHA(date):       # used in planetstab(m)
     # degv, degmars, degj, degsat have been added for the planetstab function
     return ghaa,ghav,decv,ghamars,decmars,ghaj,decj,ghasat,decsat,degv,degmars,degj,degsat
 
-def vdm_planets(date):      # used in planetstab(m)
+def vdm_planets(Date):      # used in planetstab(m)
     # compute v (GHA correction), d (Declination correction), m (magnitude of planet)
 
     obs = ephem.Observer()
-    obs.date = date
+    obs.date = Date
     
     #Venus
-    obs.date = date
-    ephem_venus.compute(date)
+    obs.date = Date
+    ephem_venus.compute(Date)
     gha = ephem.degrees(obs.sidereal_time()-ephem_venus.g_ra).norm
     dec = ephem_venus.g_dec
-    ephem_venus.compute(date+ephem.hour)
-    obs.date = date+ephem.hour
+    ephem_venus.compute(Date+ephem.hour)
+    obs.date = Date+ephem.hour
     ghap = ephem.degrees(obs.sidereal_time()-ephem_venus.g_ra).norm
     deg = ephem.degrees(ghap-gha).norm-ephem.degrees('15:00:00')
-    vvenus = "{:0.1f}".format(deg*360*30/math.pi)
+    vvenus = "{:0.1f}".format(deg*360*30/pi)
     deg = ephem.degrees(ephem_venus.g_dec-dec)
-    dvenus = "{:0.1f}".format(deg*360*30/math.pi)
+    dvenus = "{:0.1f}".format(deg*360*30/pi)
     mvenus = "{:0.1f}".format(ephem_venus.mag)
     
     #Mars
-    obs.date = date
-    ephem_mars.compute(date)
+    obs.date = Date
+    ephem_mars.compute(Date)
     gha = ephem.degrees(obs.sidereal_time()-ephem_mars.g_ra).norm
     dec = ephem_mars.g_dec
-    ephem_mars.compute(date+ephem.hour)
-    obs.date = date+ephem.hour
+    ephem_mars.compute(Date+ephem.hour)
+    obs.date = Date+ephem.hour
     ghap = ephem.degrees(obs.sidereal_time()-ephem_mars.g_ra).norm
     deg = ephem.degrees(ephem.degrees(ghap-gha).norm-ephem.degrees('15:00:00'))
-    vmars = "{:0.1f}".format(deg*360*30/math.pi)
+    vmars = "{:0.1f}".format(deg*360*30/pi)
     deg = ephem.degrees(ephem_mars.g_dec-dec)
-    dmars = "{:0.1f}".format(deg*360*30/math.pi)
+    dmars = "{:0.1f}".format(deg*360*30/pi)
     mmars = "{:0.1f}".format(ephem_mars.mag)
     
     #Jupiter
-    obs.date = date
-    ephem_jupiter.compute(date)
+    obs.date = Date
+    ephem_jupiter.compute(Date)
     gha = ephem.degrees(obs.sidereal_time()-ephem_jupiter.g_ra).norm
     dec = ephem_jupiter.g_dec
-    ephem_jupiter.compute(date+ephem.hour)
-    obs.date = date+ephem.hour
+    ephem_jupiter.compute(Date+ephem.hour)
+    obs.date = Date+ephem.hour
     ghap = ephem.degrees(obs.sidereal_time()-ephem_jupiter.g_ra).norm
     deg = ephem.degrees(ephem.degrees(ghap-gha).norm-ephem.degrees('15:00:00'))
-    vjup = "{:0.1f}".format(deg*360*30/math.pi)
+    vjup = "{:0.1f}".format(deg*360*30/pi)
     deg = ephem.degrees(ephem_jupiter.g_dec-dec)
-    djup = "{:0.1f}".format(deg*360*30/math.pi)
+    djup = "{:0.1f}".format(deg*360*30/pi)
     mjup = "{:0.1f}".format(ephem_jupiter.mag)
     
     #Saturn
-    obs.date = date
-    ephem_saturn.compute(date)
+    obs.date = Date
+    ephem_saturn.compute(Date)
     gha = ephem.degrees(obs.sidereal_time()-ephem_saturn.g_ra).norm
     dec = ephem_saturn.g_dec
-    ephem_saturn.compute(date+ephem.hour)
-    obs.date = date+ephem.hour
+    ephem_saturn.compute(Date+ephem.hour)
+    obs.date = Date+ephem.hour
     ghap = ephem.degrees(obs.sidereal_time()-ephem_saturn.g_ra).norm
     deg = ephem.degrees(ephem.degrees(ghap-gha).norm-ephem.degrees('15:00:00'))
-    vsat = "{:0.1f}".format(deg*360*30/math.pi)
+    vsat = "{:0.1f}".format(deg*360*30/pi)
     deg = ephem.degrees(ephem_saturn.g_dec-dec)
-    dsat = "{:0.1f}".format(deg*360*30/math.pi)
+    dsat = "{:0.1f}".format(deg*360*30/pi)
     msat = "{:0.1f}".format(ephem_saturn.mag)
     
     return vvenus,dvenus,mvenus,vmars,dmars,mmars,vjup,djup,mjup,vsat,dsat,msat
@@ -316,44 +317,44 @@ def vdm_planets(date):      # used in planetstab(m)
 #   Aries & planet transit calculations
 #-----------------------------------------
 
-def ariestransit(date):     # used in planetstab(m)
+def ariestransit(Date):     # used in planetstab(m)
     # returns transit time of aries for given date
 
     obs = ephem.Observer()
-    obs.date = ephem.date(date)+1
+    obs.date = ephem.date(Date)+1
     sid = obs.sidereal_time()
-    trans = ephem.hours(2*math.pi-sid/1.00273790935)
-#    obs.date = date + trans/(2*math.pi) #turns ephem.angle (time) into ephem date
+    trans = ephem.hours(2*pi-sid/1.00273790935)
+#    obs.date = Date + trans/(2*pi) #turns ephem.angle (time) into ephem date
     hhmm = str(trans)[0:5]	# can return "h:mm:"
     if hhmm[1:2] == ':':	# check if single digit hours
         hhmm = '0' + hhmm[0:4]
     return hhmm
     
-def planetstransit(date, round2seconds = False):   # used in starstab
+def planetstransit(Date, round2seconds = False):   # used in starstab
     #returns SHA and meridian passage for the navigational planets
 
     obs = ephem.Observer()
     
-    obs.date = date
-    ephem_venus.compute(date)
-    vsha = nadeg(2*math.pi - ephem.degrees(ephem_venus.g_ra).norm)
+    obs.date = Date
+    ephem_venus.compute(Date)
+    vsha = nadeg(2*pi - ephem.degrees(ephem_venus.g_ra).norm)
     vtrans = date2time(obs.next_transit(ephem_venus), round2seconds)
-    hpvenus = "{:0.1f}".format((math.tan(6371/(ephem_venus.earth_distance*149597870.7)))*60*180/math.pi)
+    hpvenus = "{:0.1f}".format((tan(6371/(ephem_venus.earth_distance*149597870.7)))*60*180/pi)
     
-    obs.date = date
-    ephem_mars.compute(date)
-    marssha = nadeg(2*math.pi - ephem.degrees(ephem_mars.g_ra).norm)
+    obs.date = Date
+    ephem_mars.compute(Date)
+    marssha = nadeg(2*pi - ephem.degrees(ephem_mars.g_ra).norm)
     marstrans = date2time(obs.next_transit(ephem_mars), round2seconds)
-    hpmars = "{:0.1f}".format((math.tan(6371/(ephem_mars.earth_distance*149597870.7)))*60*180/math.pi)
+    hpmars = "{:0.1f}".format((tan(6371/(ephem_mars.earth_distance*149597870.7)))*60*180/pi)
 
-    obs.date = date
-    ephem_jupiter.compute(date)
-    jsha = nadeg(2*math.pi - ephem.degrees(ephem_jupiter.g_ra).norm)
+    obs.date = Date
+    ephem_jupiter.compute(Date)
+    jsha = nadeg(2*pi - ephem.degrees(ephem_jupiter.g_ra).norm)
     jtrans = date2time(obs.next_transit(ephem_jupiter), round2seconds)
     
-    obs.date = date
-    ephem_saturn.compute(date)
-    satsha = nadeg(2*math.pi - ephem.degrees(ephem_saturn.g_ra).norm)
+    obs.date = Date
+    ephem_saturn.compute(Date)
+    satsha = nadeg(2*pi - ephem.degrees(ephem_saturn.g_ra).norm)
     sattrans = date2time(obs.next_transit(ephem_saturn), round2seconds)
     
     return [vsha,vtrans,marssha,marstrans,jsha,jtrans,satsha,sattrans,hpmars,hpvenus]
@@ -362,13 +363,13 @@ def planetstransit(date, round2seconds = False):   # used in starstab
 #   star calculations
 #-----------------------
 
-def stellar(date):          # used in starstab
+def stellar(Date):          # used in starstab
     # returns a list of lists with name, SHA and Dec for all navigational stars for epoch of date.
     out = []
     for line in db.strip().split('\n'):
         st = ephem.readdb(line)
-        st.compute(date)    # calculate at midnight
-        out.append([st.name,nadeg(2*math.pi - ephem.degrees(st.g_ra).norm),nadeg(st.g_dec)])
+        st.compute(Date)    # calculate at midnight
+        out.append([st.name,nadeg(2*pi - ephem.degrees(st.g_ra).norm),nadeg(st.g_dec)])
     return out
 
 # List of navigational stars with data from Hipparcos, e.g.:
@@ -445,22 +446,22 @@ Markab,f|S|B9,23:04:45.65|60.40,15:12:18.96|-41.30,2.48,2000,0
 # create a list of 'sun above/below horizon' states per Latitude per Normal/Civil/Naut...
 #sunvisible = [[None]*3 for i in range(31)]	# sunvisible[0][0] up to sunvisible[30][2]
 
-def twilight(date, lat, hemisph, round2seconds = False):   # used in twilighttab (section 1)
+def twilight(Date, lat, hemisph, round2seconds = False):   # used in twilighttab (section 1)
     # Returns for given date and latitude(in full degrees):
     # naut. and civil twilight (before sunrise), sunrise, meridian passage, sunset, civil and nautical twilight (after sunset).
     # NOTE: 'twilight' is only called for every third day in the Full Almanac...
     #       ...therefore daily tracking of the sun state is impossible.
 
-    mth = ephem.date(date).triple()[1]
+    mth = ephem.date(Date).triple()[1]
     out = [0,0,0,0,0,0,0]
     obs = ephem.Observer()
     latitude = ephem.degrees('{}:00:00.0'.format(lat))
     obs.lat = latitude
 
     if round2seconds:
-        d = ephem.date(date) - 0.5 * ephem.second   # search from 0.5 seconds before midnight
+        d = ephem.date(Date) - 0.5 * ephem.second   # search from 0.5 seconds before midnight
     else:
-        d = ephem.date(date) - 30 * ephem.second    # search from 30 seconds before midnight
+        d = ephem.date(Date) - 30 * ephem.second    # search from 30 seconds before midnight
 
     obs.date = d
     obs.pressure = 0
@@ -482,7 +483,7 @@ def twilight(date, lat, hemisph, round2seconds = False):   # used in twilighttab
     if out[2] == '--:--' and out[4] == '--:--':	# if neither sunrise nor sunset...
         abhd = True                             # enable above/below horizon display
         if config.search_next_rising_sun:
-            yn = getsunstate(date, lat, 0)      # ... get the sun state
+            yn = getsunstate(Date, lat, 0)      # ... get the sun state
         else:
             yn = midnightsun(mth, hemisph)
         out[2] = yn
@@ -501,7 +502,7 @@ def twilight(date, lat, hemisph, round2seconds = False):   # used in twilighttab
         out[5] = '--:--'
     if abhd and out[1] == '--:--' and out[5] == '--:--':	# if neither begin nor end...
         if config.search_next_rising_sun:
-            yn = getsunstate(date, lat, 1)      # ... get the sun state
+            yn = getsunstate(Date, lat, 1)      # ... get the sun state
         else:
             yn = midnightsun(mth, hemisph)
         out[1] = yn
@@ -520,7 +521,7 @@ def twilight(date, lat, hemisph, round2seconds = False):   # used in twilighttab
         out[6] = '--:--'
     if abhd and out[0] == '--:--' and out[6] == '--:--':	# if neither begin nor end...
         if config.search_next_rising_sun:
-            yn = getsunstate(date, lat, 2)      # ... get the sun state
+            yn = getsunstate(Date, lat, 2)      # ... get the sun state
         else:
             yn = midnightsun(mth, hemisph)
         out[0] = yn
@@ -539,7 +540,7 @@ def getsunstate(d, lat, h):
     i = config.lat.index(lat)
     latitude = ephem.degrees('{}:00:00.0'.format(lat))
     obs = ephem.Observer()
-    #d = ephem.date(date) - 30 * ephem.second
+    #d = ephem.date(d) - 30 * ephem.second
     obs.pressure = 0
     s = ephem.Sun(obs)
     err = False
@@ -643,7 +644,7 @@ def midnightsun(mth, hemisph):
 #    moonvisible[0] is not linked to a latitude but a manual override
 moonvisible = [None] * 32       # moonvisible[0] up to moonvisible[31]
 
-def moonrise_set(date, lat):    # used by tables.py in twilighttab (section 2)
+def moonrise_set(Date, lat):    # used by tables.py in twilighttab (section 2)
     # - - - TIMES ARE ROUNDED TO MINUTES - - -
     # returns moonrise and moonset for the given date and latitude plus next 2 days:
     #    rise day 1, rise day 2, rise day 3, set day 1, set day 2, set day 3
@@ -658,7 +659,7 @@ def moonrise_set(date, lat):    # used by tables.py in twilighttab (section 2)
     obs.lat = latitude
     obs.pressure = 0
     obs.horizon = '-0:34'       # 34' (atmospheric refraction)
-    d = ephem.date(date) - 30 * ephem.second    # search from 30 seconds before midnight
+    d = ephem.date(Date) - 30 * ephem.second    # search from 30 seconds before midnight
     obs.date = d
     m = ephem.Moon(obs)
     m.compute(d)
@@ -727,14 +728,14 @@ def moonrise_set(date, lat):    # used by tables.py in twilighttab (section 2)
         out[3] = moonstate(i)
 
     if out[0] == '--:--' and out[3] != '--:--':	# if moonset but no moonrise...
-        out[0] = moonset_no_rise(d, date, i, lat)
+        out[0] = moonset_no_rise(d, Date, i, lat)
 
     if out[0] != '--:--' and out[3] == '--:--':	# if moonrise but no moonset...
-        out[3] = moonrise_no_set(d, date, i, lat)
+        out[3] = moonrise_no_set(d, Date, i, lat)
 
 #-----------------------------------------------------------
     # Moonrise/Moonset on 2nd. day ...
-    d = ephem.date(date + 1) - 30 * ephem.second
+    d = ephem.date(Date + 1) - 30 * ephem.second
     obs.date = d
     m.compute(d)
     try:
@@ -800,14 +801,14 @@ def moonrise_set(date, lat):    # used by tables.py in twilighttab (section 2)
         out[4] = moonstate(i)
 
     if out[1] == '--:--' and out[4] != '--:--':	# if moonset but no moonrise...
-        out[1] = moonset_no_rise(d, date+1, i, lat)
+        out[1] = moonset_no_rise(d, Date+1, i, lat)
 
     if out[1] != '--:--' and out[4] == '--:--':	# if moonrise but no moonset...
-        out[4] = moonrise_no_set(d, date+1, i, lat)
+        out[4] = moonrise_no_set(d, Date+1, i, lat)
 
 #-----------------------------------------------------------
     # Moonrise/Moonset on 3rd. day ...
-    d = ephem.date(date + 2) - 30 * ephem.second
+    d = ephem.date(Date + 2) - 30 * ephem.second
     obs.date = d
     m.compute(d)
     try:
@@ -873,10 +874,10 @@ def moonrise_set(date, lat):    # used by tables.py in twilighttab (section 2)
         out[5] = moonstate(i)
 
     if out[2] == '--:--' and out[5] != '--:--':	# if moonset but no moonrise...
-        out[2] = moonset_no_rise(d, date+2, i, lat)
+        out[2] = moonset_no_rise(d, Date+2, i, lat)
 
     if out[2] != '--:--' and out[5] == '--:--':	# if moonrise but no moonset...
-        out[5] = moonrise_no_set(d, date+2, i, lat)
+        out[5] = moonrise_no_set(d, Date+2, i, lat)
 
     return out, out2
 
@@ -903,7 +904,7 @@ def getmoonstate(d, lat):
     i = 1 + config.lat.index(lat)   # index 0 is reserved to enable an explicit setting
     latitude = ephem.degrees('{}:00:00.0'.format(lat))
     obs = ephem.Observer()
-    #d = ephem.date(date) - 30 * ephem.second
+    #d = ephem.date(d) - 30 * ephem.second
     obs.pressure = 0
     obs.horizon = '-0:34'
     m = ephem.Moon(obs)
@@ -953,7 +954,7 @@ def getmoonstate(d, lat):
     return
 
 ##NEW##
-def moonset_no_rise(d, date, i, lat):
+def moonset_no_rise(d, Date, i, lat):
     # if moonset but no moonrise...
     msg = ""
     n = seek_moonrise(d, lat)
@@ -967,13 +968,13 @@ def moonset_no_rise(d, date, i, lat):
         msg = "above horizon (end)"
         #print(out[0])
     #if msg != "":
-        #print("no moonrise on {} at lat {} => {}".format(ephem.date(date).datetime().strftime("%Y-%m-%d"), lat, msg))
+        #print("no moonrise on {} at lat {} => {}".format(ephem.date(Date).datetime().strftime("%Y-%m-%d"), lat, msg))
     if n == 0:
         out = r'''\raisebox{0.24ex}{\boldmath$\cdot\cdot$~\boldmath$\cdot\cdot$}'''
     return out
 
 ##NEW##
-def moonrise_no_set(d, date, i, lat):
+def moonrise_no_set(d, Date, i, lat):
     # if moonrise but no moonset...
     msg = ""
     n = seek_moonset(d, lat)
@@ -985,7 +986,7 @@ def moonrise_no_set(d, date, i, lat):
         out = moonstate(0)       # moonset "below horizon"
         msg = "below horizon (end)"
     #if msg != "":
-        #print("no moonset on  {} at lat {} => {}".format(ephem.date(date).datetime().strftime("%Y-%m-%d"), lat, msg))
+        #print("no moonset on  {} at lat {} => {}".format(ephem.date(Date).datetime().strftime("%Y-%m-%d"), lat, msg))
     if n == 0:
         out = r'''\raisebox{0.24ex}{\boldmath$\cdot\cdot$~\boldmath$\cdot\cdot$}'''
     return out
@@ -1003,7 +1004,7 @@ def seek_moonset(d, lat):
     i = 1 + config.lat.index(lat)   # index 0 is reserved to enable an explicit setting
     latitude = ephem.degrees('{}:00:00.0'.format(lat))
     obs = ephem.Observer()
-    #d = ephem.date(date) - 30 * ephem.second
+    #d = ephem.date(d) - 30 * ephem.second
     obs.pressure = 0    # turn off PyEphem’s native mechanism for computing atmospheric refraction near the horizon
     obs.horizon = '-0:34'
     m = ephem.Moon(obs)
@@ -1067,7 +1068,7 @@ def seek_moonrise(d, lat):
     i = 1 + config.lat.index(lat)   # index 0 is reserved to enable an explicit setting
     latitude = ephem.degrees('{}:00:00.0'.format(lat))
     obs = ephem.Observer()
-    #d = ephem.date(date) - 30 * ephem.second
+    #d = ephem.date(d) - 30 * ephem.second
     obs.pressure = 0
     obs.horizon = '-0:34'
     m = ephem.Moon(obs)
@@ -1124,7 +1125,7 @@ def seek_moonrise(d, lat):
 #   EVENT TIME tables
 #-------------------------
 
-def moonrise_set2(date, lat):    # used in twilighttab of eventtables.py
+def moonrise_set2(Date, lat):    # used in twilighttab of eventtables.py
     # - - - TIMES ARE ROUNDED TO SECONDS - - -
     # returns moonrise and moonset for the given date and latitude:
     #    rise time, set time
@@ -1139,7 +1140,7 @@ def moonrise_set2(date, lat):    # used in twilighttab of eventtables.py
     obs.lat = latitude
     obs.pressure = 0
     obs.horizon = '-0:34'       # 34' (atmospheric refraction)
-    d = ephem.date(date) - 0.5 * ephem.second   # search from 0.5 seconds before midnight
+    d = ephem.date(Date) - 0.5 * ephem.second   # search from 0.5 seconds before midnight
     obs.date = d
     m = ephem.Moon(obs)
     m.compute(d)
@@ -1208,10 +1209,10 @@ def moonrise_set2(date, lat):    # used in twilighttab of eventtables.py
         out[1] = moonstate(i)
 
     if out[0] == '--:--' and out[1] != '--:--':	# if moonset but no moonrise...
-        out[0] = moonset_no_rise(d, date, i, lat)
+        out[0] = moonset_no_rise(d, Date, i, lat)
 
     if out[0] != '--:--' and out[1] == '--:--':	# if moonrise but no moonset...
-        out[1] = moonrise_no_set(d, date, i, lat)
+        out[1] = moonrise_no_set(d, Date, i, lat)
 
     return out, out2
 
@@ -1219,24 +1220,24 @@ def moonrise_set2(date, lat):    # used in twilighttab of eventtables.py
 #   Equation of Time section
 #------------------------------
 
-def equation_of_time(date, round2seconds = False): # used in twilighttab (section 3)
+def equation_of_time(Date, round2seconds = False): # used in twilighttab (section 3)
     # returns equation of time, the sun's transit time, 
     # the moon's transit-, antitransit-time, age and percent illumination.
     # (Equation of Time = Mean solar time - Apparent solar time)
 
-    py_date = date.tuple()
-    py_obsdate = datetime.date(py_date[0], py_date[1], py_date[2])
+    py_date = Date.tuple()
+    py_obsdate = date(py_date[0], py_date[1], py_date[2])
 
     if round2seconds:
         # !! transit times are rounded to the nearest second,
         # !! so the search needs to start and end 0.5 sec earlier
         # !! e.g. after 23h 59m 59.5s rounds up to 00:00:00 next day
-        d = ephem.date(date) - 0.5 * ephem.second
+        d = ephem.date(Date) - 0.5 * ephem.second
     else:
         # !! transit times are rounded to the nearest minute,
         # !! so the search needs to start and end 30 sec earlier
         # !! e.g. after 23h 59m 30s rounds up to 00:00 next day
-        d = ephem.date(date) - 30 * ephem.second
+        d = ephem.date(Date) - 30 * ephem.second
 
     obs = ephem.Observer()
     obs.date = d
@@ -1260,24 +1261,24 @@ def equation_of_time(date, round2seconds = False): # used in twilighttab (sectio
 
 #-----------------------------
     obs = ephem.Observer()
-    obs.date = date
+    obs.date = Date
     
-    ephem_moon.compute(date)
+    ephem_moon.compute(Date)
     pct = int(round(ephem_moon.phase))   # percent of moon surface illuminated
-    age = int(round((date+0.5)-ephem.previous_new_moon(date+0.5)))
+    age = int(round((Date+0.5)-ephem.previous_new_moon(Date+0.5)))
     phase = ephem_moon.elong.norm+0.0    # moon phase as float (0:new to π:full to 2π:new)
     
-    ephem_sun.compute(date-0.1)
-    obs.date = date-0.1
+    ephem_sun.compute(Date-0.1)
+    obs.date = Date-0.1
 
     # round to the second; convert back to days
-    x = round((obs.next_antitransit(ephem_sun)-date)*86400)*2*math.pi/86400
+    x = round((obs.next_antitransit(ephem_sun)-Date)*86400)*2*pi/86400
     eqt00 = ephem.hours(x)
     eqt00 = str(eqt00)[-8:-3]
     if x >= 0:
         eqt00 = r"\colorbox{{lightgray!60}}{{{}}}".format(eqt00)
 
-    y = round((obs.next_transit(ephem_sun)-(date+0.5))*86400)*2*math.pi/86400
+    y = round((obs.next_transit(ephem_sun)-(Date+0.5))*86400)*2*pi/86400
     eqt12 = ephem.hours(y)
     eqt12 = str(eqt12)[-8:-3]
     if y >= 0:

@@ -42,14 +42,14 @@
 #       The following code now uses the 'tabular' table style without any
 #       column width specifiers - thus table widths vary slightly from page to page.
 
-# Standard library imports
+###### Standard library imports ######
 from datetime import datetime, timedelta
-import math
+from math import copysign, degrees
 
-# Third party imports
+###### Third party imports ######
 import ephem
 
-# Local application imports
+###### Local application imports ######
 from alma_ephem import *
 import config
 
@@ -71,12 +71,12 @@ def declCompare(prev_rad, curr_rad, next_rad, hr):
     # note: the first three arguments are PyEphem angles in radians
     prNS = False
     prDEG = False
-    psign = math.copysign(1.0,prev_rad)
-    csign = math.copysign(1.0,curr_rad)
-    nsign = math.copysign(1.0,next_rad)
-    pdeg = abs(math.degrees(prev_rad))
-    cdeg = abs(math.degrees(curr_rad))
-    ndeg = abs(math.degrees(next_rad))
+    psign = copysign(1.0,prev_rad)
+    csign = copysign(1.0,curr_rad)
+    nsign = copysign(1.0,next_rad)
+    pdeg = abs(degrees(prev_rad))
+    cdeg = abs(degrees(curr_rad))
+    ndeg = abs(degrees(next_rad))
     pdegi = int(pdeg)
     cdegi = int(cdeg)
     ndegi = int(ndeg)
@@ -496,7 +496,7 @@ def sunmoontab(dfloat):
                 sdec = NSdecl(eph[1],h,printNS,printDEG,False)
 
                 mdec, mNS = NSdeg(eph[4],False,h)
-                if mNS != mlastNS or math.copysign(1.0,eph[8]) != math.copysign(1.0,nexteph[8]):
+                if mNS != mlastNS or copysign(1.0,eph[8]) != copysign(1.0,nexteph[8]):
                     mdec, mNS = NSdeg(eph[4],False,h,True)	# force N/S
                 mlastNS = mNS
 
@@ -587,7 +587,7 @@ def sunmoontabm(dfloat):
                 sdec = NSdecl(eph[1],h,printNS,printDEG,True)
 
                 mdec, mNS = NSdeg(eph[4],True,h)
-                if mNS != mlastNS or math.copysign(1.0,eph[8]) != math.copysign(1.0,nexteph[8]):
+                if mNS != mlastNS or copysign(1.0,eph[8]) != copysign(1.0,nexteph[8]):
                     mdec, mNS = NSdeg(eph[4],True,h,True)	# force NS
                 mlastNS = mNS
 
@@ -692,16 +692,16 @@ def twilighttab(dfloat):
         else:
             hemisph = 'S'
         if not(i in latNS):
-            hs = ""
+            hsph = ""
         else:
-            hs = hemisph
+            hsph = hemisph
             if j%6 == 0:
                 tab = tab + r'''\rule{0pt}{2.6ex}
 '''
         lasthemisph = hemisph
         # day+1 to calculate for the second day (three days are printed on one page)
         twi = twilight(dfloat+1, i, hemisph)
-        line = r'''\textbf{{{}}}'''.format(hs) + " " + r'''{}$^\circ$'''.format(abs(i))
+        line = r'''\textbf{{{}}}'''.format(hsph) + " " + r'''{}$^\circ$'''.format(abs(i))
         line = line + r''' & {} & {} & {} & {} & {} & {} \\
 '''.format(twi[0],twi[1],twi[2],twi[4],twi[5],twi[6])
         tab = tab + line
@@ -746,21 +746,21 @@ def twilighttab(dfloat):
         else:
             hemisph = 'S'
         if not(i in latNS):
-            hs = ""
+            hsph = ""
         else:
-            hs = hemisph
+            hsph = hemisph
             if j%6 == 0:
                 tab = tab + r'''\rule{0pt}{2.6ex}
 '''
         lasthemisph = hemisph
         moon, moon2 = moonrise_set(dfloat,i)
         if not(double_events_found(moon,moon2)):
-            tab = tab + r'''\textbf{{{}}}'''.format(hs) + " " + r'''{}$^\circ$'''.format(abs(i))
+            tab = tab + r'''\textbf{{{}}}'''.format(hsph) + " " + r'''{}$^\circ$'''.format(abs(i))
             tab = tab + r''' & {} & {} & {} & {} & {} & {} \\
 '''.format(moon[0],moon[1],moon[2],moon[3],moon[4],moon[5])
         else:
 # print a row with two moonrise/moonset events on the same day & latitude
-            tab = tab + r'''\multirow{{2}}{{*}}{{\textbf{{{}}} {}$^\circ$}}'''.format(hs,abs(i))
+            tab = tab + r'''\multirow{{2}}{{*}}{{\textbf{{{}}} {}$^\circ$}}'''.format(hsph,abs(i))
             #cellcolor = r'''\cellcolor[gray]{0.9}'''
 # top row...
             for k in range(len(moon)):
@@ -834,11 +834,23 @@ def doublepage(first_day, page1):
     first_day = r'''{}/{}/{}'''.format(first_day.year,first_day.month,first_day.day)
     dfloat = ephem.Date(first_day)      # convert date to float
     page = ''
-    if not(page1):
+
+# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    if config.FANCYhd:
         page = r'''
-% ------------------ N E W   P A G E ------------------
+% ------------------ N E W   E V E N   P A G E ------------------
+\newpage'''
+
+        page += r'''
+  \newgeometry{{nomarginpar, top={}, bottom={}, outer={}, inner={}, headsep={}, footskip={}}}'''.format(eventm,evenbm,evenom,evenim,evenhs,evenfs)
+# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    else:   # old formatting
+        if not(page1):
+            page = r'''
+% ------------------ N E W   E V E N   P A G E ------------------
 \newpage
 \restoregeometry    % reset to even-page margins'''
+# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     leftindent = ""
     rightindent = ""
@@ -847,19 +859,31 @@ def doublepage(first_day, page1):
         rightindent = "\hphantom{\quad}"
 
     # print date based on dfloat (as Ephem routines use dfloat)
-    page = page + r'''
+# ...........................................................
+    if config.FANCYhd:
+        page += r'''
+\sffamily
+\fancyhead[LE]{{{}\textsf{{\textbf{{{}, {}, {}   ({}.,  {}.,  {}.)}}}}}}'''.format(leftindent,ephem.date(dfloat).datetime().strftime("%B %d"),ephem.date(dfloat+1).datetime().strftime("%d"),ephem.date(dfloat+2).datetime().strftime("%d"),ephem.date(dfloat).datetime().strftime("%a"),ephem.date(dfloat+1).datetime().strftime("%a"),ephem.date(dfloat+2).datetime().strftime("%a"))
+
+        page = page + r'''
+\begin{scriptsize}
+'''
+# ...........................................................
+    else:   # old formatting
+        page = page + r'''
 \sffamily
 \noindent
 {}\textbf{{{}, {}, {}   ({}.,  {}.,  {}.)}}'''.format(leftindent,ephem.date(dfloat).datetime().strftime("%B %d"),ephem.date(dfloat+1).datetime().strftime("%d"),ephem.date(dfloat+2).datetime().strftime("%d"),ephem.date(dfloat).datetime().strftime("%a"),ephem.date(dfloat+1).datetime().strftime("%a"),ephem.date(dfloat+2).datetime().strftime("%a"))
 
-    if config.tbls == "m":
-        page = page + r'\\[1.0ex]'  # \par leaves about 1.2ex
-    else:
-        page = page + r'\\[0.7ex]'
+        if config.tbls == "m":
+            page = page + r'\\[1.0ex]'  # \par leaves about 1.2ex
+        else:
+            page = page + r'\\[0.7ex]'
 
-    page = page + r'''
+        page = page + r'''
 \begin{scriptsize}
 '''
+# ...........................................................
 
     if config.tbls == "m":
         page = page + planetstabm(dfloat)
@@ -868,9 +892,24 @@ def doublepage(first_day, page1):
 '''
     page = page + starstab(dfloat)
     # print date based on dfloat (as Ephem routines use dfloat)
-    str1 = r'''
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    if config.FANCYhd:
+        str1 = r'''
+\end{scriptsize}
+% ------------------ N E W   O D D   P A G E ------------------
+\newpage'''
+        str1 += r'''
+  \newgeometry{{nomarginpar, top={}, bottom={}, inner={}, outer={}, headsep={}, footskip={}}}'''.format(oddtm,oddbm,oddim,oddom,oddhs,oddfs)
+        str1 += r'''
+\fancyhead[RO]{{\textsf{{\textbf{{{} to {}}}}}}}
+\fancyheadoffset[RO]{{0pt}}% bugfix - otherwise its shifted right
+\begin{{scriptsize}}
+'''.format(ephem.date(dfloat).datetime().strftime("%Y %B %d"), ephem.date(dfloat+2).datetime().strftime("%b. %d"))
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    else:   # old formatting
+        str1 = r'''
 \end{{scriptsize}}
-% ------------------ N E W   P A G E ------------------
+% ------------------ N E W   O D D   P A G E ------------------
 \newpage
 \newgeometry{{nomarginpar, top={}, bottom={}, left={}, right={}}}
 \begin{{flushright}}
@@ -878,7 +917,10 @@ def doublepage(first_day, page1):
 \end{{flushright}}\par
 \begin{{scriptsize}}
 '''.format(tm, bm, oddim, oddom, ephem.date(dfloat).datetime().strftime("%Y %B %d"), ephem.date(dfloat+2).datetime().strftime("%b. %d"), rightindent)
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
     page = page + str1
+
     if config.tbls == "m":
         page = page + sunmoontabm(dfloat)
     else:
@@ -887,7 +929,6 @@ def doublepage(first_day, page1):
     page = page + twilighttab(dfloat)
     # to avoid "Overfull \hbox" messages, leave a paragraph end before the end of a size change. (This may only apply to tabular* table style) See lines below...
     page = page + r'''
-
 \end{scriptsize}'''
     return page
 
@@ -935,6 +976,319 @@ def pages(first_day, dtp):
 def almanac(first_day, dtp):
     # make almanac starting from first_day
     # dtp = 0 if for entire year; = -1 if for entire month; else days to print
+
+    if config.FANCYhd:
+        return makeNAnew(first_day, dtp) # use the 'fancyhdr' package
+    else:
+        return makeNAold(first_day, dtp) # use old formatting
+
+#   The following functions are intentionally separate functions.
+#   'makeEVold' is required for TeX Live 2019, which is the standard
+#   version in Ubuntu 20.04 LTS which expires in April 2030.
+
+def hdrNAnew(first_day, dtp, tm1, bm1, lm1, rm1, vsep1, vsep2):
+    # build the front page
+
+    tex = r'''
+\pagestyle{frontpage}
+    \begin{titlepage}
+    \begin{center}
+    \textsc{\Large Generated using Ephem}\\[0.7cm]'''
+
+    if config.dockerized:   # DOCKER ONLY
+        fn = "../A4chartNorth_P.pdf"
+    else:
+        fn = "./A4chartNorth_P.pdf"
+
+    tex += r'''
+    % TRIM values: left bottom right top
+    \includegraphics[clip, trim=5mm 8cm 5mm 21mm, width=0.8\textwidth]{{{}}}\\'''.format(fn)
+
+    tex += r'''[{}]
+    \textsc{{\huge The Nautical Almanac}}\\[{}]'''.format(vsep1,vsep2)
+
+    if dtp == 0:
+        tex += r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(first_day.year)
+    elif dtp == -1:
+        tex += r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(first_day.strftime("%B %Y"))
+    elif dtp > 1:
+        tex += r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(fmtdates(first_day,first_day+timedelta(days=dtp-1)))
+    else:
+        tex += r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(fmtdate(first_day))
+
+    if config.tbls == "m":
+        tex += r'''
+    \begin{center}\begin{tabular}[t]{rl}
+    \large\emph{Author:} & \large Andrew \textsc{Bauer}\\
+    \large\emph{Original concept from:} & \large Enno \textsc{Rodegerdts}\\
+    \end{tabular}\end{center}'''
+    else:
+        tex += r'''
+    \begin{center}\begin{tabular}[t]{rl}
+    \large\emph{Original author:} & \large Enno \textsc{Rodegerdts}\\
+    \large\emph{Enhancements:} & \large Andrew \textsc{Bauer}\\
+    \end{tabular}\end{center}'''
+
+    tex += r'''
+    {\large \today}
+    \HRule \\[0.2cm]
+    \end{center}
+    \begin{description}[leftmargin=5.5em,style=nextline]\footnotesize
+    \item[Disclaimer:] These are computer generated tables - use them at your own risk.
+    The accuracy has been randomly checked, but cannot be guaranteed.
+    The author claims no liability for any consequences arising from use of these tables.
+    Besides, this publication only contains the 'daily pages' of the Nautical Almanac: an official version of the Nautical Almanac is indispensable.
+    \end{description}
+\end{titlepage}'''
+
+    return tex
+
+def makeNAnew(first_day, dtp):
+    global oddtm,  oddbm,  oddim,  oddom,  oddhs,  oddfs  # required by doublepage
+    global eventm, evenbm, evenim, evenom, evenhs, evenfs
+
+    # page size specific parameters
+    if config.pgsz == "A4":
+        # A4 ... pay attention to the limited page width
+        paper = "a4paper"
+        # title page...
+        vsep1 = "2.0cm"
+        vsep2 = "1.5cm"
+        tm1 = "21mm"
+        bm1 = "15mm"
+        lm1 = "10mm"
+        rm1 = "10mm"
+        # even data pages...
+        eventm = "25mm"     # data pages... was "21mm"
+        evenbm = "16mm"     # was "18mm"
+        evenhs = "1.8pt"    # headsep  (page 2 onwards)
+        evenfs = "12pt"     # footskip (page 2 onwards)
+        evenim = "10mm"     # inner margin (right side on even pages)
+        evenom = "9mm"      # outer margin (left side on even pages)
+        # odd data pages...
+        oddtm = "27.5mm"    # was "21mm"
+        oddbm = "16mm"      # was "18mm"
+        oddhs = "6.5pt"     # headsep  (page 3 onwards)
+        oddfs = "12pt"      # footskip (page 3 onwards)
+        oddim = "14mm"      # inner margin (left side on odd pages)
+        oddom = "11mm"      # outer margin (right side on odd pages)
+        if config.tbls == "m":
+            # even data pages...
+            eventm = "15.8mm"   # was "10mm"
+            evenbm = "12mm"     # was "15mm"
+            evenhs = "3.0pt"    # headsep  (page 2 onwards)
+            evenfs = "12pt"     # footskip (page 2 onwards)
+            evenim = "10mm"
+            evenom = "10mm"
+            # odd data pages...
+            oddtm = "16mm"      # was "10mm"
+            oddbm = "13mm"      # was "15mm"
+            oddhs = "4.6pt"     # headsep  (page 3 onwards)
+            oddfs = "12pt"      # footskip (page 3 onwards)
+            oddim = "14mm"
+            oddom = "11mm"
+    else:
+        # LETTER ... pay attention to the limited page height
+        paper = "letterpaper"
+        # title page...
+        vsep1 = "1.5cm"
+        vsep2 = "1.0cm"
+        tm1 = "12mm"
+        bm1 = "15mm"
+        lm1 = "12mm"
+        rm1 = "12mm"
+        # even data pages...
+        eventm = "17.2mm"   # data pages... was "12.2mm"
+        evenbm = "12mm"     # was "13mm"
+        evenhs = "1.5pt"    # headsep  (page 2 onwards)
+        evenfs = "12pt"     # footskip (page 2 onwards)
+        evenim = "13mm"     # inner margin (right side on even pages)
+        evenom = "13mm"     # outer margin (left side on even pages)
+        # odd data pages...
+        oddtm = "19mm"      # was "12.2mm"
+        oddbm = "12mm"      # was "13mm"
+        oddhs = "6.1pt"     # headsep  (page 3 onwards)
+        oddfs = "12pt"      # footskip (page 3 onwards)
+        oddim = "14mm"      # inner margin (left side on odd pages)
+        oddom = "11mm"      # outer margin (right side on odd pages)
+        if config.tbls == "m":
+            eventm = "9.4mm"    # was "4mm"
+            evenbm = "8mm"      # was "8mm"
+            evenhd = "2.8pt"    # headsep  (page 2 onwards)
+            evenfs = "12pt"     # footskip (page 2 onwards)
+            evenim = "12.5mm"
+            evenom = "12.5mm"
+            # odd data pages...
+            oddtm = "11mm"      # was "4mm"
+            oddbm = "8mm"       # was "8mm"
+            oddhs = "2.5pt"     # headsep  (page 3 onwards)
+            oddfs = "12pt"      # footskip (page 3 onwards)
+            oddim = "13mm"
+            oddom = "13mm"
+
+#------------------------------------------------------------------------------
+#   This edition employs the 'fancyhdr' v4.0.3 package
+#   CAUTION: do not use '\newgeometry' & '\restoregeometry' as advised here:
+#   https://tex.stackexchange.com/questions/247972/top-margin-fancyhdr
+#------------------------------------------------------------------------------
+
+    tex = r'''\documentclass[10pt, twoside, {}]{{report}}'''.format(paper)
+
+    # document preamble...
+    tex += r'''
+%\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{fontenc}
+\usepackage{enumitem} % used to customize the {description} environment'''
+
+    # to troubleshoot add "showframe, verbose," below:
+    tex += r'''
+\usepackage[nomarginpar, top={}, bottom={}, left={}, right={}]{{geometry}}'''.format(tm1,bm1,lm1,rm1)
+
+    # define page styles
+    tex += r'''
+%------------ page styles ------------
+\usepackage{fancyhdr}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancypagestyle{frontpage}{
+%  \fancyhf{}% clear all header and footer fields
+}
+\fancypagestyle{datapage}[frontpage]{'''
+
+    tex += r'''
+  \fancyfootoffset[R]{0pt}% recalculate \headwidth
+  \cfoot{\centerline{Page \thepage}}
+  \fancyfoot[LE,RO]{\textsf{\footnotesize{https://pypi.org/project/pyalmanac/}}}
+} %-----------------------------------'''
+
+    if config.tbls == "m":
+        tex += r'''
+\usepackage[table]{xcolor}
+% [table] option loads the colortbl package for coloring rows, columns, and cells within tables.
+\definecolor{LightCyan}{rgb}{0.88,1,1}
+\usepackage{booktabs}'''
+    else:
+        tex += r'''
+\usepackage{xcolor}  % highlight double moon events on same day'''
+
+    # Note: \DeclareUnicodeCharacter is not compatible with some versions of pdflatex
+    tex += r'''
+\definecolor{khaki}{rgb}{0.76, 0.69, 0.57}
+\usepackage{multirow}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\usepackage[pdftex]{graphicx}	% for \includegraphics
+\usepackage{tikz}				% for \draw  (load after 'graphicx')
+%\showboxbreadth=50  % use for logging
+%\showboxdepth=50    % use for logging
+%\DeclareUnicodeCharacter{00B0}{\ensuremath{{}^\circ}}
+\setlength\fboxsep{1.5pt}       % ONLY used by \colorbox in alma_ephem.py
+\begin{document}'''
+
+    if not config.DPonly:
+        tex += hdrNAnew(first_day,dtp,tm1,bm1,lm1,rm1,vsep1,vsep2)
+
+# NOTE: the first data page must be even (otherwise there's no header)
+    tex += r'''
+\pagestyle{datapage}  % the default page style for the document
+\setcounter{page}{2}'''
+
+    tex += pages(first_day,dtp)
+    tex += r'''
+\end{document}'''
+    return tex
+
+# ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+# ===   ===   ===   ===   O L D   F O R M A T T I N G   ===   ===   ===   ===
+# ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+def hdrNAold(first_day, dtp, tm1, bm1, lm1, rm1, vsep1, vsep2):
+    # build the front page
+
+    tex = r'''
+% for the title page only...
+\newgeometry{{nomarginpar, top={}, bottom={}, left={}, right={}}}'''.format(tm1,bm1,lm1,rm1)
+
+    tex += r'''
+    \begin{titlepage}
+    \begin{center}
+    \textsc{\Large Generated using Ephem}\\[0.7cm]'''
+
+    if config.dockerized:   # DOCKER ONLY
+        fn = "../A4chartNorth_P.pdf"
+    else:
+        fn = "./A4chartNorth_P.pdf"
+
+    tex += r'''
+    % TRIM values: left bottom right top
+    \includegraphics[clip, trim=5mm 8cm 5mm 21mm, width=0.8\textwidth]{{{}}}\\'''.format(fn)
+
+    tex += r'''[{}]
+    \textsc{{\huge The Nautical Almanac}}\\[{}]'''.format(vsep1,vsep2)
+
+    if dtp == 0:
+        tex += r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(first_day.year)
+    elif dtp == -1:
+        tex += r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(first_day.strftime("%B %Y"))
+    elif dtp > 1:
+        tex += r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(fmtdates(first_day,first_day+timedelta(days=dtp-1)))
+    else:
+        tex += r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(fmtdate(first_day))
+
+    if config.tbls == "m":
+        tex += r'''
+    \begin{center}\begin{tabular}[t]{rl}
+    \large\emph{Author:} & \large Andrew \textsc{Bauer}\\
+    \large\emph{Original concept from:} & \large Enno \textsc{Rodegerdts}\\
+    \end{tabular}\end{center}'''
+    else:
+        tex += r'''
+    \begin{center}\begin{tabular}[t]{rl}
+    \large\emph{Original author:} & \large Enno \textsc{Rodegerdts}\\
+    \large\emph{Enhancements:} & \large Andrew \textsc{Bauer}\\
+    \end{tabular}\end{center}'''
+
+    tex += r'''
+    {\large \today}
+    \HRule \\[0.2cm]
+    \end{center}
+    \begin{description}[leftmargin=5.5em,style=nextline]\footnotesize
+    \item[Disclaimer:] These are computer generated tables - use them at your own risk.
+    The accuracy has been randomly checked, but cannot be guaranteed.
+    The author claims no liability for any consequences arising from use of these tables.
+    Besides, this publication only contains the 'daily pages' of the Nautical Almanac: an official version of the Nautical Almanac is indispensable.
+    \end{description}
+\end{titlepage}
+\restoregeometry    % so it does not affect the rest of the pages'''
+
+    return tex
+
+def makeNAold(first_day, dtp):
+    # make almanac starting from first_day
     global tm, bm, oddim, oddom     # required by doublepage
 
     # page size specific parameters
@@ -987,30 +1341,30 @@ def almanac(first_day, dtp):
             oddim = "14mm"
             oddom = "14mm"
 
-    alm = r'''\documentclass[10pt, twoside, {}]{{report}}'''.format(paper)
+    tex = r'''\documentclass[10pt, twoside, {}]{{report}}'''.format(paper)
 
-    alm = alm + r'''
+    tex += r'''
 %\usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{fontenc}
 \usepackage{enumitem} % used to customize the {description} environment'''
 
     # to troubleshoot add "showframe, verbose," below:
-    alm = alm + r'''
+    tex += r'''
 \usepackage[nomarginpar, top={}, bottom={}, left={}, right={}]{{geometry}}'''.format(tm,bm,im,om)
 
     if config.tbls == "m":
-        alm = alm + r'''
+        tex += r'''
 \usepackage[table]{xcolor}
 % [table] option loads the colortbl package for coloring rows, columns, and cells within tables.
 \definecolor{LightCyan}{rgb}{0.88,1,1}
 \usepackage{booktabs}'''
     else:
-        alm = alm + r'''
+        tex += r'''
 \usepackage{xcolor}  % highlight double moon events on same day'''
 
     # Note: \DeclareUnicodeCharacter is not compatible with some versions of pdflatex
-    alm = alm + r'''
+    tex += r'''
 \definecolor{khaki}{rgb}{0.76, 0.69, 0.57}
 \usepackage{multirow}
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
@@ -1023,77 +1377,14 @@ def almanac(first_day, dtp):
 \setlength\fboxsep{1.5pt}       % ONLY used by \colorbox in alma_ephem.py
 \begin{document}'''
 
-    alm = alm + r'''
-% for the title page only...
-\newgeometry{{nomarginpar, top={}, bottom={}, left={}, right={}}}'''.format(tm1,bm1,lm1,rm1)
+    if not config.DPonly:
+        tex += hdrNAold(first_day,dtp,tm1,bm1,lm1,rm1,vsep1,vsep2)
 
-    alm = alm + r'''
-    \begin{titlepage}
-    \begin{center}
-    \textsc{\Large Generated using Ephem}\\[0.7cm]'''
+    # Nautical Almanac pages begin with a left page (page 2)
+    tex += r'''
+\setcounter{page}{2}'''
 
-    if config.dockerized:   # DOCKER ONLY
-        fn = "../A4chartNorth_P.pdf"
-    else:
-        fn = "./A4chartNorth_P.pdf"
-
-    alm = alm + r'''
-    % TRIM values: left bottom right top
-    \includegraphics[clip, trim=5mm 8cm 5mm 21mm, width=0.8\textwidth]{{{}}}\\'''.format(fn)
-
-    alm = alm + r'''[{}]
-    \textsc{{\huge The Nautical Almanac}}\\[{}]'''.format(vsep1,vsep2)
-
-    if dtp == 0:
-        alm = alm + r'''
-    \HRule \\[0.5cm]
-    {{ \Huge \bfseries {}}}\\[0.2cm]
-    \HRule \\'''.format(first_day.year)
-    elif dtp == -1:
-        alm = alm + r'''
-    \HRule \\[0.5cm]
-    {{ \Huge \bfseries {}}}\\[0.2cm]
-    \HRule \\'''.format(first_day.strftime("%B %Y"))
-    elif dtp > 1:
-        alm = alm + r'''
-    \HRule \\[0.5cm]
-    {{ \Huge \bfseries {}}}\\[0.2cm]
-    \HRule \\'''.format(fmtdates(first_day,first_day+timedelta(days=dtp-1)))
-    else:
-        alm = alm + r'''
-    \HRule \\[0.5cm]
-    {{ \Huge \bfseries {}}}\\[0.2cm]
-    \HRule \\'''.format(fmtdate(first_day))
-
-    if config.tbls == "m":
-        alm = alm + r'''
-    \begin{center}\begin{tabular}[t]{rl}
-    \large\emph{Author:} & \large Andrew \textsc{Bauer}\\
-    \large\emph{Original concept from:} & \large Enno \textsc{Rodegerdts}\\
-    \end{tabular}\end{center}'''
-    else:
-        alm = alm + r'''
-    \begin{center}\begin{tabular}[t]{rl}
-    \large\emph{Original author:} & \large Enno \textsc{Rodegerdts}\\
-    \large\emph{Enhancements:} & \large Andrew \textsc{Bauer}\\
-    \end{tabular}\end{center}'''
-
-    alm = alm + r'''
-    {\large \today}
-    \HRule \\[0.2cm]
-    \end{center}
-    \begin{description}[leftmargin=5.5em,style=nextline]\footnotesize
-    \item[Disclaimer:] These are computer generated tables - use them at your own risk.
-    The accuracy has been checked as well as possible, but cannot be guaranteed.
-    The author claims no liability for any consequences arising from use of these tables.
-    Besides, this publication only contains the 'daily pages' of the Nautical Almanac: an official version of the Nautical Almanac is indispensable.
-    \end{description}
-\end{titlepage}
-\restoregeometry    % so it does not affect the rest of the pages'''
-
-#    first_day = r'''{}/{}/{}'''.format(year,mth,day)
-#    date = ephem.Date(first_day)    # date to float
-    alm = alm + pages(first_day,dtp)
-    alm = alm + '''
+    tex += pages(first_day,dtp)
+    tex += r'''
 \end{document}'''
-    return alm
+    return tex

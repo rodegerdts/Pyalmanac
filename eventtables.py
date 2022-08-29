@@ -21,11 +21,13 @@
 #       will be removed from Python at some later time. See:
 # https://docs.python.org/3/whatsnew/3.0.html#pep-3101-a-new-approach-to-string-formatting
 
-# Third party imports
+###### Standard library imports ######
 from datetime import datetime, timedelta
+
+###### Third party imports ######
 import ephem
 
-# Local application imports
+###### Local application imports ######
 from alma_ephem import *
 import config
 
@@ -230,7 +232,16 @@ def page(date, dpp=2):
     else:
         str2 = r'''\textbf{{{}}}'''.format(date.strftime("%Y %B %d"))
 
-    page = r'''
+    if config.FANCYhd:
+        page = r'''
+% ------------------ N E W   P A G E ------------------
+\newpage
+\sffamily
+\fancyhead[R]{{\textsf{{{}}}}}
+\begin{{scriptsize}}
+'''.format(str2)
+    else:   # old formatting
+        page = r'''
 % ------------------ N E W   P A G E ------------------
 \newpage
 \sffamily
@@ -299,7 +310,253 @@ def pages(first_day, dtp):
 #   external entry point
 #--------------------------
 
-def maketables(first_day, dtp):
+def makeEVtables(first_day, dtp):
+    # make tables starting from first_day
+    # dtp = 0 if for entire year; = -1 if for entire month; else days to print
+
+    if config.FANCYhd:
+        return makeEVnew(first_day, dtp) # use the 'fancyhdr' package
+    else:
+        return makeEVold(first_day, dtp) # use old formatting
+
+#   The following functions are intentionally separate functions.
+#   'makeEVold' is required for TeX Live 2019, which is the standard
+#   version in Ubuntu 20.04 LTS which expires in April 2030.
+
+def hdrEVnew(first_day, dtp, vsep1, vsep2):
+    # build the front page
+
+    tex = r'''
+\pagestyle{frontpage}
+    \begin{titlepage}
+    \begin{center}
+    \textsc{\Large Generated using Ephem}\\[0.7cm]'''
+
+    if config.dockerized:   # DOCKER ONLY
+        fn = "../A4chartNorth_P.pdf"
+    else:
+        fn = "./A4chartNorth_P.pdf"
+
+    tex += r'''
+    % TRIM values: left bottom right top
+    \includegraphics[clip, trim=5mm 8cm 5mm 21mm, width=0.8\textwidth]{{{}}}\\'''.format(fn)
+
+    tex += r'''[{}]
+    \textsc{{\huge Event Time Tables}}\\[{}]'''.format(vsep1,vsep2)
+
+    if dtp == 0:
+        tex += r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(first_day.year)
+    elif dtp == -1:
+        tex += r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(first_day.strftime("%B %Y"))
+    elif dtp > 1:
+        tex += r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(fmtdates(first_day,first_day+timedelta(days=dtp-1)))
+    else:
+        tex += r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(fmtdate(first_day))
+
+    tex += r'''
+    \begin{center}\begin{tabular}[t]{rl}
+    \large\emph{Author:} & \large Andrew \textsc{Bauer}\\
+    \end{tabular}\end{center}'''
+
+    tex += r'''
+    {\large \today}
+    \HRule \\[0.2cm]
+    \end{center}
+    \begin{description}[leftmargin=5.5em,style=nextline]\footnotesize
+    \item[Disclaimer:] These are computer generated tables. They focus on times of rising and setting events and are rounded to the second (not primarily intended for navigation). Meridian Passage times of the sun, moon and four planets are included.
+    The author claims no liability for any consequences arising from use of these tables.
+    \end{description}
+\end{titlepage}'''
+
+    return tex
+
+def makeEVnew(first_day, dtp):
+    # make tables starting from first_day
+    # dtp = 0 if for entire year; = -1 if for entire month; else days to print
+
+    # page size specific parameters
+    # NOTE: 'bm' (bottom margin) is an unrealistic value used only to determine the vertical size of 'body' (textheight), which must be large enough to include all the tables. 'tm' (top margin) and 'hs' (headsep) determine the top of body. Finally use 'fs' (footskip) to position the footer.
+
+    if config.pgsz == "A4":
+        # A4 ... pay attention to the limited page width
+        paper = "a4paper"
+        # title page...
+        vsep1 = "2.0cm"
+        vsep2 = "1.5cm"
+        tm1 = "21mm"
+        bm1 = "15mm"
+        lm1 = "10mm"
+        rm1 = "10mm"
+        # data pages...
+        tm = "26.6mm"       # was "21mm" [v2q]
+        bm = "18mm"         # was "18mm" [v2q]
+        hs = "2.6pt"        # headsep  (page 3 onwards) [v2q]
+        fs = "15pt"         # footskip (page 3 onwards) [v2q]
+        lm = "16mm"
+        rm = "16mm"
+    else:
+        # LETTER ... pay attention to the limited page height
+        paper = "letterpaper"
+        # title page...
+        vsep1 = "1.5cm"
+        vsep2 = "1.0cm"
+        tm1 = "12mm"
+        bm1 = "15mm"
+        lm1 = "12mm"
+        rm1 = "12mm"
+        # data pages...
+        tm = "17.8mm"       # was "12.2mm" [v2q]
+        bm = "17mm"         # was "13mm"
+        hs = "2.6pt"        # headsep  (page 3 onwards) [v2q]
+        fs = "15pt"         # footskip (page 3 onwards) [v2q]
+        lm = "15mm"
+        rm = "11mm"
+
+#------------------------------------------------------------------------------
+#   This edition employs the 'fancyhdr' v4 package
+#   CAUTION: do not use '\newgeometry' & '\restoregeometry' as advised here:
+#   https://tex.stackexchange.com/questions/247972/top-margin-fancyhdr
+#------------------------------------------------------------------------------
+
+    # default is 'oneside'...
+    tex = r'''\documentclass[10pt, {}]{{report}}'''.format(paper)
+
+    # document preamble...
+    tex += r'''
+%\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{fontenc}
+\usepackage{enumitem} % used to customize the {description} environment'''
+
+    # to troubleshoot add "showframe, verbose," below:
+    tex += r'''
+\usepackage[nomarginpar, top={}, bottom={}, left={}, right={}]{{geometry}}'''.format(tm1,bm1,lm1,rm1)
+
+    # define page styles
+    # CAUTION: putting '\fancyhf{}' in frontpage style also clears the footer in page2!
+    tex += r'''
+%------------ page styles ------------
+\usepackage{fancyhdr}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancypagestyle{frontpage}{
+}
+\fancypagestyle{page2}[frontpage]{
+  \fancyfootoffset[R]{0pt}% recalculate \headwidth
+  \cfoot{\centerline{Page \thepage}}
+}
+\fancypagestyle{datapage}[page2]{'''
+    tex += r'''
+  \newgeometry{{nomarginpar, top={}, bottom={}, left={}, right={}, headsep={}, footskip={}}}'''.format(tm,bm,lm,rm,hs,fs)
+    tex += r'''
+  \rfoot{\textsf{\footnotesize{https://pypi.org/project/pyalmanac/}}}
+} %-----------------------------------'''
+
+    # Note: \DeclareUnicodeCharacter is not compatible with some versions of pdflatex
+    tex += r'''
+\usepackage{xcolor}  % highlight double moon events on same day
+\definecolor{khaki}{rgb}{0.76, 0.69, 0.57}
+\usepackage{multirow}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\usepackage[pdftex]{graphicx}	% for \includegraphics
+\usepackage{tikz}				% for \draw  (load after 'graphicx')
+%\showboxbreadth=50  % use for logging
+%\showboxdepth=50    % use for logging
+%\DeclareUnicodeCharacter{00B0}{\ensuremath{{}^\circ}}
+\setlength\fboxsep{1.5pt}       % ONLY used by \colorbox in alma_ephem.py
+\begin{document}'''
+
+    if not config.DPonly:
+        tex += hdrEVnew(first_day,dtp,vsep1,vsep2)
+
+    tex += r'''
+\pagestyle{datapage}  % the default page style for the document'''
+
+    tex += pages(first_day,dtp)
+    tex += r'''
+\end{document}'''
+    return tex
+
+# ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+# ===   ===   ===   ===   O L D   F O R M A T T I N G   ===   ===   ===   ===
+# ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+def hdrEVold(first_day, dtp, tm1, bm1, lm1, rm1, vsep1, vsep2):
+    # build the front page
+
+    tex = r'''
+% for the title page only...
+\newgeometry{{nomarginpar, top={}, bottom={}, left={}, right={}}}'''.format(tm1,bm1,lm1,rm1)
+
+    tex += r'''
+    \begin{titlepage}
+    \begin{center}
+    \textsc{\Large Generated using Ephem}\\[0.7cm]'''
+
+    if config.dockerized:   # DOCKER ONLY
+        fn = "../A4chartNorth_P.pdf"
+    else:
+        fn = "./A4chartNorth_P.pdf"
+
+    tex += r'''
+    % TRIM values: left bottom right top
+    \includegraphics[clip, trim=5mm 8cm 5mm 21mm, width=0.8\textwidth]{{{}}}\\'''.format(fn)
+
+    tex += r'''[{}]
+    \textsc{{\huge Event Time Tables}}\\[{}]'''.format(vsep1,vsep2)
+
+    if dtp == 0:
+        tex += r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(first_day.year)
+    elif dtp == -1:
+        tex += r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(first_day.strftime("%B %Y"))
+    elif dtp > 1:
+        tex += r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(fmtdates(first_day,first_day+timedelta(days=dtp-1)))
+    else:
+        tex += r'''
+    \HRule \\[0.5cm]
+    {{ \Huge \bfseries {}}}\\[0.2cm]
+    \HRule \\'''.format(fmtdate(first_day))
+
+    tex += r'''
+    \begin{center}\begin{tabular}[t]{rl}
+    \large\emph{Author:} & \large Andrew \textsc{Bauer}\\
+    \end{tabular}\end{center}'''
+
+    tex += r'''
+    {\large \today}
+    \HRule \\[0.2cm]
+    \end{center}
+    \begin{description}[leftmargin=5.5em,style=nextline]\footnotesize
+    \item[Disclaimer:] These are computer generated tables. They focus on times of rising and setting events and are rounded to the second (not primarily intended for navigation). Meridian Passage times of the sun, moon and four planets are included.
+    The author claims no liability for any consequences arising from use of these tables.
+    \end{description}
+\end{titlepage}
+\restoregeometry    % so it does not affect the rest of the pages'''
+
+    return tex
+
+def makeEVold(first_day, dtp):
     # make tables starting from first_day
     # dtp = 0 if for entire year; = -1 if for entire month; else days to print
 
@@ -329,20 +586,21 @@ def maketables(first_day, dtp):
         lm = "15mm"
         rm = "11mm"
 
-    alm = r'''\documentclass[10pt, twoside, {}]{{report}}'''.format(paper)
+    # default is 'oneside'...
+    tex = r'''\documentclass[10pt, {}]{{report}}'''.format(paper)
 
-    alm = alm + r'''
+    tex += r'''
 %\usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{fontenc}
 \usepackage{enumitem} % used to customize the {description} environment'''
 
     # to troubleshoot add "showframe, verbose," below:
-    alm = alm + r'''
+    tex += r'''
 \usepackage[nomarginpar, top={}, bottom={}, left={}, right={}]{{geometry}}'''.format(tm,bm,lm,rm)
 
     # Note: \DeclareUnicodeCharacter is not compatible with some versions of pdflatex
-    alm = alm + r'''
+    tex += r'''
 \usepackage{xcolor}  % highlight double moon events on same day
 \definecolor{khaki}{rgb}{0.76, 0.69, 0.57}
 \usepackage{multirow}
@@ -356,67 +614,10 @@ def maketables(first_day, dtp):
 \setlength\fboxsep{1.5pt}       % ONLY used by \colorbox in alma_ephem.py
 \begin{document}'''
 
-    alm = alm + r'''
-% for the title page only...
-\newgeometry{{nomarginpar, top={}, bottom={}, left={}, right={}}}'''.format(tm1,bm1,lm1,rm1)
+    if not config.DPonly:
+        tex += hdrEVold(first_day,dtp,tm1,bm1,lm1,rm1,vsep1,vsep2)
 
-    alm = alm + r'''
-    \begin{titlepage}
-    \begin{center}
-    \textsc{\Large Generated using Ephem}\\[0.7cm]'''
-
-    if config.dockerized:   # DOCKER ONLY
-        fn = "../A4chartNorth_P.pdf"
-    else:
-        fn = "./A4chartNorth_P.pdf"
-
-    alm = alm + r'''
-    % TRIM values: left bottom right top
-    \includegraphics[clip, trim=5mm 8cm 5mm 21mm, width=0.8\textwidth]{{{}}}\\'''.format(fn)
-
-    alm = alm + r'''[{}]
-    \textsc{{\huge Event Time Tables}}\\[{}]'''.format(vsep1,vsep2)
-
-    if dtp == 0:
-        alm = alm + r'''
-    \HRule \\[0.5cm]
-    {{ \Huge \bfseries {}}}\\[0.2cm]
-    \HRule \\'''.format(first_day.year)
-    elif dtp == -1:
-        alm = alm + r'''
-    \HRule \\[0.5cm]
-    {{ \Huge \bfseries {}}}\\[0.2cm]
-    \HRule \\'''.format(first_day.strftime("%B %Y"))
-    elif dtp > 1:
-        alm = alm + r'''
-    \HRule \\[0.5cm]
-    {{ \Huge \bfseries {}}}\\[0.2cm]
-    \HRule \\'''.format(fmtdates(first_day,first_day+timedelta(days=dtp-1)))
-    else:
-        alm = alm + r'''
-    \HRule \\[0.5cm]
-    {{ \Huge \bfseries {}}}\\[0.2cm]
-    \HRule \\'''.format(fmtdate(first_day))
-
-    alm = alm + r'''
-    \begin{center}\begin{tabular}[t]{rl}
-    \large\emph{Author:} & \large Andrew \textsc{Bauer}\\
-    \end{tabular}\end{center}'''
-
-    alm = alm + r'''
-    {\large \today}
-    \HRule \\[0.2cm]
-    \end{center}
-    \begin{description}[leftmargin=5.5em,style=nextline]\footnotesize
-    \item[Disclaimer:] These are computer generated tables. They focus on times of rising and setting events and are rounded to the second (not primarily intended for navigation). Meridian Passage times of the sun, moon and four planets are included.
-    The author claims no liability for any consequences arising from use of these tables.
-    \end{description}
-\end{titlepage}
-\restoregeometry    % so it does not affect the rest of the pages'''
-
-#    first_day = r'''{}/{}/{}'''.format(year,mth,day)
-#    date = ephem.Date(first_day)    # date to float
-    alm = alm + pages(first_day,dtp)
-    alm = alm + '''
+    tex += pages(first_day,dtp)
+    tex += r'''
 \end{document}'''
-    return alm
+    return tex

@@ -35,6 +35,14 @@ docker_pdf = "tmp"
 docker_prefix  = docker_pdf + "/" if dockerized else ""  # docker image is based on Linux
 docker_postfix = "/" + docker_pdf if dockerized else ""  # docker image is based on Linux
 # ==============================================================
+
+# global variables initialized during main program startup
+WINpf = False       # system platform
+LINUXpf = False     # system platform
+MACOSpf = False     # system platform
+FANCYhd = False     # 'True' if compatible with 'fancyhdr' package
+DPonly = False      # output data pages only
+
 # define global variables
 logfileopen = False
 tbls = ''		# table style (global variable)

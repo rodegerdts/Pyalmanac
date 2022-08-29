@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 #   Copyright (C) 2014  Enno Rodegerdts
+#   Copyright (C) 2022  Andrew Bauer
 
 #  This program is free software; you can redistribute it and/or modify
 #     it under the terms of the GNU General Public License as published by
@@ -17,13 +18,13 @@
 #     with this program; if not, write to the Free Software Foundation, Inc.,
 #     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# Standard library imports
+###### Standard library imports ######
 import os
 import sys
-from math import pi as pi
-from math import cos as cos
-from math import tan as tan
-from math import sqrt as sqrt
+from math import pi, cos, tan, sqrt
+
+###### Local application imports ######
+import config
 
 def degmin(deg):
     #changes decimal degrees to the format usually used in the nautical almanac. (ddd°mm.m')
@@ -43,236 +44,282 @@ def degmin(deg):
     gm = "{}{}$^\circ${:04.1f}".format(theminus,di,mf)
     return gm
 
-def decdeg(d,min):
-	# returns decimal degrees from deg. and min.
-	d=d*1.0
-	min=min*1.0
-	deg=d+(min/60)
-	return deg
+def decdeg(d,mmm):
+    # returns decimal degrees from deg. and min.
+    d=d*1.0
+    mmm=mmm*1.0
+    deg=d+(mmm/60)
+    return deg
 	
-def rad(d,min):
-	#returns radiands from deg. and min.
-	rad=decdeg(d,min)/180*pi
-	return rad
+def rad(d,mmm):
+    #returns radians from deg. and min.
+    rad=decdeg(d,mmm)/180*pi
+    return rad
 
 def suninc(m,s):
-	# returns the increment for the sun.
-	min=m*1.0
-	sec=s/60.0
-	hour=(sec+min)/60
-	inc=degmin(15*hour)
-	return inc
+    # returns the increment for the sun.
+    mmm=m*1.0
+    sec=s/60.0
+    hour=(sec+mmm)/60
+    inc=degmin(15*hour)
+    return inc
 
 def ariesinc(m,s):
-	# returns the increment for aries
-	min= m*1.0
-	sec=s/60.0
-	hour=(sec+min)/60
-	inc=degmin(decdeg(15,2.46)*hour)
-	return inc
+    # returns the increment for aries
+    mmm= m*1.0
+    sec=s/60.0
+    hour=(sec+mmm)/60
+    inc=degmin(decdeg(15,2.46)*hour)
+    return inc
 
 def mooninc(m,s):
-	# returns the increment for the Moon
-	min= m*1.0
-	sec=s/60.0
-	hour=(sec+min)/60
-	inc=degmin(decdeg(14,19.0)*hour)
-	return inc
+    # returns the increment for the Moon
+    mmm= m*1.0
+    sec=s/60.0
+    hour=(sec+mmm)/60
+    inc=degmin(decdeg(14,19.0)*hour)
+    return inc
 	
 def vcorr(m,v):
-	# returns the v correction for a given minute and tabular v.
-	h=(m+0.5)/60.0
-	corr=round(v*h,1)
-	return corr
+    # returns the v correction for a given minute and tabular v.
+    h=(m+0.5)/60.0
+    corr=round(v*h,1)
+    return corr
 
-def inctab(min):
-    """generates a latex table for increments"""
-    tab = r'''\noindent
+def inctab(mmm):
+    # generates a latex table for increments
+
+    tab = r'''
+    \noindent
     \begin{tabular*}{0.33\textwidth}[t]{@{\extracolsep{\fill}}|>{\bfseries}p{0.3cm}|>{\hspace{-3pt}}r|>{\hspace{-3pt}}r|>{\hspace{-3pt}}r||>{\hspace{-3pt}}c>{\hspace{-3pt}}c>{\hspace{-3pt}}c<{\hspace{-3pt}}|}
     \hline
     {\tiny m} \textbf{'''
     
-    tab = tab+"{}".format(int(min))
+    tab += "{}".format(int(mmm))
     
-    tab=tab+ r'''} & \multicolumn{1}{p{0.5cm}|}{\textbf{Sun Plan.}} & \multicolumn{1}{c|}{\textbf{Aries}} & \multicolumn{1}{c||}{\textbf{Moon}} & \multicolumn{3}{c|}{\textit{\textbf{v and d corr}}}\\ 
-    \hline'''
+    tab += r'''} & \multicolumn{1}{p{0.5cm}|}{\textbf{Sun Plan.}} & \multicolumn{1}{c|}{\multirow{2}{*}{\textbf{Aries}}} & 
+    \multicolumn{1}{c||}{\multirow{2}{*}{\textbf{Moon}}} & 
+    \multicolumn{3}{c|}{\multirow{2}{*}{\textit{\textbf{v and d corr}}}}\\ 
+    \hline
+'''
    
     sec = 0
     while sec < 60:
-        line = "{} & {} & {} & {} & {} - {} & {} - {} & {} - {} \\\ \n".format(sec,suninc(min,sec),ariesinc(min,sec),mooninc(min,sec),str(round(0.1*sec,1)),vcorr(min,0.1*sec),str(round(6+0.1*sec,1)),vcorr(min,6+0.1*sec),str(round(12+0.1*sec,1)),vcorr(min,12+0.1*sec))
-        tab = tab + line
+        line = "{} & {} & {} & {} & {} - {} & {} - {} & {} - {} \\\ \n".format(sec,suninc(mmm,sec),ariesinc(mmm,sec),mooninc(mmm,sec),str(round(0.1*sec,1)),vcorr(mmm,0.1*sec),str(round(6+0.1*sec,1)),vcorr(mmm,6+0.1*sec),str(round(12+0.1*sec,1)),vcorr(mmm,12+0.1*sec))
+        tab += line
         sec += 1
         
-    tab = tab+r"""\hline \end{tabular*}
-    """
+    tab = tab + r'''\hline \end{tabular*}'''
     return tab
 
-def allinctabs():
-	# iterates throu 60 minutes
-	min=0
-	tab=""
-	while min < 60:
-		tab = tab + inctab(min)
-		min += 1
-	return tab
+def allinctabs(colsep):
+    tab = ""
+    if colsep != "":
+        # change tabcolsep just for the inctabs
+        tab += r'''
+\newlength{{\oldtabcolsep}}
+\setlength{{\oldtabcolsep}}{{\tabcolsep}}
+\setlength{{\tabcolsep}}{{{}}}'''.format(colsep)
+
+    # iterates through 60 minutes
+    mmm=0
+    while mmm < 60:
+        tab += inctab(mmm)
+        mmm += 1
+
+    if colsep != "":
+        # reset tabcolsep to the previous value (= 6.0pt)
+        tab += r'''
+\setlength{\tabcolsep}{\oldtabcolsep}'''
+
+    return tab
 
 def dip(meter):
-	dip=60*0.0293*sqrt(meter)
-	return dip
+    dip=60*0.0293*sqrt(meter)
+    return dip
 
 def diptab():
-	meter=1
-	tab = r'''\noindent 
-	\begin{tabular}[t]{|c c c|} 
-	\multicolumn{3}{c}{\textbf{DIP}}\\
-	\hline 
-	\textit{m} & \textit{dip} & \textit{ft}\\ 
-	\hline
-	'''
-	while meter < 25.5:
-		line = "{} &  {:.1f} & {:.1f}\\\ \n".format(meter, dip(meter), meter/0.3084)
-		tab = tab + line
-		meter += 0.5
-	tab = tab + r"""\hline
-	\end{tabular}
-	"""
-	
-	return tab
+    meter=1
+    tab = r'''\noindent 
+    \begin{tabular}[t]{|c c c|} 
+    \multicolumn{3}{c}{\textbf{DIP}}\\
+    \hline 
+    \textit{m} & \textit{dip} & \textit{ft}\\ 
+    \hline
+'''
+    while meter < 25.5:
+        line = "{} &  {:.1f} & {:.1f}\\\ \n".format(meter, dip(meter), meter/0.3084)
+        tab = tab + line
+        meter += 0.5
+    tab = tab + r'''\hline
+    \end{tabular}
+'''
+
+    return tab
 
 def refrac(h):
-	r = 1/tan((h+7.31/(h+4.4))/180*pi)
-	return r
+    r = 1/tan((h+7.31/(h+4.4))/180*pi)
+    return r
 
 def refractab():
-	ho=5
-	tab = r'''\noindent 
-	\begin{tabular}[t]{|c c|} 
-	\multicolumn{2}{c}{\textbf{Refract.}}\\
-	\hline 
-	\textit{$H_{a}$} & \textit{ref} \\ 
-	\hline
-	'''
-	while ho < 20:
-		line = "{}$^\circ$ &  {:.1f}\\\ \n".format(ho, refrac(ho))
-		tab = tab + line
-		ho += 0.5
-	while ho < 40:
-		line = "{}$^\circ$ &  {:.1f}\\\ \n".format(ho, refrac(ho))
-		tab = tab + line
-		ho += 1
-	while ho < 90:
-		line = "{}$^\circ$ &  {:.1f}\\\ \n".format(ho, refrac(ho))
-		tab = tab + line
-		ho += 5
-	tab = tab + r"""\hline
-	\end{tabular}
-	"""
-	return tab
+    ho=5
+    tab = r'''
+    \noindent 
+    \begin{tabular}[t]{|c c|} 
+    \multicolumn{2}{c}{\textbf{Refract.}}\\
+    \hline 
+    \textit{$H_{a}$} & \textit{ref} \\ 
+    \hline
+'''
+    while ho < 20:
+        line = "{}$^\circ$ &  {:.1f}\\\ \n".format(ho, refrac(ho))
+        tab = tab + line
+        ho += 0.5
+    while ho < 40:
+        line = "{}$^\circ$ &  {:.1f}\\\ \n".format(ho, refrac(ho))
+        tab = tab + line
+        ho += 1
+    while ho < 90:
+        line = "{}$^\circ$ &  {:.1f}\\\ \n".format(ho, refrac(ho))
+        tab = tab + line
+        ho += 5
+    tab = tab + r'''\hline
+    \end{tabular}
+'''
+    return tab
 
-def parallax(hp, deg, min):
-	#returns parallax in dec minutes from horizontal parallax, and Ha
-	p = rad(0, hp) * cos(rad(deg, min)) * 180/pi *60
-	return p 
+def parallax(hp, deg, mmm):
+    #returns parallax in dec minutes from horizontal parallax, and Ha
+    p = rad(0, hp) * cos(rad(deg, mmm)) * 180/pi *60
+    return p 
 	
 def parallaxtab():
-	Hdeg=0 
-	
-	HP=54.0
-	tab = r'''\noindent 
-	\begin{tabular}[t]{|c|rrrrrrrrrrrrrrrrrr|}
-	\multicolumn{19}{c}{\textbf{Parallax of the Moon}}\\
-	\hline
-	'''
-	d = 0
-	line = r"\textbf{$H_{a}$} "
-	while d<90:
-		line += r"& \multicolumn{{1}}{{>{{\hspace{{-4pt}}}}c<{{\hspace{{-4pt}}}}|}}{{\textbf{{{}-{}$^\circ$}}}}".format(d, d+5)
-		d+= 5
-	line += " \\\ \n \\hline"
-	tab += line
-	
-	while Hdeg < 5 :
-		#line = " \u0027 "        # DOCKER ONLY
-		line = " $'$ "
-		dd = Hdeg
-		while dd < 90:
-			line += r"& \multicolumn{{1}}{{l}}{{\textbf{{{}$^\circ$}}}}".format(dd)
-			dd += 5
-		line += "\\vline \\\ \n"
-		tab = tab + line
-		Hmin=0
-		while Hmin < 60:
-			dd = Hdeg
-			line = r"\textbf{{{}}} ".format(Hmin)
-			while dd < 90:
-				line += " & {:.1f} ".format(parallax(HP,dd,Hmin))
-				dd += 5
-			line += "\\\ \n"
-			tab = tab + line
-			Hmin += 10	
-		Hdeg += 1
-		
-	tab += r"""\hline 
+    Hdeg=0 
+
+    HP=54.0
+    tab = r'''\noindent 
+    \begin{tabular}[t]{|c|rrrrrrrrrrrrrrrrrr|}
+    \multicolumn{19}{c}{\textbf{Parallax of the Moon}}\\
+    \hline
+'''
+    d = 0
+    line = r"\textbf{$H_{a}$} "
+    while d<90:
+        line += r"& \multicolumn{{1}}{{>{{\hspace{{-4pt}}}}c<{{\hspace{{-4pt}}}}|}}{{\textbf{{{}-{}$^\circ$}}}}".format(d, d+5)
+        d+= 5
+    line += " \\\ \n \\hline"
+    tab += line
+
+    while Hdeg < 5 :
+        #line = " \u0027 "        # DOCKER ONLY
+        line = " $'$ "
+        dd = Hdeg
+        while dd < 90:
+            line += r"& \multicolumn{{1}}{{l}}{{\textbf{{{}$^\circ$}}}}".format(dd)
+            dd += 5
+        line += "\\vline \\\ \n"
+        tab = tab + line
+        Hmin=0
+        while Hmin < 60:
+            dd = Hdeg
+            line = r"\textbf{{{}}} ".format(Hmin)
+            while dd < 90:
+                line += " & {:.1f} ".format(parallax(HP,dd,Hmin))
+                dd += 5
+            line += "\\\ \n"
+            tab = tab + line
+            Hmin += 10	
+        Hdeg += 1
+
+    tab += r'''\hline 
 	\multicolumn{1}{|c|}{\textbf{HP}} & \multicolumn{18}{c|}{correction for HP per column}\\
 	\hline
-	"""
-	hp = 54.3
-	while hp<61.5:
-		line = r"\textbf{{ {:.1f}}} ".format(hp)
-		d = 2
-		while d<90:
-			line += "& {:.1f} ".format(parallax(hp, d, 30) - parallax(54, d, 30))
-			d += 5
-		line += "\\\ \n"
-		tab += line
-		hp += 0.3
-			
-		
-	tab = tab + r"""\hline
-	\end{tabular}
-	"""
-	return tab
+'''
+    hp = 54.3
+    while hp<61.5:
+        line = r"\textbf{{ {:.1f}}} ".format(hp)
+        d = 2
+        while d<90:
+            line += "& {:.1f} ".format(parallax(hp, d, 30) - parallax(54, d, 30))
+            d += 5
+        line += "\\\ \n"
+        tab += line
+        hp += 0.3
 	
-def venparallax():
-	Hdeg=10 
-	
-	tab = r'''\noindent 
-	\begin{tabular}[t]{|c|cccccc|}
-	\multicolumn{7}{c}{\textbf{Parallax of Venus and Mars}}\\
-	'''
-	tab += r"""\hline 
-	$H_{a}$ HP & \textbf{.1$'$} & \textbf{.2$'$} & \textbf{.3$'$} & \textbf{.4$'$} & \textbf{.5$'$} & \textbf{.6$'$} \\
-	\hline
-	"""
-	while Hdeg<90:
-		hp = 0.1
-		line = r"\textbf{{ {}$^\circ$}} ".format(Hdeg)
-		while hp < 0.7:
-			line += "& {:.1f} ".format(parallax(hp, Hdeg, 0))
-			hp += 0.1
-		line += "\\\ \n"
-		tab += line
-		Hdeg += 10		
-	tab = tab + r"""\hline
-	\end{tabular}
-	"""
-	return tab
 
-# >>>>>>>>>>>>>>>>>>>>>>>>
+    tab = tab + r'''\hline
+    \end{tabular}
+'''
+    return tab
+
+def venparallax():
+    Hdeg=10 
+
+    tab = r'''\noindent 
+    \begin{tabular}[t]{|c|cccccc|}
+    \multicolumn{7}{c}{\textbf{Parallax of Venus and Mars}}\\
+'''
+    tab += r'''\hline 
+    $H_{a}$ HP & \textbf{.1$'$} & \textbf{.2$'$} & \textbf{.3$'$} & \textbf{.4$'$} & \textbf{.5$'$} & \textbf{.6$'$} \\
+    \hline
+'''
+    while Hdeg<90:
+        hp = 0.1
+        line = r"\textbf{{ {}$^\circ$}} ".format(Hdeg)
+        while hp < 0.7:
+            line += "& {:.1f} ".format(parallax(hp, Hdeg, 0))
+            hp += 0.1
+        line += "\\\ \n"
+        tab += line
+        Hdeg += 10		
+    tab = tab + r'''\hline
+    \end{tabular}
+'''
+    return tab
+
+#--------------------------
+#   external entry point
+#--------------------------
+
 def makelatex():
-	lx = r"""\documentclass[ 10pt, a4paper]{scrreprt}
-	\usepackage[automark]{scrlayer-scrpage}
-	\pagestyle{scrheadings}
-	\clearpairofpagestyles
-	\chead{\large \textbf{Increments and Corrections}}
+
+    if config.pgsz == "A4":
+        # A4 ... pay attention to the limited page width
+        paper = "a4paper"
+        tm = "15mm"
+        bm = "15mm"
+        lm = "8mm"
+        rm = "8mm"
+        colsep = ""
+    else:
+        # LETTER ... pay attention to the limited page height
+        paper = "letterpaper"
+        tm = "15mm"
+        bm = "15mm"
+        lm = "8mm"
+        rm = "8mm"
+        colsep = "5pt"
+
+    lx = r'''\documentclass[10pt, {}]{{scrreprt}}'''.format(paper)
+
+    lx += r'''
+    \usepackage[automark]{scrlayer-scrpage}
+    \pagestyle{scrheadings}
+    \clearpairofpagestyles
+    \chead{\large \textbf{Increments and Corrections}}
     %\usepackage[utf8]{inputenc}
     \usepackage[english]{babel}
     \usepackage{fontenc}
     %\usepackage{upquote}
-    \usepackage{array, multicol, blindtext}
-    \usepackage[landscape,headsep=0mm, headheight=5mm, top=15mm, bottom=15mm, left=8mm, right=8mm]{geometry}
-	\newcommand{\HRule}{\rule{\linewidth}{0.9mm}}
-	\usepackage[pdftex]{graphicx}
+    \usepackage{multirow}
+    \usepackage{array, multicol, blindtext}'''
+
+    lx += r'''
+    \usepackage[landscape,headsep=0mm, headheight=5mm, top={}, bottom={}, left={}, right={}]{{geometry}}'''.format(tm,bm,lm,rm)
+
+    lx += r'''
+    \newcommand{\HRule}{\rule{\linewidth}{0.9mm}}
+    \usepackage[pdftex]{graphicx}
     %\DeclareUnicodeCharacter{00B0}{\ensuremath{{}^\circ}}
 \begin{document}
 % ----------------------
@@ -283,19 +330,19 @@ def makelatex():
 \hfuzz=6.5Pt
 \newdimen\hfuzz
 % ----------------------
-\begin{scriptsize}"""
-	lx = lx + allinctabs()
-	lx = lx + refractab()
-	lx = lx + parallaxtab()
-	lx = lx + diptab()
-	lx += r''' \end{scriptsize} \newpage
-	\begin{multicols}{2} \begin{scriptsize}
-	'''
-	lx = lx + venparallax()
-	lx = lx + r'''\end{scriptsize} \newpage
-	\section*{About these tables}
-	The preceding static tables are independent from the year. They differ from the tables found in the official paper versions of the Nautical almanac in two important considerations. 
-\begin{itemize}
+\begin{scriptsize}'''
+    lx += allinctabs(colsep)
+    lx += refractab()
+    lx += parallaxtab()
+    lx += diptab()
+    lx += r''' \end{scriptsize} \newpage
+    \begin{multicols}{2} \begin{scriptsize}
+'''
+    lx += venparallax()
+    lx += r'''\end{scriptsize} \newpage
+    \section*{About these tables}
+    The preceding static tables are independent from the year. They differ from the tables found in the official paper versions of the Nautical almanac in two important considerations. 
+    \begin{itemize}
       \item My tables are not arranged as \textit{critical} tables. So chose the value that fits best to your value and interpolate in the rare cases where this should be necessary.
       \item My tables do not combine multiple corrections as some tables in the paper Nautical Almanac do. Each correction has to be applied separately. 
     \end{itemize}
@@ -328,12 +375,12 @@ and
 \[\cos A = \frac{\sin d - \sin L \sin H_c}{\cos L \cos H_c}\]
 where $A$ is the azimuth angle, $L$ is the latitude, $d$ is the declination and $LHA$ is the local hour angle. The azimuth ($Z_n$) is given by the following rule:
 \begin{itemize}
-      \item if the $LHA$ is greater than $180^\circ$,\quad$Z_n=A$
-      \item if the $LHA$ is less than $180^\circ$,\quad$Z_n = 360^\circ - A$
+    \item if the $LHA$ is greater than $180^\circ$,\quad$Z_n=A$
+    \item if the $LHA$ is less than $180^\circ$,\quad$Z_n = 360^\circ - A$
 \end{itemize}
-
-	\end{multicols} \end{document}'''
-	return lx
+\end{multicols}
+\end{document}'''
+    return lx
 
 #if sys.version_info[0] != 3:
 #    raise Exception("This runs with Python 3")

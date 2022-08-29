@@ -23,14 +23,14 @@
 #       will be removed from Python at some later time. See:
 # https://docs.python.org/3/whatsnew/3.0.html#pep-3101-a-new-approach-to-string-formatting
 
-# Standard library imports
+###### Standard library imports ######
 from datetime import datetime, timedelta
-import math
+from math import copysign, degrees
 
-# Third party imports
+###### Third party imports ######
 import ephem
 
-# Local application imports
+###### Local application imports ######
 from alma_ephem import *
 import config
 
@@ -52,12 +52,12 @@ def declCompare(prev_rad, curr_rad, next_rad, hr):
     # note: the first three arguments are Ephem angles in radians
     prNS = False
     prDEG = False
-    psign = math.copysign(1.0,prev_rad)
-    csign = math.copysign(1.0,curr_rad)
-    nsign = math.copysign(1.0,next_rad)
-    pdeg = abs(math.degrees(prev_rad))
-    cdeg = abs(math.degrees(curr_rad))
-    ndeg = abs(math.degrees(next_rad))
+    psign = copysign(1.0,prev_rad)
+    csign = copysign(1.0,curr_rad)
+    nsign = copysign(1.0,next_rad)
+    pdeg = abs(degrees(prev_rad))
+    cdeg = abs(degrees(curr_rad))
+    ndeg = abs(degrees(next_rad))
     pdegi = int(pdeg)
     cdegi = int(cdeg)
     ndegi = int(ndeg)
@@ -312,7 +312,16 @@ def page(date, dpp=15):
         str2 = r'''\textbf{{{}}}'''.format(date.strftime("%Y %B %d"))
 
     # creates a page(15 days) of the Sun almanac
-    page = r'''
+    if config.FANCYhd:
+        page = r'''
+% ------------------ N E W   P A G E ------------------
+\newpage
+\sffamily
+\fancyhead[R]{{\textsf{{{}}}}}
+\begin{{scriptsize}}
+'''.format(str2)
+    else:   # old formatting
+        page = r'''
 % ------------------ N E W   P A G E ------------------
 \newpage
 \sffamily
@@ -385,6 +394,38 @@ def pages(first_day, dtp):
 
     return out
 
+def page2():
+    return r'''
+    \thispagestyle{empty}
+    \vspace*{2cm}
+    \noindent
+    DIP corrects for height of eye over the surface. This value has to be subtracted from the sextant altitude ($H_s$). The  correction in degrees for height of eye in meters is given by the following formula: 
+    \[d=0.0293\sqrt{m}\]
+    This is the first correction (apart from index error) that has to be applied to the measured altitude.\\[12pt]
+    \noindent
+    The next correction is for refraction in the earth's atmosphere. As usual this table is correct for 10$^\circ$C and a pressure of 1010 hPa. This correction has to be applied to apparent altitude ($H_a$). The exact values can be calculated by the following formula.
+    \[R_0=\cot \left( H_a + \frac{7.31}{H_a+4.4}\right)\]
+    For other than standard conditions, calculate a correction factor for $R_0$ by: \[f=\frac{0.28P}{T+273}\] where $P$ is the pressure in hectopascal and $T$ is the temperature in $^\circ$C.\\[12pt]
+    \noindent
+    Semidiameter has to be added for lower limb sights and subtracted for upper limb sights. The value for semidiameter is tabulated in the daily pages.\\[12pt]
+    \noindent
+    To correct your sextant altitude $H_s$ do the following:
+    Calculate $H_a$ by
+     \[H_a= H_s+I-d\] 
+    where $I$ is the sextant's index error and $d$ is DIP. Then calculate the observed altitude $H_o$ by
+    \[H_o= H_a-R+P\pm SD\]
+    where $R$ is refraction, $P$ is parallax and $SD$ is the semidiameter.\\[12pt]
+    \noindent
+    Sight reduction tables can be downloaded for the US government's internet pages. Search for HO-229 or HO-249.  These values can also be calculated with two, relatively simple, formulas:
+    \[ \sin H_c= \sin L \sin d + \cos L \cos d \cos LHA\]
+    and
+    \[\cos A = \frac{\sin d - \sin L \sin H_c}{\cos L \cos H_c}\]
+    where $A$ is the azimuth angle, $L$ is the latitude, $d$ is the declination and $LHA$ is the local hour angle. The azimuth ($Z_n$) is given by the following rule:
+    \begin{itemize}
+    \item if the $LHA$ is greater than $180^\circ$,\quad$Z_n=A$
+    \item if the $LHA$ is less than $180^\circ$,\quad$Z_n = 360^\circ - A$
+    \end{itemize}'''
+
 #--------------------------
 #   external entry point
 #--------------------------
@@ -392,7 +433,299 @@ def pages(first_day, dtp):
 def sunalmanac(first_day, dtp):
     # make almanac starting from first_day
 
+    if config.FANCYhd:
+        return makeSUNnew(first_day, dtp) # use the 'fancyhdr' package
+    else:
+        return makeSUNold(first_day, dtp) # use old formatting
+
+#   The following functions are intentionally separate functions.
+#   'makeEVold' is required for TeX Live 2019, which is the standard
+#   version in Ubuntu 20.04 LTS which expires in April 2030.
+
+def hdrSUNnew(first_day,dtp):
+    # build the front page
+
+    tex = r'''
+\pagestyle{frontpage}
+    \begin{titlepage}
+    \vspace*{2cm}
+    \begin{center}
+    \textsc{\Large Generated using Ephem}\\[1.5cm]'''
+
+    if config.dockerized:   # DOCKER ONLY
+        fn = "../Ra"
+    else:
+        fn = "./Ra"
+
+    tex += r'''
+    \includegraphics[width=0.4\textwidth]{{{}}}\\[1cm]
+    \textsc{{\huge The Nautical Almanac for the Sun}}\\[0.7cm]'''.format(fn)
+
+    if dtp == 0:
+        tex += r'''
+    \HRule \\[0.6cm]
+    {{ \Huge \bfseries {}}}\\[0.4cm]
+    \HRule \\[1.5cm]'''.format(first_day.year)
+    elif dtp == -1:
+        tex += r'''
+    \HRule \\[0.6cm]
+    {{ \Huge \bfseries {}}}\\[0.4cm]
+    \HRule \\[1.5cm]'''.format(first_day.strftime("%B %Y"))
+    elif dtp > 1:
+        tex += r'''
+    \HRule \\[0.6cm]
+    {{ \Huge \bfseries {}}}\\[0.4cm]
+    \HRule \\[1.5cm]'''.format(fmtdates(first_day,first_day+timedelta(days=dtp-1)))
+    else:
+        tex += r'''
+    \HRule \\[0.6cm]
+    {{ \Huge \bfseries {}}}\\[0.4cm]
+    \HRule \\[1.5cm]'''.format(fmtdate(first_day))
+
+    if config.tbls == "m":
+        tex += r'''
+    \begin{center} \large
+    \emph{Author:}\\
+    Andrew \textsc{Bauer}\\[6Pt]
+    \emph{Original concept from:}\\
+    Enno \textsc{Rodegerdts}
+    \end{center}'''
+    else:
+        tex += r'''
+    \begin{center} \large
+    \emph{Original author:}\\
+    Enno \textsc{Rodegerdts}\\[6Pt]
+    \emph{Enhancements:}\\
+    Andrew \textsc{Bauer}    
+    \end{center}'''
+
+    tex += r'''
+    \vfill
+    {\large \today}
+    \HRule \\[0.6cm]
+    \end{center}
+    \begin{description}[leftmargin=5.5em,style=nextline]\footnotesize
+    \item[Disclaimer:] These are computer generated tables - use them at your own risk.
+    The accuracy has been randomly checked, but cannot be guaranteed.
+    The author claims no liability for any consequences arising from use of these tables.
+    Besides, this publication only contains sun tables: an official version of the Nautical Almanac is indispensable.
+    \end{description}
+\end{titlepage}
+\pagestyle{page2}'''
+
+    tex += page2()
+
+    return tex
+
+def makeSUNnew(first_day, dtp):
     # page size specific parameters
+    # NOTE: 'bm' (bottom margin) is an unrealistic value used only to determine the vertical size of 'body' (textheight), which must be large enough to include all the tables. 'tm' (top margin) and 'hs' (headsep) determine the top of body. Finally use 'fs' (footskip) to position the footer.
+
+    if config.pgsz == "A4":
+        # A4 ... pay attention to the limited page width
+        paper = "a4paper"
+        # title & page 2...
+        tm1 = "5mm"
+        bm1 = "13mm"
+        lm1 = "20mm"
+        rm1 = "14mm"
+        # data pages...
+        tm = "26.6mm"       # was "21mm"
+        bm = "18mm"
+        hs = "2.3pt"        # headsep
+        fs = "18pt"         # footskip
+        lm = "12mm"         # 13mm
+        rm = "12mm"         # 13mm
+        if config.tbls == "m":  # USNO format for Declination
+            tm = "14mm"     # was "8mm"
+            bm = "13mm"     # was "13mm"
+            hs = "3.4pt"    # headsep
+            fs = "15pt"     # footskip
+            lm = "11mm"
+            rm = "10mm"
+            if config.decf == '+':	# Positive/Negative Declinations
+                lm = "12mm"     # 14mm
+                rm = "12mm"     # 14mm
+    else:
+        # LETTER ... pay attention to the limited page height
+        paper = "letterpaper"
+        # title & page 2...
+        tm1 = "5mm"
+        bm1 = "13mm"
+        lm1 = "20mm"
+        rm1 = "14mm"
+        # data pages...
+        tm = "17.8mm"       # was "12.2mm"
+        bm = "18mm"         # was "13mm"
+        hs = "2.6pt"        # headsep
+        fs = "28pt"         # footskip
+        lm = "15mm"         # 16mm
+        rm = "15mm"         # 16mm
+        if config.tbls == "m":	# USNO format for Declination
+            tm = "10.5mm"   # was "5mm"
+            bm = "8mm"      # was "8mm"
+            hs = "1.6pt"    # headsep
+            fs = "14pt"     # footskip
+            lm = "14mm"
+            rm = "13mm"
+            if config.decf == '+':	# Positive/Negative Declinations
+                lm = "15mm"
+                rm = "15mm"
+
+#------------------------------------------------------------------------------
+#   This edition employs the 'fancyhdr' v4.0.3 package
+#   CAUTION: do not use '\newgeometry' & '\restoregeometry' as advised here:
+#   https://tex.stackexchange.com/questions/247972/top-margin-fancyhdr
+#------------------------------------------------------------------------------
+
+    # default is 'oneside'...
+    tex = r'''\documentclass[10pt, {}]{{report}}'''.format(paper)
+
+    # document preamble...
+    tex += r'''
+%\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{fontenc}
+\usepackage{enumitem} % used to customize the {description} environment'''
+
+    # to troubleshoot add "showframe, verbose," below:
+    tex += r'''
+\usepackage[nomarginpar, top={}, bottom={}, left={}, right={}]{{geometry}}'''.format(tm1,bm1,lm1,rm1)
+
+    # define page styles
+    tex += r'''
+%------------ page styles ------------
+\usepackage{fancyhdr}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancypagestyle{frontpage}{
+%  \fancyhf{}% clear all header and footer fields
+}
+\fancypagestyle{page2}[frontpage]{
+}
+\fancypagestyle{datapage}[page2]{'''
+    tex += r'''
+  \newgeometry{{nomarginpar, top={}, bottom={}, left={}, right={}, headsep={}, footskip={}}}'''.format(tm,bm,lm,rm,hs,fs)
+    tex += r'''
+  \fancyfootoffset[R]{0pt}% recalculate \headwidth
+  \cfoot{\centerline{Page \thepage}}
+  \rfoot{\textsf{\footnotesize{https://pypi.org/project/pyalmanac/}}}
+} %-----------------------------------'''
+
+    if config.tbls == "m":
+        tex += r'''
+\usepackage[table]{xcolor}
+\definecolor{LightCyan}{rgb}{0.88,1,1}
+\usepackage{booktabs}'''
+
+    # Note: \DeclareUnicodeCharacter is not compatible with some versions of pdflatex
+    tex += r'''
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\usepackage[pdftex]{graphicx}
+%\showboxbreadth=50  % use for logging
+%\showboxdepth=50    % use for logging
+%\DeclareUnicodeCharacter{00B0}{\ensuremath{{}^\circ}}
+\begin{document}'''
+
+    if not config.DPonly:
+        tex += hdrSUNnew(first_day,dtp)
+
+    tex += r'''
+\pagestyle{datapage}  % the default page style for the document
+\setcounter{page}{1}    % otherwise it's 2'''
+
+    tex += pages(first_day,dtp)
+    tex += r'''
+\end{document}'''
+    return tex
+
+# ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+# ===   ===   ===   ===   O L D   F O R M A T T I N G   ===   ===   ===   ===
+# ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+def hdrSUNold(first_day, dtp):
+    # build the front page
+
+    tex = r'''
+% for the title page and page 2 only...
+\newgeometry{nomarginpar, top=5mm, bottom=13mm, left=20mm, right=14mm}
+\begin{titlepage}
+    \vspace*{2cm}
+    \begin{center}
+    \textsc{\Large Generated using Ephem}\\[1.5cm]'''
+
+    if config.dockerized:   # DOCKER ONLY
+        fn = "../Ra"
+    else:
+        fn = "./Ra"
+
+    tex += r'''
+    \includegraphics[width=0.4\textwidth]{{{}}}\\[1cm]
+    \textsc{{\huge The Nautical Almanac for the Sun}}\\[0.7cm]'''.format(fn)
+
+    if dtp == 0:
+        tex += r'''
+    \HRule \\[0.6cm]
+    {{ \Huge \bfseries {}}}\\[0.4cm]
+    \HRule \\[1.5cm]'''.format(first_day.year)
+    elif dtp == -1:
+        tex += r'''
+    \HRule \\[0.6cm]
+    {{ \Huge \bfseries {}}}\\[0.4cm]
+    \HRule \\[1.5cm]'''.format(first_day.strftime("%B %Y"))
+    elif dtp > 1:
+        tex += r'''
+    \HRule \\[0.6cm]
+    {{ \Huge \bfseries {}}}\\[0.4cm]
+    \HRule \\[1.5cm]'''.format(fmtdates(first_day,first_day+timedelta(days=dtp-1)))
+    else:
+        tex += r'''
+    \HRule \\[0.6cm]
+    {{ \Huge \bfseries {}}}\\[0.4cm]
+    \HRule \\[1.5cm]'''.format(fmtdate(first_day))
+
+    if config.tbls == "m":
+        tex += r'''
+    \begin{center} \large
+    \emph{Author:}\\
+    Andrew \textsc{Bauer}\\[6Pt]
+    \emph{Original concept from:}\\
+    Enno \textsc{Rodegerdts}
+    \end{center}'''
+    else:
+        tex += r'''
+    \begin{center} \large
+    \emph{Original author:}\\
+    Enno \textsc{Rodegerdts}\\[6Pt]
+    \emph{Enhancements:}\\
+    Andrew \textsc{Bauer}    
+    \end{center}'''
+
+    tex += r'''
+    \vfill
+    {\large \today}
+    \HRule \\[0.6cm]
+    \end{center}
+    \begin{description}[leftmargin=5.5em,style=nextline]\footnotesize
+    \item[Disclaimer:] These are computer generated tables - use them at your own risk.
+    The accuracy has been randomly checked, but cannot be guaranteed.
+    The author claims no liability for any consequences arising from use of these tables.
+    Besides, this publication only contains sun tables: an official version of the Nautical Almanac is indispensable.
+    \end{description}
+\end{titlepage}'''
+
+    tex += page2()
+
+    tex += r'''
+\restoregeometry    % so it does not affect the rest of the pages
+\setcounter{page}{1}    % otherwise it's 2'''
+
+    return tex
+
+def makeSUNold(first_day, dtp):
+    # make almanac starting from first_day
+    # page size specific parameters
+
     if config.pgsz == "A4":
         # pay attention to the limited page width
         paper = "a4paper"
@@ -429,136 +762,38 @@ def sunalmanac(first_day, dtp):
             rm = "15mm"
 
     # default is 'oneside'...
-    alm = r'''\documentclass[10pt, {}]{{report}}'''.format(paper)
+    tex = r'''\documentclass[10pt, {}]{{report}}'''.format(paper)
 
-    alm = alm + r'''
+    tex += r'''
 %\usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{fontenc}
 \usepackage{enumitem} % used to customize the {description} environment'''
 
     if config.tbls == "m":
-        alm = alm + r'''
+        tex += r'''
 \usepackage[table]{xcolor}
 \definecolor{LightCyan}{rgb}{0.88,1,1}
 \usepackage{booktabs}'''
 
     # to troubleshoot add "showframe, verbose," below:
-    alm = alm + r'''
+    tex += r'''
 \usepackage[nomarginpar, top={}, bottom={}, left={}, right={}]{{geometry}}'''.format(tm,bm,lm,rm)
 
     # Note: \DeclareUnicodeCharacter is not compatible with some versions of pdflatex
-    alm = alm + r'''
+    tex += r'''
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 \setlength{\footskip}{15pt}
 \usepackage[pdftex]{graphicx}
 %\showboxbreadth=50  % use for logging
 %\showboxdepth=50    % use for logging
 %\DeclareUnicodeCharacter{00B0}{\ensuremath{{}^\circ}}
-\begin{document}
-% for the title page and page 2 only...
-\newgeometry{nomarginpar, top=5mm, bottom=13mm, left=20mm, right=14mm}
-\begin{titlepage}
-    \vspace*{2cm}
-    \begin{center}
-    \textsc{\Large Generated using Ephem}\\[1.5cm]'''
+\begin{document}'''
 
-    if config.dockerized:   # DOCKER ONLY
-        fn = "../Ra"
-    else:
-        fn = "./Ra"
+    if not config.DPonly:
+        tex += hdrSUNold(first_day,dtp)
 
-    alm = alm + r'''
-    \includegraphics[width=0.4\textwidth]{{{}}}\\[1cm]
-    \textsc{{\huge The Nautical Almanac for the Sun}}\\[0.7cm]'''.format(fn)
-
-    if dtp == 0:
-        alm = alm + r'''
-    \HRule \\[0.6cm]
-    {{ \Huge \bfseries {}}}\\[0.4cm]
-    \HRule \\[1.5cm]'''.format(first_day.year)
-    elif dtp == -1:
-        alm = alm + r'''
-    \HRule \\[0.6cm]
-    {{ \Huge \bfseries {}}}\\[0.4cm]
-    \HRule \\[1.5cm]'''.format(first_day.strftime("%B %Y"))
-    elif dtp > 1:
-        alm = alm + r'''
-    \HRule \\[0.6cm]
-    {{ \Huge \bfseries {}}}\\[0.4cm]
-    \HRule \\[1.5cm]'''.format(fmtdates(first_day,first_day+timedelta(days=dtp-1)))
-    else:
-        alm = alm + r'''
-    \HRule \\[0.6cm]
-    {{ \Huge \bfseries {}}}\\[0.4cm]
-    \HRule \\[1.5cm]'''.format(fmtdate(first_day))
-
-    if config.tbls == "m":
-        alm = alm + r'''
-    \begin{center} \large
-    \emph{Author:}\\
-    Andrew \textsc{Bauer}\\[6Pt]
-    \emph{Original concept from:}\\
-    Enno \textsc{Rodegerdts}
-    \end{center}'''
-    else:
-        alm = alm + r'''
-    \begin{center} \large
-    \emph{Original author:}\\
-    Enno \textsc{Rodegerdts}\\[6Pt]
-    \emph{Enhancements:}\\
-    Andrew \textsc{Bauer}    
-    \end{center}'''
-
-    alm = alm + r'''
-    \vfill
-    {\large \today}
-    \HRule \\[0.6cm]
-    \end{center}
-    \begin{description}[leftmargin=5.5em,style=nextline]\footnotesize
-    \item[Disclaimer:] These are computer generated tables - use them at your own risk.
-    The accuracy has been checked as well as possible, but cannot be guaranteed.
-    The author claims no liability for any consequences arising from use of these tables.
-    Besides, this publication only contains sun tables: an official version of the Nautical Almanac is indispensable.
-    \end{description}
-\end{titlepage}
-'''
-
-    alm = alm + r'''
-    \setcounter{page}{2}    % otherwise it's 1
-    \vspace*{2cm}
-    \noindent
-    DIP corrects for height of eye over the surface. This value has to be subtracted from the sextant altitude ($H_s$). The  correction in degrees for height of eye in meters is given by the following formula: 
-    \[d=0.0293\sqrt{m}\]
-    This is the first correction (apart from index error) that has to be applied to the measured altitude.\\[12pt]
-    \noindent
-    The next correction is for refraction in the earth's atmosphere. As usual this table is correct for 10$^\circ$C and a pressure of 1010 hPa. This correction has to be applied to apparent altitude ($H_a$). The exact values can be calculated by the following formula.
-    \[R_0=\cot \left( H_a + \frac{7.31}{H_a+4.4}\right)\]
-    For other than standard conditions, calculate a correction factor for $R_0$ by: \[f=\frac{0.28P}{T+273}\] where $P$ is the pressure in hectopascal and $T$ is the temperature in $^\circ$C.\\[12pt]
-    \noindent
-    Semidiameter has to be added for lower limb sights and subtracted for upper limb sights. The value for semidiameter is tabulated in the daily pages.\\[12pt]
-    \noindent
-    To correct your sextant altitude $H_s$ do the following:
-    Calculate $H_a$ by
-     \[H_a= H_s+I-d\] 
-    where $I$ is the sextant's index error and $d$ is DIP. Then calculate the observed altitude $H_o$ by
-    \[H_o= H_a-R+P\pm SD\]
-    where $R$ is refraction, $P$ is parallax and $SD$ is the semidiameter.\\[12pt]
-    \noindent
-    Sight reduction tables can be downloaded for the US government's internet pages. Search for HO-229 or HO-249.  These values can also be calculated with two, relatively simple, formulas:
-    \[ \sin H_c= \sin L \sin d + \cos L \cos d \cos LHA\]
-    and
-    \[\cos A = \frac{\sin d - \sin L \sin H_c}{\cos L \cos H_c}\]
-    where $A$ is the azimuth angle, $L$ is the latitude, $d$ is the declination and $LHA$ is the local hour angle. The azimuth ($Z_n$) is given by the following rule:
-    \begin{itemize}
-    \item if the $LHA$ is greater than $180^\circ$,\quad$Z_n=A$
-    \item if the $LHA$ is less than $180^\circ$,\quad$Z_n = 360^\circ - A$
-    \end{itemize}
-\restoregeometry    % so it does not affect the rest of the pages'''
-
-#    first_day = r'''{}/{}/{}'''.format(year,mth,day)
-#    date = ephem.Date(first_day)    # date to float
-    alm = alm + pages(first_day,dtp)
-    alm = alm + '''
+    tex += pages(first_day,dtp)
+    tex += r'''
 \end{document}'''
-    return alm
+    return tex
