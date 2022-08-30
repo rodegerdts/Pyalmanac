@@ -1334,10 +1334,12 @@ def makeNAold(first_day, dtp):
         oddim = "14mm"  # inner margin (left side on odd pages)
         oddom = "11mm"  # outer margin (right side on odd pages)
         if config.tbls == "m":
+            # even data pages...
             tm = "4mm"
             bm = "8mm"
-            im = "13mm"
-            om = "13mm"
+            im = "12mm"
+            om = "12mm"
+            # odd data pages...
             oddim = "14mm"
             oddom = "14mm"
 
