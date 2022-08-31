@@ -373,7 +373,8 @@ def starstab(dfloat):
     # OLD: \begin{tabular*}{0.25\textwidth}[t]{@{\extracolsep{\fill}}|rrr|}
 
     if config.tbls == "m":
-        out = r'''\setlength{\tabcolsep}{4pt}  % default 6pt
+        out = r'''\renewcommand{\arraystretch}{1.1}
+\setlength{\tabcolsep}{4pt}  % default 6pt
 \begin{tabular}[t]{|rrr|}
 \multicolumn{3}{c}{\normalsize{Stars}}\\
 \hline
@@ -646,7 +647,8 @@ def twilighttab(dfloat):
     if config.tbls == "m":
     # The header begins with a thin empty row as top padding; and the top row with
     # bold text has some padding below it. This result gives a balanced impression.
-        tab = r'''\setlength{\tabcolsep}{5pt}  % default 6pt
+        tab = r'''\renewcommand{\arraystretch}{1.05}
+\setlength{\tabcolsep}{5pt}  % default 6pt
 \begin{tabular}[t]{|r|ccc|ccc|}
 \multicolumn{7}{c}{\normalsize{}}\\
 \hline
@@ -916,7 +918,7 @@ def doublepage(first_day, page1):
 \textbf{{{} to {}}}{}%
 \end{{flushright}}\par
 \begin{{scriptsize}}
-'''.format(tm, bm, oddim, oddom, ephem.date(dfloat).datetime().strftime("%Y %B %d"), ephem.date(dfloat+2).datetime().strftime("%b. %d"), rightindent)
+'''.format(oddtm, bm, oddim, oddom, ephem.date(dfloat).datetime().strftime("%Y %B %d"), ephem.date(dfloat+2).datetime().strftime("%b. %d"), rightindent)
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     page = page + str1
@@ -1056,8 +1058,11 @@ def hdrNAnew(first_day, dtp, tm1, bm1, lm1, rm1, vsep1, vsep2):
     return tex
 
 def makeNAnew(first_day, dtp):
+    # make almanac starting from first_day
     global oddtm,  oddbm,  oddim,  oddom,  oddhs,  oddfs  # required by doublepage
     global eventm, evenbm, evenim, evenom, evenhs, evenfs
+
+    # NOTE: 'bm' (bottom margin) is an unrealistic value used only to determine the vertical size of 'body' (textheight), which must be large enough to include all the tables. 'tm' (top margin) and 'hds' (headsep) determine the top of body. Note: 'fs' (footskip) does not position the footer.
 
     # page size specific parameters
     if config.pgsz == "A4":
@@ -1124,16 +1129,17 @@ def makeNAnew(first_day, dtp):
         oddim = "14mm"      # inner margin (left side on odd pages)
         oddom = "11mm"      # outer margin (right side on odd pages)
         if config.tbls == "m":
+            # even data pages...
             eventm = "9.4mm"    # was "4mm"
             evenbm = "8mm"      # was "8mm"
             evenhd = "2.8pt"    # headsep  (page 2 onwards)
             evenfs = "12pt"     # footskip (page 2 onwards)
             evenim = "12.5mm"
             evenom = "12.5mm"
-            # odd data pages...
-            oddtm = "11mm"      # was "4mm"
+            # odd data pages... use 26.06.2024 as a testcase
+            oddtm = "8mm"       # was "4mm"
             oddbm = "8mm"       # was "8mm"
-            oddhs = "2.5pt"     # headsep  (page 3 onwards)
+            oddhs = "0pt"       # headsep  (page 3 onwards)
             oddfs = "12pt"      # footskip (page 3 onwards)
             oddim = "13mm"
             oddom = "13mm"
@@ -1289,11 +1295,11 @@ def hdrNAold(first_day, dtp, tm1, bm1, lm1, rm1, vsep1, vsep2):
 
 def makeNAold(first_day, dtp):
     # make almanac starting from first_day
-    global tm, bm, oddim, oddom     # required by doublepage
+    global tm, bm, oddtm, oddim, oddom     # required by doublepage
 
     # page size specific parameters
     if config.pgsz == "A4":
-        # pay attention to the limited page width
+        # A4 ... pay attention to the limited page width
         paper = "a4paper"
         vsep1 = "2.0cm"
         vsep2 = "1.5cm"
@@ -1307,17 +1313,21 @@ def makeNAold(first_day, dtp):
         im = "10mm"     # inner margin (right side on even pages)
         om = "9mm"      # outer margin (left side on even pages)
         # odd data pages...
+        oddtm = tm
         oddim = "14mm"  # inner margin (left side on odd pages)
         oddom = "11mm"  # outer margin (right side on odd pages)
         if config.tbls == "m":
+            # even data pages...
             tm = "10mm"
             bm = "15mm"
             im = "10mm"
             om = "10mm"
+            # odd data pages...
+            oddtm = tm
             oddim = "14mm"
             oddom = "11mm"
     else:
-        # pay attention to the limited page height
+        # LETTER ... pay attention to the limited page height
         paper = "letterpaper"
         vsep1 = "1.5cm"
         vsep2 = "1.0cm"
@@ -1331,6 +1341,7 @@ def makeNAold(first_day, dtp):
         im = "13mm"     # inner margin (right side on even pages)
         om = "13mm"     # outer margin (left side on even pages)
         # odd data pages...
+        oddtm = tm
         oddim = "14mm"  # inner margin (left side on odd pages)
         oddom = "11mm"  # outer margin (right side on odd pages)
         if config.tbls == "m":
@@ -1339,7 +1350,8 @@ def makeNAold(first_day, dtp):
             bm = "8mm"
             im = "12mm"
             om = "12mm"
-            # odd data pages...
+            # odd data pages... use 26.06.2024 & 18.06.2025 as testcases
+            oddtm = "2.6mm"
             oddim = "14mm"
             oddom = "14mm"
 

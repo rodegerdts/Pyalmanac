@@ -369,7 +369,6 @@ if __name__ == '__main__':
                 first_day = date(yearint, 1, 1)
                 ff = "NAtrad" if config.tbls != 'm' else "NAmod"
                 fn = toUnix("{}({})_{}".format(ff,papersize,year+DecFmt))
-                fn = "{}{}".format(ff,year+DecFmt)
                 deletePDF(f_prefix + fn)
                 # :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
                 outfile = open(f_prefix + fn + ".tex", mode="w", encoding="utf8")
