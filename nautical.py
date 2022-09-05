@@ -4,19 +4,19 @@
 #   Copyright (C) 2014  Enno Rodegerdts
 #   Copyright (C) 2022  Andrew Bauer
 
-#  This program is free software; you can redistribute it and/or modify
-#     it under the terms of the GNU General Public License as published by
-#     the Free Software Foundation; either version 2 of the License, or
-#     (at your option) any later version.
-# 
-#     This program is distributed in the hope that it will be useful,
-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#     GNU General Public License for more details.
-# 
-#     You should have received a copy of the GNU General Public License along
-#     with this program; if not, write to the Free Software Foundation, Inc.,
-#     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License along
+#   with this program; if not, write to the Free Software Foundation, Inc.,
+#   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # NOTE: the new format statement requires a literal '{' to be entered as '{{',
 #       and a literal '}' to be entered as '}}'. The old '%' format specifier
@@ -247,9 +247,9 @@ def planetstab(dfloat):
         tab = tab + r'''\hline
 \multicolumn{{2}}{{|c|}}{{\rule{{0pt}}{{2.4ex}}Mer.pass. {}}} & 
 \multicolumn{{2}}{{c|}}{{\(\nu\) {}$'$ \emph{{d}} {}$'$ m {}\hphantom{{0}}}} & 
-\multicolumn{{2}}{{c|}}{{\(\nu\) {}$'$ \emph{{d}} {}$'$ m {}}} & 
 \multicolumn{{2}}{{c|}}{{\(\nu\) {}$'$ \emph{{d}} {}$'$ m {}\hphantom{{0}}}} & 
-\multicolumn{{2}}{{c|}}{{\(\nu\) {}$'$ \emph{{d}} {}$'$ m {}}}\\
+\multicolumn{{2}}{{c|}}{{\(\nu\) {}$'$ \emph{{d}} {}$'$ m {}\hphantom{{0}}}} & 
+\multicolumn{{2}}{{c|}}{{\(\nu\) {}$'$ \emph{{d}} {}$'$ m {}\hphantom{{0}}}}\\
 \hline
 \multicolumn{{10}}{{c}}{{}}\\
 '''.format(ariestransit(dfloat + n),vd[0],vd[1],vd[2],vd[3],vd[4],vd[5],vd[6],vd[7],vd[8],vd[9],vd[10],vd[11])
@@ -349,9 +349,9 @@ def planetstabm(dfloat):
         tab = tab + r'''\cmidrule{{1-2}} \cmidrule{{4-5}} \cmidrule{{7-8}} \cmidrule{{10-11}} \cmidrule{{13-14}}
 \multicolumn{{2}}{{c}}{{\footnotesize{{Mer.pass. {}}}}} && 
 \multicolumn{{2}}{{c}}{{\footnotesize{{\(\nu\){}$'$ \emph{{d}}{}$'$ m{}\hphantom{{0}}}}}} && 
-\multicolumn{{2}}{{c}}{{\footnotesize{{\(\nu\){}$'$ \emph{{d}}{}$'$ m{}}}}} && 
 \multicolumn{{2}}{{c}}{{\footnotesize{{\(\nu\){}$'$ \emph{{d}}{}$'$ m{}\hphantom{{0}}}}}} && 
-\multicolumn{{2}}{{c}}{{\footnotesize{{\(\nu\){}$'$ \emph{{d}}{}$'$ m{}}}}}\\
+\multicolumn{{2}}{{c}}{{\footnotesize{{\(\nu\){}$'$ \emph{{d}}{}$'$ m{}\hphantom{{0}}}}}} && 
+\multicolumn{{2}}{{c}}{{\footnotesize{{\(\nu\){}$'$ \emph{{d}}{}$'$ m{}\hphantom{{0}}}}}}\\
 \cmidrule{{1-2}} \cmidrule{{4-5}} \cmidrule{{7-8}} \cmidrule{{10-11}} \cmidrule{{13-14}}
 '''.format(ariestransit(dfloat + n),vd[0],vd[1],vd[2],vd[3],vd[4],vd[5],vd[6],vd[7],vd[8],vd[9],vd[10],vd[11])
         # the phantom character '0' compensates the format with two decimal places in SFalmanac
@@ -878,21 +878,21 @@ def doublepage(first_day, page1):
 {}\textbf{{{}, {}, {}   ({}.,  {}.,  {}.)}}'''.format(leftindent,ephem.date(dfloat).datetime().strftime("%B %d"),ephem.date(dfloat+1).datetime().strftime("%d"),ephem.date(dfloat+2).datetime().strftime("%d"),ephem.date(dfloat).datetime().strftime("%a"),ephem.date(dfloat+1).datetime().strftime("%a"),ephem.date(dfloat+2).datetime().strftime("%a"))
 
         if config.tbls == "m":
-            page = page + r'\\[1.0ex]'  # \par leaves about 1.2ex
+            page += r'\\[1.0ex]'  # \par leaves about 1.2ex
         else:
-            page = page + r'\\[0.7ex]'
+            page += r'\\[0.7ex]'
 
-        page = page + r'''
+        page += r'''
 \begin{scriptsize}
 '''
 # ...........................................................
 
     if config.tbls == "m":
-        page = page + planetstabm(dfloat)
+        page += planetstabm(dfloat)
     else:
-        page = page + planetstab(dfloat) + r'''\enskip
+        page += planetstab(dfloat) + r'''\enskip
 '''
-    page = page + starstab(dfloat)
+    page += starstab(dfloat)
     # print date based on dfloat (as Ephem routines use dfloat)
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     if config.FANCYhd:
@@ -921,16 +921,16 @@ def doublepage(first_day, page1):
 '''.format(oddtm, bm, oddim, oddom, ephem.date(dfloat).datetime().strftime("%Y %B %d"), ephem.date(dfloat+2).datetime().strftime("%b. %d"), rightindent)
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    page = page + str1
+    page += str1
 
     if config.tbls == "m":
-        page = page + sunmoontabm(dfloat)
+        page += sunmoontabm(dfloat)
     else:
-        page = page + sunmoontab(dfloat) + r'''\enskip
+        page += sunmoontab(dfloat) + r'''\enskip
 '''
-    page = page + twilighttab(dfloat)
+    page += twilighttab(dfloat)
     # to avoid "Overfull \hbox" messages, leave a paragraph end before the end of a size change. (This may only apply to tabular* table style) See lines below...
-    page = page + r'''
+    page += r'''
 \end{scriptsize}'''
     return page
 
